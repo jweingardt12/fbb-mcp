@@ -17,6 +17,8 @@ services:
       - PORT=4951
     ports:
       - "4951:4951"
+    shm_size: '2gb'
+    init: true
     tty: true
     stdin_open: true
     restart: unless-stopped

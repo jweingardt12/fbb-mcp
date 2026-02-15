@@ -4,7 +4,7 @@ import { z } from "zod";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { apiGet, apiPost, toolError } from "../api/python-client.js";
-import { str, type RosterResponse, type FreeAgentsResponse, type SearchResponse, type ActionResponse, type WaiverClaimResponse, type WaiverClaimSwapResponse, type WhoOwnsResponse } from "../api/types.js";
+import { str, type RosterResponse, type FreeAgentsResponse, type SearchResponse, type ActionResponse, type WaiverClaimResponse, type WaiverClaimSwapResponse, type WhoOwnsResponse, type ChangeTeamNameResponse, type ChangeTeamLogoResponse } from "../api/types.js";
 
 const ROSTER_URI = "ui://fbb-mcp/roster.html";
 
@@ -223,6 +223,68 @@ export function registerRosterTools(server: McpServer, distDir: string) {
         return {
           content: [{ type: "text" as const, text: data.message || "Waiver claim+drop result: " + JSON.stringify(data) }],
           structuredContent: { type: "waiver-claim-swap", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_browser_status
+  registerAppTool(
+    server,
+    "yahoo_browser_status",
+    {
+      description: "Check if the browser session for write operations (add, drop, trade, etc.) is valid. If not valid, user needs to run './yf browser-login'.",
+      _meta: { ui: { resourceUri: ROSTER_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<{ valid: boolean; reason?: string; cookie_count?: number }>("/api/browser-login-status");
+        const text = data.valid
+          ? "Browser session is valid (" + (data.cookie_count || 0) + " Yahoo cookies)"
+          : "Browser session not valid: " + (data.reason || "unknown") + ". Run './yf browser-login' to set up.";
+        return {
+          content: [{ type: "text" as const, text }],
+          structuredContent: { type: "browser-status", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_change_team_name
+  registerAppTool(
+    server,
+    "yahoo_change_team_name",
+    {
+      description: "Change your fantasy team name",
+      inputSchema: { new_name: z.string() },
+      _meta: { ui: { resourceUri: ROSTER_URI } },
+    },
+    async ({ new_name }) => {
+      try {
+        const data = await apiPost<ChangeTeamNameResponse>("/api/change-team-name", { new_name });
+        return {
+          content: [{ type: "text" as const, text: data.message || "Result: " + JSON.stringify(data) }],
+          structuredContent: { type: "change-team-name", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_change_team_logo
+  registerAppTool(
+    server,
+    "yahoo_change_team_logo",
+    {
+      description: "Change your fantasy team logo. Provide an absolute file path to an image (PNG/JPG) inside the container.",
+      inputSchema: { image_path: z.string() },
+      _meta: { ui: { resourceUri: ROSTER_URI } },
+    },
+    async ({ image_path }) => {
+      try {
+        const data = await apiPost<ChangeTeamLogoResponse>("/api/change-team-logo", { image_path });
+        return {
+          content: [{ type: "text" as const, text: data.message || "Result: " + JSON.stringify(data) }],
+          structuredContent: { type: "change-team-logo", ...data },
         };
       } catch (e) { return toolError(e); }
     },

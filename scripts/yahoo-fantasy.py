@@ -285,6 +285,9 @@ def cmd_search(args, as_json=False):
         line = "  " + pname.ljust(25) + " " + positions.ljust(12) + " " + str(pct).rjust(3) + "% owned  (id:" + str(pid) + ")"
         print(line)
 
+from yahoo_browser import is_scope_error as _is_scope_error, write_method as _write_method
+
+
 def cmd_add(args, as_json=False):
     """Add a player by player_id"""
     if not args:
@@ -294,18 +297,42 @@ def cmd_add(args, as_json=False):
         return
     player_id = args[0]
     player_key = GAME_KEY + ".p." + str(player_id)
-    sc = get_connection()
-    gm = yfa.Game(sc, "mlb")
-    team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+    method = _write_method()
+
+    # Try API first (unless browser-only mode)
+    if method != "browser":
+        try:
+            sc = get_connection()
+            gm = yfa.Game(sc, "mlb")
+            team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+            team.add_player(player_key)
+            if as_json:
+                return {"success": True, "player_key": player_key, "message": "Added player " + player_key}
+            print("Added player " + player_key)
+            return
+        except Exception as e:
+            if method == "api" or not _is_scope_error(e):
+                if as_json:
+                    return {"success": False, "player_key": player_key, "message": "Error adding player: " + str(e)}
+                print("Error adding player: " + str(e))
+                return
+            # Fall through to browser
+
+    # Browser fallback
     try:
-        team.add_player(player_key)
+        from yahoo_browser import add_player
+        result = add_player(player_id)
         if as_json:
-            return {"success": True, "player_key": player_key, "message": "Added player " + player_key}
-        print("Added player " + player_key)
+            result["player_key"] = player_key
+            return result
+        if result.get("success"):
+            print(result.get("message", "Added player " + player_key + " via browser"))
+        else:
+            print(result.get("message", "Browser add failed"))
     except Exception as e:
         if as_json:
-            return {"success": False, "player_key": player_key, "message": "Error adding player: " + str(e)}
-        print("Error adding player: " + str(e))
+            return {"success": False, "player_key": player_key, "message": "Browser fallback error: " + str(e)}
+        print("Browser fallback error: " + str(e))
 
 def cmd_drop(args, as_json=False):
     """Drop a player by player_id"""
@@ -316,18 +343,39 @@ def cmd_drop(args, as_json=False):
         return
     player_id = args[0]
     player_key = GAME_KEY + ".p." + str(player_id)
-    sc = get_connection()
-    gm = yfa.Game(sc, "mlb")
-    team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+    method = _write_method()
+
+    if method != "browser":
+        try:
+            sc = get_connection()
+            gm = yfa.Game(sc, "mlb")
+            team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+            team.drop_player(player_key)
+            if as_json:
+                return {"success": True, "player_key": player_key, "message": "Dropped player " + player_key}
+            print("Dropped player " + player_key)
+            return
+        except Exception as e:
+            if method == "api" or not _is_scope_error(e):
+                if as_json:
+                    return {"success": False, "player_key": player_key, "message": "Error dropping player: " + str(e)}
+                print("Error dropping player: " + str(e))
+                return
+
     try:
-        team.drop_player(player_key)
+        from yahoo_browser import drop_player
+        result = drop_player(player_id)
         if as_json:
-            return {"success": True, "player_key": player_key, "message": "Dropped player " + player_key}
-        print("Dropped player " + player_key)
+            result["player_key"] = player_key
+            return result
+        if result.get("success"):
+            print(result.get("message", "Dropped player " + player_key + " via browser"))
+        else:
+            print(result.get("message", "Browser drop failed"))
     except Exception as e:
         if as_json:
-            return {"success": False, "player_key": player_key, "message": "Error dropping player: " + str(e)}
-        print("Error dropping player: " + str(e))
+            return {"success": False, "player_key": player_key, "message": "Browser fallback error: " + str(e)}
+        print("Browser fallback error: " + str(e))
 
 def _extract_team_name(team_data):
     """Extract team name from Yahoo's nested team structure"""
@@ -943,17 +991,40 @@ def cmd_swap(args, as_json=False):
     drop_id = args[1]
     add_key = GAME_KEY + ".p." + str(add_id)
     drop_key = GAME_KEY + ".p." + str(drop_id)
-    sc = get_connection()
-    gm = yfa.Game(sc, "mlb")
-    team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+    method = _write_method()
+
+    if method != "browser":
+        try:
+            sc = get_connection()
+            gm = yfa.Game(sc, "mlb")
+            team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+            team.add_and_drop_players(add_key, drop_key)
+            msg = "Swapped: added " + add_key + ", dropped " + drop_key
+            if as_json:
+                return {"success": True, "add_key": add_key, "drop_key": drop_key, "message": msg}
+            print(msg)
+            return
+        except Exception as e:
+            if method == "api" or not _is_scope_error(e):
+                msg = "Error swapping players: " + str(e)
+                if as_json:
+                    return {"success": False, "add_key": add_key, "drop_key": drop_key, "message": msg}
+                print(msg)
+                return
+
     try:
-        team.add_and_drop_players(add_key, drop_key)
-        msg = "Swapped: added " + add_key + ", dropped " + drop_key
+        from yahoo_browser import swap_players
+        result = swap_players(add_id, drop_id)
         if as_json:
-            return {"success": True, "add_key": add_key, "drop_key": drop_key, "message": msg}
-        print(msg)
+            result["add_key"] = add_key
+            result["drop_key"] = drop_key
+            return result
+        if result.get("success"):
+            print(result.get("message", "Swap completed via browser"))
+        else:
+            print(result.get("message", "Browser swap failed"))
     except Exception as e:
-        msg = "Error swapping players: " + str(e)
+        msg = "Browser fallback error: " + str(e)
         if as_json:
             return {"success": False, "add_key": add_key, "drop_key": drop_key, "message": msg}
         print(msg)
@@ -976,21 +1047,44 @@ def cmd_waiver_claim(args, as_json=False):
                 return {"success": False, "message": "Invalid FAAB bid: " + str(args[1])}
             print("Invalid FAAB bid: " + str(args[1]))
             return
-    sc = get_connection()
-    gm = yfa.Game(sc, "mlb")
-    team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+    method = _write_method()
+
+    if method != "browser":
+        try:
+            sc = get_connection()
+            gm = yfa.Game(sc, "mlb")
+            team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+            if faab is not None:
+                team.claim_player(player_key, faab=faab)
+                msg = "Waiver claim submitted for " + player_key + " with $" + str(faab) + " FAAB bid"
+            else:
+                team.claim_player(player_key)
+                msg = "Waiver claim submitted for " + player_key
+            if as_json:
+                return {"success": True, "player_key": player_key, "faab": faab, "message": msg}
+            print(msg)
+            return
+        except Exception as e:
+            if method == "api" or not _is_scope_error(e):
+                msg = "Error submitting waiver claim: " + str(e)
+                if as_json:
+                    return {"success": False, "player_key": player_key, "faab": faab, "message": msg}
+                print(msg)
+                return
+
     try:
-        if faab is not None:
-            team.claim_player(player_key, faab=faab)
-            msg = "Waiver claim submitted for " + player_key + " with $" + str(faab) + " FAAB bid"
-        else:
-            team.claim_player(player_key)
-            msg = "Waiver claim submitted for " + player_key
+        from yahoo_browser import waiver_claim
+        result = waiver_claim(player_id, faab=faab)
         if as_json:
-            return {"success": True, "player_key": player_key, "faab": faab, "message": msg}
-        print(msg)
+            result["player_key"] = player_key
+            result["faab"] = faab
+            return result
+        if result.get("success"):
+            print(result.get("message", "Waiver claim submitted via browser"))
+        else:
+            print(result.get("message", "Browser waiver claim failed"))
     except Exception as e:
-        msg = "Error submitting waiver claim: " + str(e)
+        msg = "Browser fallback error: " + str(e)
         if as_json:
             return {"success": False, "player_key": player_key, "faab": faab, "message": msg}
         print(msg)
@@ -1016,21 +1110,45 @@ def cmd_waiver_claim_swap(args, as_json=False):
                 return {"success": False, "message": "Invalid FAAB bid: " + str(args[2])}
             print("Invalid FAAB bid: " + str(args[2]))
             return
-    sc = get_connection()
-    gm = yfa.Game(sc, "mlb")
-    team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+    method = _write_method()
+
+    if method != "browser":
+        try:
+            sc = get_connection()
+            gm = yfa.Game(sc, "mlb")
+            team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+            if faab is not None:
+                team.claim_and_drop_players(add_key, drop_key, faab=faab)
+                msg = "Waiver claim+drop submitted: add " + add_key + ", drop " + drop_key + " with $" + str(faab) + " FAAB"
+            else:
+                team.claim_and_drop_players(add_key, drop_key)
+                msg = "Waiver claim+drop submitted: add " + add_key + ", drop " + drop_key
+            if as_json:
+                return {"success": True, "add_key": add_key, "drop_key": drop_key, "faab": faab, "message": msg}
+            print(msg)
+            return
+        except Exception as e:
+            if method == "api" or not _is_scope_error(e):
+                msg = "Error submitting waiver claim+drop: " + str(e)
+                if as_json:
+                    return {"success": False, "add_key": add_key, "drop_key": drop_key, "faab": faab, "message": msg}
+                print(msg)
+                return
+
     try:
-        if faab is not None:
-            team.claim_and_drop_players(add_key, drop_key, faab=faab)
-            msg = "Waiver claim+drop submitted: add " + add_key + ", drop " + drop_key + " with $" + str(faab) + " FAAB"
-        else:
-            team.claim_and_drop_players(add_key, drop_key)
-            msg = "Waiver claim+drop submitted: add " + add_key + ", drop " + drop_key
+        from yahoo_browser import waiver_claim_swap
+        result = waiver_claim_swap(add_id, drop_id, faab=faab)
         if as_json:
-            return {"success": True, "add_key": add_key, "drop_key": drop_key, "faab": faab, "message": msg}
-        print(msg)
+            result["add_key"] = add_key
+            result["drop_key"] = drop_key
+            result["faab"] = faab
+            return result
+        if result.get("success"):
+            print(result.get("message", "Waiver claim+drop submitted via browser"))
+        else:
+            print(result.get("message", "Browser waiver claim+drop failed"))
     except Exception as e:
-        msg = "Error submitting waiver claim+drop: " + str(e)
+        msg = "Browser fallback error: " + str(e)
         if as_json:
             return {"success": False, "add_key": add_key, "drop_key": drop_key, "faab": faab, "message": msg}
         print(msg)

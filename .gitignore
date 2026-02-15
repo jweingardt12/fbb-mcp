@@ -11,6 +11,7 @@ config/draft-cheatsheet.json
 .mcp.json
 .claude/
 .playwright-mcp/
+.venv-browser/
 __pycache__/
 *.pyc
 *.png

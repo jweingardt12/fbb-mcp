@@ -28,6 +28,10 @@ TEAM_ID = os.environ.get("TEAM_ID", "")
 GAME_KEY = LEAGUE_ID.split(".")[0] if LEAGUE_ID else ""
 DATA_DIR = os.environ.get("DATA_DIR", "/app/data")
 
+
+from yahoo_browser import is_scope_error as _is_scope_error, write_method as _write_method
+
+
 MLB_API = "https://statsapi.mlb.com/api/v1"
 
 # Common MLB team name mappings (Yahoo name -> MLB Stats API name)
@@ -2580,31 +2584,55 @@ def cmd_set_lineup(args, as_json=False):
             print(msg)
             return
         moves.append({"player_id": parts[0], "selected_position": parts[1]})
-    sc = get_connection()
-    gm = yfa.Game(sc, "mlb")
-    team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
-    results = []
+    method = _write_method()
+
+    if method != "browser":
+        try:
+            sc = get_connection()
+            gm = yfa.Game(sc, "mlb")
+            team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
+            results = []
+            for move in moves:
+                pid = move.get("player_id", "")
+                new_pos = move.get("selected_position", "")
+                try:
+                    team.change_positions(date.today(), [{"player_id": pid, "selected_position": new_pos}])
+                    results.append({"player_id": pid, "position": new_pos, "success": True})
+                except Exception as e:
+                    results.append({"player_id": pid, "position": new_pos, "success": False, "error": str(e)})
+            all_success = all(r.get("success") for r in results)
+            # Check if any failures are scope errors
+            scope_errors = [r for r in results if not r.get("success") and _is_scope_error(r.get("error", ""))]
+            if not scope_errors or method == "api":
+                if as_json:
+                    return {"success": all_success, "moves": results, "message": "Applied " + str(len(results)) + " lineup change(s)"}
+                for r in results:
+                    if r.get("success"):
+                        print("Moved player " + r.get("player_id", "") + " to " + r.get("position", ""))
+                    else:
+                        print("Error moving player " + r.get("player_id", "") + ": " + r.get("error", ""))
+                return
+            # Fall through to browser for scope errors
+        except Exception as e:
+            if method == "api" or not _is_scope_error(e):
+                if as_json:
+                    return {"success": False, "moves": [], "message": "Error: " + str(e)}
+                print("Error setting lineup: " + str(e))
+                return
+
     try:
-        for move in moves:
-            pid = move.get("player_id", "")
-            new_pos = move.get("selected_position", "")
-            try:
-                team.change_positions(date.today(), [{"player_id": pid, "selected_position": new_pos}])
-                results.append({"player_id": pid, "position": new_pos, "success": True})
-            except Exception as e:
-                results.append({"player_id": pid, "position": new_pos, "success": False, "error": str(e)})
-        all_success = all(r.get("success") for r in results)
+        from yahoo_browser import set_lineup
+        result = set_lineup(moves)
         if as_json:
-            return {"success": all_success, "moves": results, "message": "Applied " + str(len(results)) + " lineup change(s)"}
-        for r in results:
-            if r.get("success"):
-                print("Moved player " + r.get("player_id", "") + " to " + r.get("position", ""))
-            else:
-                print("Error moving player " + r.get("player_id", "") + ": " + r.get("error", ""))
+            return result
+        if result.get("success"):
+            print(result.get("message", "Lineup changes applied via browser"))
+        else:
+            print(result.get("message", "Browser set-lineup failed"))
     except Exception as e:
         if as_json:
-            return {"success": False, "moves": results, "message": "Error: " + str(e)}
-        print("Error setting lineup: " + str(e))
+            return {"success": False, "moves": [], "message": "Browser fallback error: " + str(e)}
+        print("Browser fallback error: " + str(e))
 
 
 def cmd_pending_trades(args, as_json=False):
@@ -2668,35 +2696,55 @@ def cmd_propose_trade(args, as_json=False):
     your_ids = [pid.strip() for pid in args[1].split(",")]
     their_ids = [pid.strip() for pid in args[2].split(",")]
     trade_note = " ".join(args[3:]) if len(args) > 3 else ""
-    # Build player keys
     your_player_keys = [GAME_KEY + ".p." + pid for pid in your_ids]
     their_player_keys = [GAME_KEY + ".p." + pid for pid in their_ids]
-    sc = get_connection()
-    gm = yfa.Game(sc, "mlb")
-    lg = gm.to_league(LEAGUE_ID)
-    team = lg.to_team(TEAM_ID)
+    method = _write_method()
+
+    if method != "browser":
+        try:
+            sc = get_connection()
+            gm = yfa.Game(sc, "mlb")
+            lg = gm.to_league(LEAGUE_ID)
+            team = lg.to_team(TEAM_ID)
+            xml = team._construct_trade_proposal_xml(
+                tradee_team_key,
+                your_player_keys=your_player_keys,
+                their_player_keys=their_player_keys,
+                trade_note=trade_note,
+            )
+            team.yhandler.post_transactions(team.league_id, xml)
+            msg = "Trade proposed to " + tradee_team_key
+            if as_json:
+                return {
+                    "success": True,
+                    "tradee_team_key": tradee_team_key,
+                    "your_player_keys": your_player_keys,
+                    "their_player_keys": their_player_keys,
+                    "message": msg,
+                }
+            print(msg)
+            return
+        except Exception as e:
+            if method == "api" or not _is_scope_error(e):
+                msg = "Error proposing trade: " + str(e)
+                if as_json:
+                    return {"success": False, "message": msg}
+                print(msg)
+                return
+
     try:
-        # Workaround for propose_trade() parameter mismatch bug:
-        # Call _construct_trade_proposal_xml directly then post
-        xml = team._construct_trade_proposal_xml(
-            tradee_team_key,
-            your_player_keys=your_player_keys,
-            their_player_keys=their_player_keys,
-            trade_note=trade_note,
-        )
-        team.yhandler.post_transactions(team.league_id, xml)
-        msg = "Trade proposed to " + tradee_team_key
+        from yahoo_browser import propose_trade
+        result = propose_trade(tradee_team_key, your_ids, their_ids, trade_note)
         if as_json:
-            return {
-                "success": True,
-                "tradee_team_key": tradee_team_key,
-                "your_player_keys": your_player_keys,
-                "their_player_keys": their_player_keys,
-                "message": msg,
-            }
-        print(msg)
+            result["your_player_keys"] = your_player_keys
+            result["their_player_keys"] = their_player_keys
+            return result
+        if result.get("success"):
+            print(result.get("message", "Trade proposed via browser"))
+        else:
+            print(result.get("message", "Browser propose trade failed"))
     except Exception as e:
-        msg = "Error proposing trade: " + str(e)
+        msg = "Browser fallback error: " + str(e)
         if as_json:
             return {"success": False, "message": msg}
         print(msg)
@@ -2712,18 +2760,39 @@ def cmd_accept_trade(args, as_json=False):
         return
     transaction_key = args[0]
     trade_note = " ".join(args[1:]) if len(args) > 1 else ""
-    sc = get_connection()
-    gm = yfa.Game(sc, "mlb")
-    lg = gm.to_league(LEAGUE_ID)
-    team = lg.to_team(TEAM_ID)
+    method = _write_method()
+
+    if method != "browser":
+        try:
+            sc = get_connection()
+            gm = yfa.Game(sc, "mlb")
+            lg = gm.to_league(LEAGUE_ID)
+            team = lg.to_team(TEAM_ID)
+            team.accept_trade(transaction_key, trade_note=trade_note)
+            msg = "Trade accepted: " + transaction_key
+            if as_json:
+                return {"success": True, "transaction_key": transaction_key, "message": msg}
+            print(msg)
+            return
+        except Exception as e:
+            if method == "api" or not _is_scope_error(e):
+                msg = "Error accepting trade: " + str(e)
+                if as_json:
+                    return {"success": False, "transaction_key": transaction_key, "message": msg}
+                print(msg)
+                return
+
     try:
-        team.accept_trade(transaction_key, trade_note=trade_note)
-        msg = "Trade accepted: " + transaction_key
+        from yahoo_browser import accept_trade
+        result = accept_trade(transaction_key, trade_note)
         if as_json:
-            return {"success": True, "transaction_key": transaction_key, "message": msg}
-        print(msg)
+            return result
+        if result.get("success"):
+            print(result.get("message", "Trade accepted via browser"))
+        else:
+            print(result.get("message", "Browser accept trade failed"))
     except Exception as e:
-        msg = "Error accepting trade: " + str(e)
+        msg = "Browser fallback error: " + str(e)
         if as_json:
             return {"success": False, "transaction_key": transaction_key, "message": msg}
         print(msg)
@@ -2739,18 +2808,39 @@ def cmd_reject_trade(args, as_json=False):
         return
     transaction_key = args[0]
     trade_note = " ".join(args[1:]) if len(args) > 1 else ""
-    sc = get_connection()
-    gm = yfa.Game(sc, "mlb")
-    lg = gm.to_league(LEAGUE_ID)
-    team = lg.to_team(TEAM_ID)
+    method = _write_method()
+
+    if method != "browser":
+        try:
+            sc = get_connection()
+            gm = yfa.Game(sc, "mlb")
+            lg = gm.to_league(LEAGUE_ID)
+            team = lg.to_team(TEAM_ID)
+            team.reject_trade(transaction_key, trade_note=trade_note)
+            msg = "Trade rejected: " + transaction_key
+            if as_json:
+                return {"success": True, "transaction_key": transaction_key, "message": msg}
+            print(msg)
+            return
+        except Exception as e:
+            if method == "api" or not _is_scope_error(e):
+                msg = "Error rejecting trade: " + str(e)
+                if as_json:
+                    return {"success": False, "transaction_key": transaction_key, "message": msg}
+                print(msg)
+                return
+
     try:
-        team.reject_trade(transaction_key, trade_note=trade_note)
-        msg = "Trade rejected: " + transaction_key
+        from yahoo_browser import reject_trade
+        result = reject_trade(transaction_key, trade_note)
         if as_json:
-            return {"success": True, "transaction_key": transaction_key, "message": msg}
-        print(msg)
+            return result
+        if result.get("success"):
+            print(result.get("message", "Trade rejected via browser"))
+        else:
+            print(result.get("message", "Browser reject trade failed"))
     except Exception as e:
-        msg = "Error rejecting trade: " + str(e)
+        msg = "Browser fallback error: " + str(e)
         if as_json:
             return {"success": False, "transaction_key": transaction_key, "message": msg}
         print(msg)

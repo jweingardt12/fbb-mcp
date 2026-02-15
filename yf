@@ -35,6 +35,31 @@ case "$1" in
         shift
         docker exec $CONTAINER python3 /app/scripts/mlb-data.py "$@"
         ;;
+    # Browser session management
+    browser-login)
+        VENV="$(dirname "$0")/.venv-browser/bin/python3"
+        if [ ! -f "$VENV" ]; then
+            echo "Setting up browser venv..."
+            python3 -m venv "$(dirname "$0")/.venv-browser"
+            "$(dirname "$0")/.venv-browser/bin/pip" install playwright
+            "$(dirname "$0")/.venv-browser/bin/playwright" install chromium
+        fi
+        LEAGUE_ID="${LEAGUE_ID}" YAHOO_SESSION_FILE="$(dirname "$0")/config/yahoo_session.json" "$VENV" "$(dirname "$0")/scripts/yahoo_browser.py" login
+        ;;
+    browser-status)
+        docker exec $CONTAINER python3 /app/scripts/yahoo_browser.py status
+        ;;
+    browser-test)
+        docker exec $CONTAINER python3 /app/scripts/yahoo_browser.py test
+        ;;
+    change-team-name)
+        shift
+        docker exec $CONTAINER python3 /app/scripts/yahoo_browser.py change-team-name "$@"
+        ;;
+    change-team-logo)
+        shift
+        docker exec $CONTAINER python3 /app/scripts/yahoo_browser.py change-team-logo "$@"
+        ;;
     # Docker management
     shell)
         docker exec -it $CONTAINER /bin/bash
@@ -96,6 +121,13 @@ case "$1" in
         echo "  mlb stats <id>  - Player stats"
         echo "  mlb schedule    - Today's games"
         echo "  mlb injuries    - Current injuries"
+        echo ""
+        echo "Browser (write operations):"
+        echo "  browser-login             - Log into Yahoo for browser writes"
+        echo "  browser-status            - Check browser session status"
+        echo "  browser-test              - Test browser session"
+        echo "  change-team-name <name>   - Change team name"
+        echo "  change-team-logo <path>   - Change team logo image"
         echo ""
         echo "Docker:"
         echo "  build       - Build container"

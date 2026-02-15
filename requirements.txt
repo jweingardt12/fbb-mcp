@@ -10,5 +10,8 @@ numpy>=1.26.0
 pybaseball>=2.2.7
 MLB-StatsAPI>=1.7.0
 
+# Browser automation (write operations fallback)
+playwright>=1.40.0
+
 # API server
 flask>=3.0.0

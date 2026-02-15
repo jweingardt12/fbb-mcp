@@ -743,6 +743,22 @@ export interface BatchIntelResponse {
   [playerName: string]: PlayerIntel;
 }
 
+// Team Settings responses
+export interface ChangeTeamNameResponse {
+  success: boolean;
+  method: string;
+  message: string;
+  old_name?: string;
+  new_name?: string;
+}
+
+export interface ChangeTeamLogoResponse {
+  success: boolean;
+  method: string;
+  message: string;
+  cloudinary_id?: string;
+}
+
 // Waiver Claim responses
 export interface WaiverClaimResponse {
   success: boolean;

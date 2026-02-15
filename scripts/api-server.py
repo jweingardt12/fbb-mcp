@@ -19,8 +19,34 @@ season_manager = importlib.import_module("season-manager")
 import valuations
 import history
 import intel
+import yahoo_browser
 
 app = Flask(__name__)
+
+
+# --- Session heartbeat (keeps Yahoo cookies alive) ---
+
+HEARTBEAT_INTERVAL = int(os.environ.get("BROWSER_HEARTBEAT_HOURS", "6")) * 3600
+
+
+def _run_heartbeat():
+    """Background loop that refreshes the browser session periodically"""
+    import time
+    # Wait a bit for startup to settle
+    time.sleep(30)
+    while True:
+        try:
+            status = yahoo_browser.is_session_valid()
+            if status.get("valid"):
+                yahoo_browser.refresh_session()
+        except Exception as e:
+            print("Heartbeat error: " + str(e))
+        time.sleep(HEARTBEAT_INTERVAL)
+
+
+import threading
+_heartbeat_thread = threading.Thread(target=_run_heartbeat, daemon=True)
+_heartbeat_thread.start()
 
 
 # --- Health check ---
@@ -28,6 +54,42 @@ app = Flask(__name__)
 @app.route("/api/health")
 def health():
     return jsonify({"status": "ok"})
+
+
+@app.route("/api/browser-login-status")
+def api_browser_login_status():
+    try:
+        result = yahoo_browser.is_session_valid()
+        result["heartbeat"] = yahoo_browser.get_heartbeat_state()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"valid": False, "reason": str(e)}), 500
+
+
+@app.route("/api/change-team-name", methods=["POST"])
+def api_change_team_name():
+    try:
+        data = request.get_json(force=True) if request.is_json else request.form
+        new_name = data.get("new_name", "")
+        if not new_name:
+            return jsonify({"error": "Missing new_name"}), 400
+        result = yahoo_browser.change_team_name(new_name)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/change-team-logo", methods=["POST"])
+def api_change_team_logo():
+    try:
+        data = request.get_json(force=True) if request.is_json else request.form
+        image_path = data.get("image_path", "")
+        if not image_path:
+            return jsonify({"error": "Missing image_path"}), 400
+        result = yahoo_browser.change_team_logo(image_path)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # --- Yahoo Fantasy (yahoo-fantasy.py) ---

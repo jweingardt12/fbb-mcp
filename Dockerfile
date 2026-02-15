@@ -31,6 +31,9 @@ WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Playwright + Chromium for browser-based write operations
+RUN playwright install --with-deps chromium
+
 # Install Node production dependencies
 COPY mcp-apps/package.json mcp-apps/package-lock.json /app/mcp-apps/
 RUN cd /app/mcp-apps && npm ci --omit=dev
