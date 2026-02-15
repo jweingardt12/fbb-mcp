@@ -161,7 +161,14 @@ This opens a browser window — log into Yahoo manually (handles CAPTCHA, 2FA). 
 
 ## Connecting to Claude
 
-### Claude Code (local, stdio)
+The MCP server supports two transport modes:
+
+- **stdio** — For Claude Code and Claude Desktop. The client launches the MCP server as a subprocess and communicates over stdin/stdout. Runs entirely on your machine.
+- **Streamable HTTP** — For Claude.ai (remote). The MCP server runs as an HTTP endpoint with OAuth 2.1 authentication. Claude.ai connects to it over the internet.
+
+Both modes use the same tools and the same Python API backend inside the Docker container.
+
+### Claude Code
 
 With the Docker container running, add to your project's `.mcp.json`:
 
@@ -176,11 +183,112 @@ With the Docker container running, add to your project's `.mcp.json`:
 }
 ```
 
-This runs the MCP server inside the Docker container via stdio. The Python API is already running in the container — no additional setup needed.
+This runs a second Node process inside the already-running container in stdio mode. The Python API server is already running in the same container — no additional setup, no ports to expose for local use.
 
-### Claude.ai (remote, HTTP)
+Restart Claude Code (or run `/mcp` to refresh) after adding the config. You should see 59 tools (or 71 with `ENABLE_WRITE_OPS=true`).
 
-The Docker container exposes port 4951 with MCP SDK OAuth 2.1 auth. Point a reverse proxy (e.g., Caddy, nginx, Pangolin) at the container, then set `MCP_SERVER_URL` and `MCP_AUTH_PASSWORD` in `.env`. Claude.ai connects to the public URL and prompts for the password on first use.
+### Claude Desktop
+
+Add to your Claude Desktop config file:
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "fbb-mcp": {
+      "command": "docker",
+      "args": ["exec", "-i", "fbb-mcp", "node", "/app/mcp-apps/dist/main.js", "--stdio"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop after saving. The server appears in the MCP tools menu (hammer icon). Same setup as Claude Code — everything runs inside Docker.
+
+### Claude.ai (remote access)
+
+Claude.ai can't run local processes, so the MCP server needs to be reachable over the internet as an HTTP endpoint. This requires:
+
+1. A machine running the Docker container (home server, VPS, etc.)
+2. A domain name pointing to that machine
+3. A reverse proxy terminating TLS and forwarding to the container's port 4951
+
+#### Step 1: Set environment variables
+
+Add to your `.env`:
+
+```bash
+MCP_SERVER_URL=https://your-domain.com    # Your public URL (must be HTTPS)
+MCP_AUTH_PASSWORD=your_secure_password     # Password for the login page
+```
+
+`MCP_SERVER_URL` must match exactly what Claude.ai will connect to — the MCP server uses it to generate OAuth callback URLs. If it doesn't match, authentication will fail.
+
+#### Step 2: Configure a reverse proxy
+
+The container listens on port 4951 (HTTP). You need a reverse proxy in front of it to handle TLS. Any reverse proxy works — here are examples for common setups:
+
+**Caddy** (automatic HTTPS):
+```
+your-domain.com {
+    reverse_proxy localhost:4951
+}
+```
+
+**nginx**:
+```nginx
+server {
+    listen 443 ssl;
+    server_name your-domain.com;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location / {
+        proxy_pass http://localhost:4951;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+**Pangolin / Cloudflare Tunnel / Tailscale Funnel** also work — anything that forwards HTTPS traffic to `localhost:4951`.
+
+#### Step 3: Rebuild the container
+
+```bash
+docker compose up -d --build
+```
+
+The MCP server starts in HTTP mode (not stdio) and listens on port 4951 with OAuth 2.1 authentication.
+
+#### Step 4: Connect from Claude.ai
+
+1. Go to [claude.ai](https://claude.ai) and open Settings > MCP Servers (or Integrations)
+2. Click "Add MCP Server" and enter your URL: `https://your-domain.com/mcp`
+3. Claude.ai will redirect you to a login page served by the MCP server
+4. Enter your `MCP_AUTH_PASSWORD` and click Authorize
+5. You're connected — Claude now has access to all the fantasy baseball tools
+
+The OAuth token persists across sessions. You only need to re-authenticate if the token expires or you change the password.
+
+#### How the auth flow works
+
+The MCP server implements the full MCP OAuth 2.1 spec using `@modelcontextprotocol/sdk`:
+
+```
+Claude.ai → GET /mcp → 401 Unauthorized
+         → discovers OAuth metadata at /.well-known/oauth-authorization-server
+         → redirects user to /authorize → /login (password form)
+         → user enters password → /login/callback validates it
+         → issues authorization code → Claude.ai exchanges for bearer token
+         → GET/POST /mcp with Authorization: Bearer <token> → tools work
+```
+
+No third-party auth provider needed. The password is checked directly against `MCP_AUTH_PASSWORD`.
 
 ## MCP Tools
 
