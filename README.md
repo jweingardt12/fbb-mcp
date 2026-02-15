@@ -16,9 +16,11 @@ Request an API key from Yahoo:
 1. Go to [https://developer.yahoo.com/apps/create](https://developer.yahoo.com/apps/create) and sign in
 2. Fill in:
    - **Application Name**: anything (e.g., "Fantasy Baseball")
-   - **API Permissions**: select **Fantasy Sports** with Read/Write access (write is needed for roster changes)
+   - **API Permissions**: select **Fantasy Sports** (Read)
    - **Redirect URI(s)**: `oob`
 3. Copy your **Consumer Key** and **Consumer Secret**
+
+> **Note on write access**: Yahoo's developer portal only shows a Read option for Fantasy Sports. Despite this, the OAuth tokens granted through the authorization flow include write scope, and roster moves (add, drop, trades, lineup changes) work normally.
 
 Create `config/yahoo_oauth.json` with your credentials:
 

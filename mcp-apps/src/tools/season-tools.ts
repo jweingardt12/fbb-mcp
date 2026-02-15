@@ -29,7 +29,7 @@ import {
 
 const SEASON_URI = "ui://fbb-mcp/season.html";
 
-export function registerSeasonTools(server: McpServer, distDir: string) {
+export function registerSeasonTools(server: McpServer, distDir: string, writesEnabled: boolean = false) {
   registerAppResource(
     server,
     "Season Manager View",
@@ -388,6 +388,8 @@ export function registerSeasonTools(server: McpServer, distDir: string) {
     },
   );
 
+  if (writesEnabled) {
+
   // yahoo_set_lineup
   registerAppTool(
     server,
@@ -417,6 +419,8 @@ export function registerSeasonTools(server: McpServer, distDir: string) {
       } catch (e) { return toolError(e); }
     },
   );
+
+  } // end writesEnabled (set_lineup)
 
   // yahoo_pending_trades
   registerAppTool(
@@ -452,6 +456,8 @@ export function registerSeasonTools(server: McpServer, distDir: string) {
       } catch (e) { return toolError(e); }
     },
   );
+
+  if (writesEnabled) {
 
   // yahoo_propose_trade
   registerAppTool(
@@ -519,6 +525,8 @@ export function registerSeasonTools(server: McpServer, distDir: string) {
       } catch (e) { return toolError(e); }
     },
   );
+
+  } // end writesEnabled (trades)
 
   // yahoo_whats_new
   registerAppTool(

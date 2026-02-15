@@ -8,7 +8,7 @@ import { str, type RosterResponse, type FreeAgentsResponse, type SearchResponse,
 
 const ROSTER_URI = "ui://fbb-mcp/roster.html";
 
-export function registerRosterTools(server: McpServer, distDir: string) {
+export function registerRosterTools(server: McpServer, distDir: string, writesEnabled: boolean = false) {
   // Register the app resource for roster UI
   registerAppResource(
     server,
@@ -123,6 +123,8 @@ export function registerRosterTools(server: McpServer, distDir: string) {
       } catch (e) { return toolError(e); }
     },
   );
+
+  if (writesEnabled) {
 
   // yahoo_add
   registerAppTool(
@@ -289,6 +291,8 @@ export function registerRosterTools(server: McpServer, distDir: string) {
       } catch (e) { return toolError(e); }
     },
   );
+
+  } // end writesEnabled
 
   // yahoo_who_owns
   registerAppTool(

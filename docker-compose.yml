@@ -13,6 +13,7 @@ services:
       - PYTHON_API_URL=http://localhost:8766
       - MCP_SERVER_URL=${MCP_SERVER_URL}
       - MCP_AUTH_PASSWORD=${MCP_AUTH_PASSWORD}
+      - ENABLE_WRITE_OPS=${ENABLE_WRITE_OPS:-false}
       - PORT=4951
     ports:
       - "4951:4951"

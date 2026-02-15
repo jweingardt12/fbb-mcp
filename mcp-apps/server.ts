@@ -13,16 +13,18 @@ import { registerIntelTools } from "./src/tools/intel-tools.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = __dirname;
 
+const WRITES_ENABLED = process.env.ENABLE_WRITE_OPS === "true";
+
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "Yahoo Fantasy Baseball",
     version: "1.0.0",
   });
 
-  registerRosterTools(server, DIST_DIR);
+  registerRosterTools(server, DIST_DIR, WRITES_ENABLED);
   registerStandingsTools(server, DIST_DIR);
   registerValuationsTools(server, DIST_DIR);
-  registerSeasonTools(server, DIST_DIR);
+  registerSeasonTools(server, DIST_DIR, WRITES_ENABLED);
   registerDraftTools(server, DIST_DIR);
   registerHistoryTools(server, DIST_DIR);
   registerMlbTools(server, DIST_DIR);
