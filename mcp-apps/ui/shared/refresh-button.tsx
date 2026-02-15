@@ -1,0 +1,27 @@
+import { Button } from "../components/ui/button";
+import { useCallTool } from "./use-call-tool";
+import { RefreshCw } from "lucide-react";
+
+interface RefreshButtonProps {
+  app: any;
+  toolName: string;
+  toolArgs?: Record<string, any>;
+  navigate: (data: any) => void;
+}
+
+export function RefreshButton({ app, toolName, toolArgs, navigate }: RefreshButtonProps) {
+  const { callTool, loading } = useCallTool(app);
+
+  const handleRefresh = async () => {
+    const result = await callTool(toolName, toolArgs || {});
+    if (result && result.structuredContent) {
+      navigate(result.structuredContent);
+    }
+  };
+
+  return (
+    <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={loading} className="h-7 w-7 p-0">
+      <RefreshCw className={"h-3.5 w-3.5" + (loading ? " animate-spin" : "")} />
+    </Button>
+  );
+}

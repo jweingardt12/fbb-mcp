@@ -1,0 +1,22 @@
+# Secrets and personal data - never bake into image
+.env
+config/yahoo_oauth.json
+config/league-history.json
+config/draft-cheatsheet.json
+
+# Generated/cached data
+data/player-rankings-*.json
+data/generated_rankings.json
+data/mlb-id-cache.json
+data/season.db
+
+# Dev/build artifacts
+node_modules/
+mcp-apps/node_modules/
+mcp-apps/dist/
+.git/
+.gitignore
+.claude/
+.mcp.json
+.playwright-mcp/
+README.md

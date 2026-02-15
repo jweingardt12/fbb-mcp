@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0a0a0a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0a0a0a;
+  --color-primary: #1a365d;
+  --color-primary-foreground: #f7fafc;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0f172a;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #fafafa;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #1a365d;
+  --radius: 0.5rem;
+}
+
+/* Host variable overrides with light-dark() fallbacks.
+   When hosted in Claude.ai, useHostStyles injects variables via inline style
+   on <html> (highest specificity, always wins). These :root fallbacks only
+   apply in standalone/dev mode. color-scheme enables light-dark() resolution
+   and native dark scrollbars/form controls. */
+:root {
+  color-scheme: light dark;
+  --color-background: var(--color-background-primary, light-dark(#ffffff, #0a0a0a));
+  --color-foreground: var(--color-text-primary, light-dark(#0a0a0a, #fafafa));
+  --color-card: var(--color-background-primary, light-dark(#ffffff, #0a0a0a));
+  --color-card-foreground: var(--color-text-primary, light-dark(#0a0a0a, #fafafa));
+  --color-popover: var(--color-background-primary, light-dark(#ffffff, #0a0a0a));
+  --color-popover-foreground: var(--color-text-primary, light-dark(#0a0a0a, #fafafa));
+  --color-primary: light-dark(#1a365d, #3b82f6);
+  --color-primary-foreground: light-dark(#f7fafc, #0a0a0a);
+  --color-secondary: var(--color-background-secondary, light-dark(#f1f5f9, #1e293b));
+  --color-secondary-foreground: var(--color-text-primary, light-dark(#0f172a, #fafafa));
+  --color-muted: var(--color-background-secondary, light-dark(#f1f5f9, #1e293b));
+  --color-muted-foreground: var(--color-text-secondary, light-dark(#64748b, #94a3b8));
+  --color-accent: var(--color-background-secondary, light-dark(#f1f5f9, #1e293b));
+  --color-accent-foreground: var(--color-text-primary, light-dark(#0f172a, #fafafa));
+  --color-border: var(--color-border-primary, light-dark(#e2e8f0, #1e293b));
+  --color-input: var(--color-border-primary, light-dark(#e2e8f0, #1e293b));
+  --color-ring: var(--color-ring-primary, light-dark(#1a365d, #3b82f6));
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  margin: 0;
+  padding: 12px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, a, [role="button"] {
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+
+@keyframes bar-fill {
+  from { width: 0; }
+}
+.animate-bar-fill {
+  animation: bar-fill 400ms ease-out both;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-muted-foreground); border-radius: 3px; opacity: 0.3; }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 200ms ease-out;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background);
+  opacity: 0.7;
+  z-index: 10;
+  border-radius: var(--radius);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

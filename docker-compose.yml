@@ -1,0 +1,21 @@
+services:
+  fbb-mcp:
+    build: .
+    container_name: fbb-mcp
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./scripts:/app/scripts
+    environment:
+      - OAUTH_FILE=/app/config/yahoo_oauth.json
+      - LEAGUE_ID=${LEAGUE_ID}
+      - TEAM_ID=${TEAM_ID}
+      - PYTHON_API_URL=http://localhost:8766
+      - MCP_SERVER_URL=${MCP_SERVER_URL}
+      - MCP_AUTH_PASSWORD=${MCP_AUTH_PASSWORD}
+      - PORT=4951
+    ports:
+      - "4951:4951"
+    tty: true
+    stdin_open: true
+    restart: unless-stopped

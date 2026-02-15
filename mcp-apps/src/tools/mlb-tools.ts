@@ -1,0 +1,218 @@
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";
+import { z } from "zod";
+import * as fs from "fs/promises";
+import * as path from "path";
+import { apiGet, toolError } from "../api/python-client.js";
+import {
+  str,
+  type MlbTeamsResponse,
+  type MlbRosterResponse,
+  type MlbPlayerResponse,
+  type MlbStatsResponse,
+  type MlbInjuriesResponse,
+  type MlbStandingsResponse,
+  type MlbScheduleResponse,
+} from "../api/types.js";
+
+const MLB_URI = "ui://fbb-mcp/mlb.html";
+
+export function registerMlbTools(server: McpServer, distDir: string) {
+  registerAppResource(
+    server,
+    "MLB Data View",
+    MLB_URI,
+    {
+      description: "MLB teams, rosters, stats, injuries, standings, and schedule",
+      _meta: {
+        ui: {
+          csp: {
+            resourceDomains: [
+              "img.mlbstatic.com",
+              "securea.mlb.com",
+            ],
+          },
+          permissions: { clipboardWrite: {} },
+          prefersBorder: true,
+        },
+      },
+    },
+    async () => ({
+      contents: [{
+        uri: MLB_URI,
+        mimeType: RESOURCE_MIME_TYPE,
+        text: await fs.readFile(path.join(distDir, "mlb.html"), "utf-8"),
+      }],
+    }),
+  );
+
+  // mlb_teams
+  registerAppTool(
+    server,
+    "mlb_teams",
+    {
+      description: "List all MLB teams with abbreviations",
+      _meta: { ui: { resourceUri: MLB_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<MlbTeamsResponse>("/api/mlb/teams");
+        const text = "MLB Teams:\n" + data.teams.map((t) =>
+          "  " + str(t.abbreviation).padEnd(4) + " " + str(t.name)
+        ).join("\n");
+        return {
+          content: [{ type: "text" as const, text }],
+          structuredContent: { type: "mlb-teams", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // mlb_roster
+  registerAppTool(
+    server,
+    "mlb_roster",
+    {
+      description: "Get an MLB team's roster. team: abbreviation (NYY, LAD) or team ID",
+      inputSchema: { team: z.string() },
+      _meta: { ui: { resourceUri: MLB_URI } },
+    },
+    async ({ team }) => {
+      try {
+        const data = await apiGet<MlbRosterResponse>("/api/mlb/roster", { team });
+        const text = data.team_name + " Roster:\n" + data.roster.map((p) =>
+          "  #" + str(p.jersey_number).padStart(2) + " " + str(p.name).padEnd(25) + " " + str(p.position)
+        ).join("\n");
+        return {
+          content: [{ type: "text" as const, text }],
+          structuredContent: { type: "mlb-roster", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // mlb_player
+  registerAppTool(
+    server,
+    "mlb_player",
+    {
+      description: "Get MLB player info by MLB Stats API player ID",
+      inputSchema: { player_id: z.string() },
+      _meta: { ui: { resourceUri: MLB_URI } },
+    },
+    async ({ player_id }) => {
+      try {
+        const data = await apiGet<MlbPlayerResponse>("/api/mlb/player", { player_id });
+        const text = "Player: " + data.name + "\n"
+          + "  Position: " + data.position + "\n"
+          + "  Team: " + data.team + "\n"
+          + "  Bats/Throws: " + data.bats + "/" + data.throws + "\n"
+          + "  Age: " + data.age + "\n"
+          + "  MLB ID: " + data.mlb_id;
+        return {
+          content: [{ type: "text" as const, text }],
+          structuredContent: { type: "mlb-player", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // mlb_stats
+  registerAppTool(
+    server,
+    "mlb_stats",
+    {
+      description: "Get player season stats by MLB Stats API player ID",
+      inputSchema: { player_id: z.string(), season: z.string().default("2025") },
+      _meta: { ui: { resourceUri: MLB_URI } },
+    },
+    async ({ player_id, season }) => {
+      try {
+        const data = await apiGet<MlbStatsResponse>("/api/mlb/stats", { player_id, season });
+        const lines = ["Stats for " + season + ":"];
+        for (const [key, val] of Object.entries(data.stats)) {
+          lines.push("  " + key + ": " + String(val));
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "mlb-stats", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // mlb_injuries
+  registerAppTool(
+    server,
+    "mlb_injuries",
+    {
+      description: "Show current MLB injuries across all teams",
+      _meta: { ui: { resourceUri: MLB_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<MlbInjuriesResponse>("/api/mlb/injuries");
+        const text = data.injuries.length > 0
+          ? "Current Injuries:\n" + data.injuries.map((i) =>
+              "  " + i.player + " (" + i.team + "): " + i.description
+            ).join("\n")
+          : "No injuries reported (may be offseason)";
+        return {
+          content: [{ type: "text" as const, text }],
+          structuredContent: { type: "mlb-injuries", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // mlb_standings
+  registerAppTool(
+    server,
+    "mlb_standings",
+    {
+      description: "Show MLB division standings",
+      _meta: { ui: { resourceUri: MLB_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<MlbStandingsResponse>("/api/mlb/standings");
+        const lines: string[] = [];
+        for (const div of data.divisions) {
+          lines.push("", div.name + ":");
+          for (const t of div.teams) {
+            lines.push("  " + str(t.name).padEnd(25) + " " + t.wins + "-" + t.losses + " (" + str(t.games_back) + " GB)");
+          }
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "mlb-standings", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // mlb_schedule
+  registerAppTool(
+    server,
+    "mlb_schedule",
+    {
+      description: "Show MLB game schedule. Leave date empty for today, or pass YYYY-MM-DD",
+      inputSchema: { date: z.string().default("") },
+      _meta: { ui: { resourceUri: MLB_URI } },
+    },
+    async ({ date }) => {
+      try {
+        const params: Record<string, string> = {};
+        if (date) params.date = date;
+        const data = await apiGet<MlbScheduleResponse>("/api/mlb/schedule", params);
+        const text = "Games for " + data.date + ":\n" + data.games.map((g) =>
+          "  " + g.away + " @ " + g.home + " - " + g.status
+        ).join("\n");
+        return {
+          content: [{ type: "text" as const, text }],
+          structuredContent: { type: "mlb-schedule", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+}

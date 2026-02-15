@@ -1,0 +1,252 @@
+import { useState, useCallback, useEffect, useRef, type ReactNode } from "react";
+import { useApp, useHostStyles } from "@modelcontextprotocol/ext-apps/react";
+import { Skeleton } from "../components/ui/skeleton";
+import { Button } from "../components/ui/button";
+import { Maximize2, Minimize2 } from "lucide-react";
+
+var TOOL_LABELS: Record<string, string> = {
+  "yahoo_roster": "roster",
+  "yahoo_free_agents": "free agents",
+  "yahoo_standings": "standings",
+  "yahoo_matchups": "matchups",
+  "yahoo_scoreboard": "scoreboard",
+  "yahoo_scout_opponent": "scout report",
+  "yahoo_lineup_optimize": "lineup",
+  "yahoo_streaming": "streaming picks",
+  "yahoo_waiver_analyze": "waiver analysis",
+  "yahoo_trade_eval": "trade evaluation",
+  "yahoo_injury_report": "injury report",
+  "yahoo_rankings": "rankings",
+  "yahoo_compare": "comparison",
+  "yahoo_value": "player value",
+  "yahoo_daily_update": "daily update",
+  "fantasy_player_report": "player report",
+  "yahoo_transaction_trends": "transaction trends",
+  "yahoo_set_lineup": "set lineup",
+  "yahoo_pending_trades": "pending trades",
+  "yahoo_propose_trade": "propose trade",
+  "yahoo_accept_trade": "accept trade",
+  "yahoo_reject_trade": "reject trade",
+  "yahoo_whats_new": "what's new",
+  "yahoo_trade_finder": "trade finder",
+  "yahoo_week_planner": "week planner",
+  "yahoo_closer_monitor": "closer monitor",
+  "yahoo_pitcher_matchup": "pitcher matchups",
+  "yahoo_league_pulse": "league pulse",
+  "yahoo_power_rankings": "power rankings",
+  "yahoo_season_pace": "season pace",
+  "yahoo_waiver_claim": "waiver claim",
+  "yahoo_waiver_claim_swap": "waiver claim swap",
+  "yahoo_who_owns": "who owns",
+};
+
+function toolLabel(name: string): string | null {
+  if (TOOL_LABELS[name]) return TOOL_LABELS[name];
+  if (name) return name.replace(/_/g, " ");
+  return null;
+}
+
+interface AppShellProps {
+  name: string;
+  version?: string;
+  children: (props: { data: any; toolName: string; app: any; navigate: (newData: any) => void }) => ReactNode;
+}
+
+export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
+  var [data, setData] = useState<any>(null);
+  var [toolName, setToolName] = useState<string>("");
+  var [lastAction, setLastAction] = useState<string | null>(null);
+  var [timedOut, setTimedOut] = useState(false);
+  var [cancelled, setCancelled] = useState(false);
+  var [errorMsg, setErrorMsg] = useState<string | null>(null);
+  var [displayMode, setDisplayMode] = useState("inline");
+  var dataRef = useRef(data);
+
+  useEffect(function () {
+    dataRef.current = data;
+  }, [data]);
+
+  var { app, error } = useApp({
+    appInfo: { name, version },
+    onAppCreated: useCallback(function (app: any) {
+      app.ontoolresult = function (result: any) {
+        var sc = result.structuredContent;
+        setTimedOut(false);
+        setCancelled(false);
+
+        // Handle errors (with or without structuredContent)
+        if (result.isError || (sc && sc.type === "_error")) {
+          var msg = (sc && sc.message)
+            || (result.content && result.content[0] && result.content[0].text)
+            || "Tool execution failed";
+          setErrorMsg(msg);
+          return;
+        }
+
+        if (!sc) return;
+
+        setData(sc);
+        setToolName(sc.type || "");
+        setErrorMsg(null);
+        if (app.updateModelContext) {
+          var context: Record<string, any> = { structuredContent: sc };
+          if (sc.type) context.view = sc.type;
+          if (sc.type === "add" || sc.type === "drop" || sc.type === "swap") {
+            context.action_taken = sc.type;
+            context.success = sc.success;
+            context.suggestions = ["View updated roster", "Check category impact", "Review lineup"];
+            setLastAction(sc.type);
+          }
+          var needsAttention: string[] = [];
+          if (sc.active_off_day && sc.active_off_day.length > 0) {
+            needsAttention.push(sc.active_off_day.length + " active players with no game today");
+          }
+          if (sc.injured_active && sc.injured_active.length > 0) {
+            needsAttention.push(sc.injured_active.length + " injured players in active lineup");
+          }
+          if (sc.weakest && sc.weakest.length > 0) {
+            needsAttention.push("Weak categories: " + sc.weakest.join(", "));
+          }
+          if (needsAttention.length > 0) {
+            context.needs_attention = needsAttention;
+          }
+          app.updateModelContext(context);
+        }
+      };
+
+      app.ontoolinputpartial = function (input: any) {
+        if (input.name) {
+          setToolName(input.name);
+        }
+      };
+
+      app.ontoolcancelled = function () {
+        setTimedOut(false);
+        if (!dataRef.current) {
+          setCancelled(true);
+        }
+      };
+
+      app.onteardown = function () {
+        setData(null);
+        setToolName("");
+      };
+
+      app.onhostcontextchanged = function (ctx: any) {
+        if (ctx && ctx.displayMode) {
+          setDisplayMode(ctx.displayMode);
+        }
+      };
+    }, []),
+  });
+
+  useHostStyles(app, app?.getHostContext());
+
+  var navigate = useCallback(function (newData: any) {
+    if (newData) {
+      setData(newData);
+      setToolName(newData.type || "");
+      // Update model context on navigation too
+      if (app && app.updateModelContext) {
+        app.updateModelContext({ structuredContent: newData, navigated_to: newData.type || "" });
+      }
+    }
+  }, [app]);
+
+  // Timeout for waiting state
+  useEffect(function () {
+    if (data || !app) return;
+    var timer = setTimeout(function () { setTimedOut(true); }, 5000);
+    return function () { clearTimeout(timer); };
+  }, [data, app]);
+
+  if (error) {
+    return (
+      <div className="p-4 space-y-3">
+        <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4">
+          <h3 className="text-sm font-medium text-destructive">Connection Error</h3>
+          <p className="text-xs text-muted-foreground mt-1">{String(error)}</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={function () { window.location.reload(); }}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (!app) {
+    return (
+      <div className="space-y-3 p-4">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-4 w-48" />
+        <div className="space-y-2 mt-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-3/4" />
+        </div>
+        <Skeleton className="h-48 w-full mt-2" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    if (cancelled) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <p className="text-sm text-muted-foreground">Tool call was cancelled.</p>
+          <p className="text-xs text-muted-foreground mt-1">Ask Claude to try again.</p>
+        </div>
+      );
+    }
+
+    if (errorMsg) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 max-w-md">
+            <h3 className="text-sm font-medium text-destructive">Something went wrong</h3>
+            <p className="text-xs text-muted-foreground mt-1">{errorMsg}</p>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">Ask Claude to try again.</p>
+        </div>
+      );
+    }
+
+    var label = toolName ? toolLabel(toolName) : null;
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+          <span className="text-sm">{label ? "Loading " + label + "..." : "Waiting for data..."}</span>
+        </div>
+        {timedOut && (
+          <p className="text-xs text-muted-foreground mt-3">
+            Taking longer than expected. Make sure a tool has been called.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ position: "relative", overflow: "hidden" }}>
+      {app.requestDisplayMode && (
+        <div style={{ position: "absolute", top: 8, right: 8, zIndex: 10 }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={function () {
+              var newMode = displayMode === "fullscreen" ? "inline" : "fullscreen";
+              app.requestDisplayMode(newMode);
+            }}
+            title={displayMode === "fullscreen" ? "Exit fullscreen" : "Fullscreen"}
+          >
+            {displayMode === "fullscreen" ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          </Button>
+        </div>
+      )}
+      {children({ data, toolName, app, navigate })}
+    </div>
+  );
+}

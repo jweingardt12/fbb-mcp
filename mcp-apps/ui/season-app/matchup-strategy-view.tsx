@@ -1,0 +1,362 @@
+import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
+import { useCallTool } from "../shared/use-call-tool";
+import { PlayerName } from "../shared/player-name";
+import { mlbHeadshotUrl } from "../shared/mlb-images";
+import { TeamLogo } from "../shared/team-logo";
+import {
+  Swords, TrendingUp, TrendingDown, Target, Shield, Lock, XCircle,
+  Calendar, ArrowRightLeft, Loader2, RefreshCw, UserPlus,
+} from "lucide-react";
+
+interface StrategyCategory {
+  name: string;
+  my_value: string;
+  opp_value: string;
+  result: "win" | "loss" | "tie";
+  margin: "close" | "comfortable" | "dominant";
+  classification: "target" | "protect" | "concede" | "lock";
+  reason: string;
+}
+
+interface ScheduleData {
+  my_batter_games: number;
+  my_pitcher_games: number;
+  opp_batter_games: number;
+  opp_pitcher_games: number;
+  advantage: "you" | "opponent" | "neutral";
+}
+
+interface OppTransaction {
+  type: string;
+  player: string;
+  date: string;
+}
+
+interface WaiverTarget {
+  name: string;
+  pid: string;
+  pct: number;
+  categories: string[];
+  team: string;
+  games: number;
+  mlb_id?: number;
+}
+
+interface MatchupStrategyData {
+  week: number | string;
+  opponent: string;
+  score: { wins: number; losses: number; ties: number };
+  schedule: ScheduleData;
+  categories: StrategyCategory[];
+  opp_transactions: OppTransaction[];
+  strategy: { target: string[]; protect: string[]; concede: string[]; lock: string[] };
+  waiver_targets: WaiverTarget[];
+  summary: string;
+}
+
+function resultColor(wins: number, losses: number): "green" | "red" | "yellow" {
+  if (wins > losses) return "green";
+  if (losses > wins) return "red";
+  return "yellow";
+}
+
+function scoreBadgeColor(wins: number, losses: number): string {
+  var color = resultColor(wins, losses);
+  if (color === "green") return "bg-green-600 text-white";
+  if (color === "red") return "bg-red-500 text-white";
+  return "bg-yellow-500 text-white";
+}
+
+function scoreLabel(wins: number, losses: number): string {
+  if (wins > losses) return "Winning";
+  if (losses > wins) return "Losing";
+  return "Tied";
+}
+
+function classificationBadge(cls: string) {
+  switch (cls) {
+    case "target":
+      return <Badge className="bg-blue-600 text-white text-[10px]"><Target className="h-2.5 w-2.5 mr-0.5 inline" />Target</Badge>;
+    case "protect":
+      return <Badge className="bg-yellow-500 text-white text-[10px]"><Shield className="h-2.5 w-2.5 mr-0.5 inline" />Protect</Badge>;
+    case "concede":
+      return <Badge variant="outline" className="text-[10px] text-muted-foreground"><XCircle className="h-2.5 w-2.5 mr-0.5 inline" />Concede</Badge>;
+    case "lock":
+      return <Badge className="bg-green-600 text-white text-[10px]"><Lock className="h-2.5 w-2.5 mr-0.5 inline" />Lock</Badge>;
+    default:
+      return <Badge variant="outline" className="text-[10px]">{cls}</Badge>;
+  }
+}
+
+function rowBg(classification: string): string {
+  switch (classification) {
+    case "target": return "bg-blue-500/10";
+    case "protect": return "bg-yellow-500/10";
+    case "concede": return "bg-muted/30";
+    case "lock": return "bg-green-500/10";
+    default: return "";
+  }
+}
+
+export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStrategyData; app?: any; navigate?: (data: any) => void }) {
+  const { callTool, loading } = useCallTool(app);
+  const [localData, setLocalData] = useState<MatchupStrategyData | null>(null);
+  const d = localData || data;
+
+  const handleRefresh = async () => {
+    var result = await callTool("yahoo_matchup_strategy");
+    if (result && result.structuredContent) {
+      setLocalData(result.structuredContent as MatchupStrategyData);
+    }
+  };
+
+  const handleAdd = async (playerId: string) => {
+    var result = await callTool("yahoo_add", { player_id: playerId });
+    if (result && navigate) {
+      navigate(result.structuredContent);
+    }
+  };
+
+  const score = d.score || { wins: 0, losses: 0, ties: 0 };
+  const sched = d.schedule || { my_batter_games: 0, my_pitcher_games: 0, opp_batter_games: 0, opp_pitcher_games: 0, advantage: "neutral" };
+  const strat = d.strategy || { target: [], protect: [], concede: [], lock: [] };
+  var myTotal = sched.my_batter_games + sched.my_pitcher_games;
+  var oppTotal = sched.opp_batter_games + sched.opp_pitcher_games;
+  var gameDiff = Math.abs(myTotal - oppTotal);
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Swords className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Matchup Strategy</h2>
+        </div>
+        {app && (
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading} className="h-7 text-xs gap-1">
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+            Refresh
+          </Button>
+        )}
+      </div>
+
+      {/* Opponent + Score */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">Week {d.week}</p>
+          <p className="font-semibold">vs. {d.opponent}</p>
+        </div>
+        <Badge className={"text-sm px-3 py-1 " + scoreBadgeColor(score.wins, score.losses)}>
+          {scoreLabel(score.wins, score.losses)}{" "}
+          {score.wins}-{score.losses}{score.ties > 0 ? "-" + score.ties : ""}
+        </Badge>
+      </div>
+
+      {/* Summary Card */}
+      {d.summary && (
+        <Card className={"border-" + resultColor(score.wins, score.losses) + "-500/30 bg-" + resultColor(score.wins, score.losses) + "-500/5"}>
+          <CardContent className="p-4">
+            <p className="text-sm leading-relaxed">{d.summary}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Schedule Comparison */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">Remaining Games</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">You</p>
+              <p className="text-xl font-bold font-mono">{myTotal}</p>
+              <p className="text-[10px] text-muted-foreground">{sched.my_batter_games} bat / {sched.my_pitcher_games} pitch</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">Opponent</p>
+              <p className="text-xl font-bold font-mono">{oppTotal}</p>
+              <p className="text-[10px] text-muted-foreground">{sched.opp_batter_games} bat / {sched.opp_pitcher_games} pitch</p>
+            </div>
+          </div>
+          {sched.advantage !== "neutral" && (
+            <div className="mt-3 text-center">
+              <Badge className={sched.advantage === "you" ? "bg-green-600 text-white" : "bg-red-500 text-white"}>
+                {sched.advantage === "you"
+                  ? "+" + gameDiff + " game advantage"
+                  : "Opponent +" + gameDiff + " games"}
+              </Badge>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Strategy Summary Badges */}
+      <div className="grid grid-cols-4 gap-2">
+        {([
+          { key: "target" as const, label: "Target", Icon: Target, border: "border-blue-500/30 bg-blue-500/5", icon: "text-blue-500", text: "text-blue-600 dark:text-blue-400" },
+          { key: "protect" as const, label: "Protect", Icon: Shield, border: "border-yellow-500/30 bg-yellow-500/5", icon: "text-yellow-500", text: "text-yellow-600 dark:text-yellow-400" },
+          { key: "concede" as const, label: "Concede", Icon: XCircle, border: "border-muted", icon: "text-muted-foreground", text: "text-muted-foreground" },
+          { key: "lock" as const, label: "Lock", Icon: Lock, border: "border-green-500/30 bg-green-500/5", icon: "text-green-600 dark:text-green-400", text: "text-green-600 dark:text-green-400" },
+        ]).map(function (s) {
+          if (strat[s.key].length === 0) return null;
+          return (
+            <Card key={s.key} className={s.border}>
+              <CardContent className="p-2 text-center">
+                <s.Icon className={"h-3.5 w-3.5 mx-auto mb-1 " + s.icon} />
+                <p className={"text-[10px] font-semibold " + s.text}>{s.label}</p>
+                <p className="text-[10px] text-muted-foreground">{strat[s.key].join(", ")}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Category Strategy Table */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Category Breakdown</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Category</TableHead>
+                <TableHead className="text-right">You</TableHead>
+                <TableHead className="text-right">Opp</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-center">Plan</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(d.categories || []).map(function (c, i) {
+                return (
+                  <TableRow key={i + "-" + c.name} className={rowBg(c.classification)} title={c.reason}>
+                    <TableCell className="font-medium text-sm">{c.name}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{c.my_value}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{c.opp_value}</TableCell>
+                    <TableCell className="text-center">
+                      {c.result === "win" && <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400 inline" />}
+                      {c.result === "loss" && <TrendingDown className="h-4 w-4 text-red-500 inline" />}
+                      {c.result === "tie" && <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">TIE</span>}
+                    </TableCell>
+                    <TableCell className="text-center">{classificationBadge(c.classification)}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Opponent Activity */}
+      {(d.opp_transactions || []).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <ArrowRightLeft className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">Opponent Recent Moves</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {(d.opp_transactions || []).map(function (tx, idx) {
+                return (
+                  <div key={idx} className="flex items-center gap-2 text-sm">
+                    <Badge variant={tx.type === "add" ? "default" : "outline"} className="text-[10px] w-12 justify-center">
+                      {tx.type === "add" ? "ADD" : "DROP"}
+                    </Badge>
+                    <span>{tx.player}</span>
+                    {tx.date && <span className="text-xs text-muted-foreground ml-auto">{tx.date}</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Waiver Targets */}
+      {(d.waiver_targets || []).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">Recommended Pickups</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Player</TableHead>
+                  <TableHead className="hidden sm:table-cell">Team</TableHead>
+                  <TableHead className="text-center">Games</TableHead>
+                  <TableHead className="text-right">Own%</TableHead>
+                  <TableHead className="hidden sm:table-cell">Targets</TableHead>
+                  {app && <TableHead className="w-10"></TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(d.waiver_targets || []).map(function (wt, idx) {
+                  return (
+                    <TableRow key={idx}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {wt.mlb_id && (
+                            <img
+                              src={mlbHeadshotUrl(wt.mlb_id)}
+                              alt=""
+                              className="w-6 h-6 rounded-full object-cover bg-muted"
+                              loading="lazy"
+                            />
+                          )}
+                          <PlayerName name={wt.name} playerId={wt.pid} mlbId={wt.mlb_id} app={app} navigate={navigate} context="waivers" />
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
+                        <span className="flex items-center" style={{ gap: "4px" }}>
+                          <TeamLogo abbrev={wt.team} />
+                          {wt.team}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-sm">{wt.games}</TableCell>
+                      <TableCell className="text-right font-mono text-sm">{wt.pct}%</TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <div className="flex flex-wrap gap-0.5">
+                          {(wt.categories || []).map(function (cat) {
+                            return <Badge key={cat} variant="outline" className="text-[9px]">{cat}</Badge>;
+                          })}
+                        </div>
+                      </TableCell>
+                      {app && (
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={function () { handleAdd(wt.pid); }}
+                            disabled={loading}
+                          >
+                            <UserPlus className="h-3 w-3" />
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,713 @@
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";
+import { z } from "zod";
+import * as fs from "fs/promises";
+import * as path from "path";
+import { apiGet, apiPost, toolError } from "../api/python-client.js";
+import {
+  str,
+  type LineupOptimizeResponse,
+  type CategoryCheckResponse,
+  type InjuryReportResponse,
+  type WaiverAnalyzeResponse,
+  type StreamingResponse,
+  type TradeEvalResponse,
+  type DailyUpdateResponse,
+  type CategorySimulateResponse,
+  type ScoutOpponentResponse,
+  type MatchupStrategyResponse,
+  type SetLineupResponse,
+  type PendingTradesResponse,
+  type ProposeTradeResponse,
+  type TradeActionResponse,
+  type WhatsNewResponse,
+  type TradeFinderResponse,
+  type WeekPlannerResponse,
+  type CloserMonitorResponse,
+  type PitcherMatchupResponse,
+} from "../api/types.js";
+
+const SEASON_URI = "ui://fbb-mcp/season.html";
+
+export function registerSeasonTools(server: McpServer, distDir: string) {
+  registerAppResource(
+    server,
+    "Season Manager View",
+    SEASON_URI,
+    {
+      description: "In-season management: lineup, waivers, injuries, streaming",
+      _meta: {
+        ui: {
+          csp: {
+            resourceDomains: [
+              "img.mlbstatic.com",
+              "securea.mlb.com",
+            ],
+          },
+          permissions: { clipboardWrite: {} },
+          prefersBorder: true,
+        },
+      },
+    },
+    async () => ({
+      contents: [{
+        uri: SEASON_URI,
+        mimeType: RESOURCE_MIME_TYPE,
+        text: await fs.readFile(path.join(distDir, "season.html"), "utf-8"),
+      }],
+    }),
+  );
+
+  // yahoo_lineup_optimize
+  registerAppTool(
+    server,
+    "yahoo_lineup_optimize",
+    {
+      description: "Optimize daily lineup by benching off-day players and starting active ones. Set apply=true to execute changes.",
+      inputSchema: { apply: z.boolean().default(false) },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ apply }) => {
+      try {
+        const params: Record<string, string> = {};
+        if (apply) params.apply = "true";
+        const data = await apiGet<LineupOptimizeResponse>("/api/lineup-optimize", params);
+        const lines = ["Lineup Optimizer:"];
+        if (data.active_off_day.length > 0) {
+          lines.push("PROBLEM: Active players on OFF DAY:");
+          for (const p of data.active_off_day) {
+            lines.push("  " + str(p.position || "?").padEnd(4) + " " + str(p.name).padEnd(25) + " (" + str(p.team || "?") + ") - NO GAME");
+          }
+        } else {
+          lines.push("All active players have games today.");
+        }
+        if (data.bench_playing.length > 0) {
+          lines.push("OPPORTUNITY: Bench players WITH games today:");
+          for (const p of data.bench_playing) {
+            lines.push("  BN   " + str(p.name).padEnd(25) + " (" + str(p.team || "?") + ")");
+          }
+        }
+        if (data.suggested_swaps.length > 0) {
+          lines.push("Suggested Swaps:");
+          for (const s of data.suggested_swaps) {
+            lines.push("  Bench " + s.bench_player + ", Start " + s.start_player + " (" + s.position + ")");
+          }
+        }
+        if (data.applied) lines.push("Changes applied.");
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "lineup-optimize", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_category_check
+  registerAppTool(
+    server,
+    "yahoo_category_check",
+    {
+      description: "Show where you rank in each stat category vs the league",
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<CategoryCheckResponse>("/api/category-check");
+        const lines = [
+          "Category Check (week " + data.week + "):",
+          "  " + "Category".padEnd(12) + "Value".padStart(10) + "  Rank",
+          "  " + "-".repeat(35),
+        ];
+        for (const c of data.categories) {
+          let marker = "";
+          if (c.strength === "strong") marker = " << STRONG";
+          if (c.strength === "weak") marker = " << WEAK";
+          lines.push("  " + str(c.name).padEnd(12) + str(c.value).padStart(10) + "  " + c.rank + "/" + c.total + marker);
+        }
+        if (data.strongest.length > 0) lines.push("Strongest: " + data.strongest.join(", "));
+        if (data.weakest.length > 0) lines.push("Weakest:   " + data.weakest.join(", "));
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "category-check", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_injury_report
+  registerAppTool(
+    server,
+    "yahoo_injury_report",
+    {
+      description: "Check roster for injured players and suggest IL moves",
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<InjuryReportResponse>("/api/injury-report");
+        const lines = ["Injury Report:"];
+        if (data.injured_active.length > 0) {
+          lines.push("PROBLEM: Injured players in ACTIVE lineup:");
+          for (const p of data.injured_active) {
+            lines.push("  " + str(p.position).padEnd(4) + " " + str(p.name).padEnd(25) + " [" + str(p.status) + "]" + (p.injury_description ? " - " + p.injury_description : ""));
+          }
+        } else {
+          lines.push("No injured players in active lineup.");
+        }
+        if (data.healthy_il.length > 0) {
+          lines.push("INEFFICIENCY: Players on IL with no injury status:");
+          for (const p of data.healthy_il) {
+            lines.push("  " + str(p.position).padEnd(4) + " " + str(p.name).padEnd(25) + " - may be activatable");
+          }
+        }
+        if (data.injured_bench.length > 0) {
+          lines.push("NOTE: Injured players on bench:");
+          for (const p of data.injured_bench) {
+            lines.push("  BN   " + str(p.name).padEnd(25) + " [" + str(p.status) + "]");
+          }
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "injury-report", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_waiver_analyze
+  registerAppTool(
+    server,
+    "yahoo_waiver_analyze",
+    {
+      description: "Score free agents by how much they'd improve your weakest categories. pos_type: B or P",
+      inputSchema: { pos_type: z.string().default("B"), count: z.number().default(15) },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ pos_type, count }) => {
+      try {
+        const data = await apiGet<WaiverAnalyzeResponse>("/api/waiver-analyze", { pos_type, count: String(count) });
+        const label = pos_type === "B" ? "Batters" : "Pitchers";
+        const lines = [
+          "Waiver Wire Analysis (" + label + "):",
+        ];
+        if (data.weak_categories.length > 0) {
+          lines.push("Weak categories: " + data.weak_categories.map((c) => c.name).join(", "));
+        }
+        lines.push("  " + "Player".padEnd(25) + "Pos".padEnd(12) + "Own%".padStart(5) + "  Score  Status");
+        lines.push("  " + "-".repeat(60));
+        for (const p of data.recommendations) {
+          const status = p.status ? " [" + p.status + "]" : "";
+          const tier = (p.intel && p.intel.statcast && p.intel.statcast.quality_tier) ? " {" + p.intel.statcast.quality_tier + "}" : "";
+          lines.push("  " + str(p.name).padEnd(25) + str(p.positions).padEnd(12) + str(p.pct).padStart(5)
+            + "  " + str(p.score.toFixed(1)).padStart(5) + status + tier + "  (id:" + p.pid + ")");
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "waiver-analyze", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_streaming
+  registerAppTool(
+    server,
+    "yahoo_streaming",
+    {
+      description: "Recommend streaming pitchers based on schedule and two-start potential",
+      inputSchema: { week: z.string().default("") },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ week }) => {
+      try {
+        const params: Record<string, string> = {};
+        if (week) params.week = week;
+        const data = await apiGet<StreamingResponse>("/api/streaming", params);
+        const lines = [
+          "Streaming Pitcher Recommendations (week " + data.week + "):",
+          "  " + "Pitcher".padEnd(25) + "Team".padEnd(15) + "Games".padStart(5) + "  Own%".padStart(6) + "  Score",
+          "  " + "-".repeat(65),
+        ];
+        for (const p of data.recommendations) {
+          const twoStart = p.games >= 7 ? " *2S*" : "";
+          const tier = (p.intel && p.intel.statcast && p.intel.statcast.quality_tier) ? " {" + p.intel.statcast.quality_tier + "}" : "";
+          lines.push("  " + str(p.name).padEnd(25) + str(p.team).padEnd(15) + str(p.games).padStart(5)
+            + str(p.pct).padStart(6) + "  " + str(p.score.toFixed(1)).padStart(5)
+            + twoStart + tier + "  (id:" + p.pid + ")");
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "streaming", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_trade_eval
+  registerAppTool(
+    server,
+    "yahoo_trade_eval",
+    {
+      description: "Evaluate a trade. give_ids and get_ids are comma-separated player IDs (e.g. '12345,12346')",
+      inputSchema: { give_ids: z.string(), get_ids: z.string() },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ give_ids, get_ids }) => {
+      try {
+        const data = await apiPost<TradeEvalResponse>("/api/trade-eval", { give_ids, get_ids });
+        const lines = [
+          "Trade Evaluation:",
+          "GIVING:",
+        ];
+        for (const p of data.give_players) {
+          const tier = (p.intel && p.intel.statcast && p.intel.statcast.quality_tier) ? " {" + p.intel.statcast.quality_tier + "}" : "";
+          lines.push("  " + str(p.name).padEnd(25) + " " + (p.positions || []).join(",") + tier);
+        }
+        lines.push("GETTING:");
+        for (const p of data.get_players) {
+          const tier = (p.intel && p.intel.statcast && p.intel.statcast.quality_tier) ? " {" + p.intel.statcast.quality_tier + "}" : "";
+          lines.push("  " + str(p.name).padEnd(25) + " " + (p.positions || []).join(",") + tier);
+        }
+        lines.push("");
+        lines.push("Give Value:    " + data.give_value.toFixed(1));
+        lines.push("Get Value:     " + data.get_value.toFixed(1));
+        lines.push("Net Value:     " + data.net_value.toFixed(1));
+        lines.push("Trade Grade:   " + data.grade);
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "trade-eval", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_daily_update
+  registerAppTool(
+    server,
+    "yahoo_daily_update",
+    {
+      description: "Run all daily checks: lineup optimization and injury report",
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<DailyUpdateResponse>("/api/daily-update");
+        return {
+          content: [{ type: "text" as const, text: "Daily update complete" }],
+          structuredContent: { type: "daily-update", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_scout_opponent
+  registerAppTool(
+    server,
+    "yahoo_scout_opponent",
+    {
+      description: "Scout your current matchup opponent - analyze their strengths, weaknesses, and suggest counter-strategies",
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<ScoutOpponentResponse>("/api/scout-opponent");
+        const lines = [
+          "Opponent Scout Report (week " + data.week + "):",
+          "vs. " + data.opponent,
+          "Score: " + data.score.wins + "-" + data.score.losses + "-" + data.score.ties,
+          "",
+          "Strategy:",
+        ];
+        for (const s of data.strategy) {
+          lines.push("  - " + s);
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "scout-opponent", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_category_simulate
+  registerAppTool(
+    server,
+    "yahoo_category_simulate",
+    {
+      description: "Simulate category rank impact of adding a player. Shows how your weak/strong categories would change.",
+      inputSchema: { add_name: z.string(), drop_name: z.string().default("") },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ add_name, drop_name }) => {
+      try {
+        const params: Record<string, string> = { add_name };
+        if (drop_name) params.drop_name = drop_name;
+        const data = await apiGet<CategorySimulateResponse>("/api/category-simulate", params);
+        const lines = ["Category Simulation:"];
+        lines.push("Adding: " + data.add_player.name);
+        if (data.drop_player) lines.push("Dropping: " + data.drop_player.name);
+        lines.push("");
+        lines.push(data.summary);
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "category-simulate", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_matchup_strategy
+  registerAppTool(
+    server,
+    "yahoo_matchup_strategy",
+    {
+      description: "Analyze your matchup and get a category-by-category game plan to maximize wins",
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<MatchupStrategyResponse>("/api/matchup-strategy");
+        const lines = [
+          "Matchup Strategy (week " + data.week + "):",
+          "vs. " + data.opponent,
+          "Score: " + data.score.wins + "-" + data.score.losses + "-" + data.score.ties,
+          "",
+        ];
+        const strat = data.strategy || { target: [], protect: [], concede: [], lock: [] };
+        if (strat.target.length > 0) lines.push("TARGET: " + strat.target.join(", "));
+        if (strat.protect.length > 0) lines.push("PROTECT: " + strat.protect.join(", "));
+        if (strat.concede.length > 0) lines.push("CONCEDE: " + strat.concede.join(", "));
+        if (strat.lock.length > 0) lines.push("LOCK: " + strat.lock.join(", "));
+        lines.push("");
+        lines.push(data.summary);
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "matchup-strategy", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_set_lineup
+  registerAppTool(
+    server,
+    "yahoo_set_lineup",
+    {
+      description: "Move specific player(s) to specific position(s). Each move is {player_id, position}.",
+      inputSchema: {
+        moves: z.array(z.object({ player_id: z.string(), position: z.string() })),
+      },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ moves }) => {
+      try {
+        const data = await apiPost<SetLineupResponse>("/api/set-lineup", { moves } as any);
+        const lines = ["Set Lineup:"];
+        for (const m of data.moves || []) {
+          if (m.success) {
+            lines.push("  Moved " + m.player_id + " to " + m.position);
+          } else {
+            lines.push("  Error moving " + m.player_id + ": " + (m.error || "unknown"));
+          }
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "set-lineup", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_pending_trades
+  registerAppTool(
+    server,
+    "yahoo_pending_trades",
+    {
+      description: "View all pending incoming and outgoing trade proposals",
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<PendingTradesResponse>("/api/pending-trades");
+        if (!data.trades || data.trades.length === 0) {
+          return {
+            content: [{ type: "text" as const, text: "No pending trade proposals" }],
+            structuredContent: { type: "pending-trades", ...data },
+          };
+        }
+        const lines = ["Pending Trade Proposals:"];
+        for (const t of data.trades) {
+          const traderNames = (t.trader_players || []).map((p) => p.name || "?").join(", ");
+          const tradeeNames = (t.tradee_players || []).map((p) => p.name || "?").join(", ");
+          lines.push("  " + (t.trader_team_name || t.trader_team_key) + " sends: " + traderNames);
+          lines.push("  " + (t.tradee_team_name || t.tradee_team_key) + " sends: " + tradeeNames);
+          lines.push("  Status: " + t.status + "  Key: " + t.transaction_key);
+          if (t.trade_note) lines.push("  Note: " + t.trade_note);
+          lines.push("");
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "pending-trades", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_propose_trade
+  registerAppTool(
+    server,
+    "yahoo_propose_trade",
+    {
+      description: "Propose a trade to another team. your_player_ids and their_player_ids are comma-separated.",
+      inputSchema: {
+        their_team_key: z.string(),
+        your_player_ids: z.string(),
+        their_player_ids: z.string(),
+        note: z.string().default(""),
+      },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ their_team_key, your_player_ids, their_player_ids, note }) => {
+      try {
+        const data = await apiPost<ProposeTradeResponse>("/api/propose-trade", {
+          their_team_key, your_player_ids, their_player_ids, note,
+        });
+        return {
+          content: [{ type: "text" as const, text: data.message || "Trade proposal result: " + JSON.stringify(data) }],
+          structuredContent: { type: "propose-trade", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_accept_trade
+  registerAppTool(
+    server,
+    "yahoo_accept_trade",
+    {
+      description: "Accept a pending trade by transaction key",
+      inputSchema: { transaction_key: z.string(), note: z.string().default("") },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ transaction_key, note }) => {
+      try {
+        const data = await apiPost<TradeActionResponse>("/api/accept-trade", { transaction_key, note });
+        return {
+          content: [{ type: "text" as const, text: data.message || "Accept trade result: " + JSON.stringify(data) }],
+          structuredContent: { type: "accept-trade", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_reject_trade
+  registerAppTool(
+    server,
+    "yahoo_reject_trade",
+    {
+      description: "Reject a pending trade by transaction key",
+      inputSchema: { transaction_key: z.string(), note: z.string().default("") },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ transaction_key, note }) => {
+      try {
+        const data = await apiPost<TradeActionResponse>("/api/reject-trade", { transaction_key, note });
+        return {
+          content: [{ type: "text" as const, text: data.message || "Reject trade result: " + JSON.stringify(data) }],
+          structuredContent: { type: "reject-trade", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_whats_new
+  registerAppTool(
+    server,
+    "yahoo_whats_new",
+    {
+      description: "Get a digest of what's new: injuries, pending trades, league activity, trending pickups, prospect call-ups",
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<WhatsNewResponse>("/api/whats-new");
+        const sections: string[] = ["What's New Digest:"];
+        if (data.injuries.length > 0) {
+          sections.push("INJURIES (" + data.injuries.length + "):");
+          for (const p of data.injuries) {
+            sections.push("  " + str(p.name).padEnd(25) + " [" + str(p.status) + "]");
+          }
+        }
+        if (data.pending_trades.length > 0) {
+          sections.push("PENDING TRADES (" + data.pending_trades.length + ")");
+        }
+        if (data.league_activity.length > 0) {
+          sections.push("LEAGUE ACTIVITY (" + data.league_activity.length + "):");
+          for (const a of data.league_activity.slice(0, 5)) {
+            sections.push("  " + str(a.type).padEnd(6) + " " + str(a.player).padEnd(25) + " -> " + str(a.team));
+          }
+        }
+        if (data.trending.length > 0) {
+          sections.push("TRENDING (" + data.trending.length + "):");
+          for (const t of data.trending.slice(0, 5)) {
+            sections.push("  " + str(t.name).padEnd(25) + " " + t.percent_owned + "% (" + t.delta + ")");
+          }
+        }
+        if (data.prospects.length > 0) {
+          sections.push("PROSPECT CALL-UPS (" + data.prospects.length + "):");
+          for (const p of data.prospects) {
+            sections.push("  " + str(p.player).padEnd(25) + " " + str(p.type));
+          }
+        }
+        return {
+          content: [{ type: "text" as const, text: sections.join("\n") }],
+          structuredContent: { type: "whats-new", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_trade_finder
+  registerAppTool(
+    server,
+    "yahoo_trade_finder",
+    {
+      description: "Scan the league for complementary trade partners and suggest trade packages based on your weak/strong categories",
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<TradeFinderResponse>("/api/trade-finder");
+        const lines = [
+          "Trade Finder:",
+          "Weak categories: " + (data.weak_categories || []).join(", "),
+          "Strong categories: " + (data.strong_categories || []).join(", "),
+          "",
+        ];
+        if (!data.partners || data.partners.length === 0) {
+          lines.push("No complementary trade partners found");
+        } else {
+          for (const p of data.partners) {
+            lines.push("Partner: " + p.team_name + " (complementary: " + p.complementary_categories.join(", ") + ")");
+            for (const pkg of p.packages || []) {
+              const give = (pkg.give || []).map((pl) => pl.name).join(", ");
+              const get = (pkg.get || []).map((pl) => pl.name).join(", ");
+              lines.push("  Give: " + give + " <-> Get: " + get);
+            }
+            lines.push("");
+          }
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "trade-finder", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_week_planner
+  registerAppTool(
+    server,
+    "yahoo_week_planner",
+    {
+      description: "Show games-per-day grid for your roster this week. Identifies off-days and two-start pitchers.",
+      inputSchema: { week: z.string().default("") },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ week }) => {
+      try {
+        const params: Record<string, string> = {};
+        if (week) params.week = week;
+        const data = await apiGet<WeekPlannerResponse>("/api/week-planner", params);
+        const lines = [
+          "Week " + data.week + " Planner (" + data.start_date + " to " + data.end_date + "):",
+        ];
+        const dateHeaders = (data.dates || []).map((d) => d.slice(5));
+        lines.push("  " + "Player".padEnd(20) + "Pos".padEnd(5) + dateHeaders.map((d) => d.padStart(6)).join(""));
+        for (const p of data.players || []) {
+          const days = (data.dates || []).map((d) => p.games_by_date[d] ? "  *  " : "  -  ");
+          lines.push("  " + str(p.name).slice(0, 20).padEnd(20) + str(p.position).padEnd(5) + days.join(""));
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "week-planner", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_closer_monitor
+  registerAppTool(
+    server,
+    "yahoo_closer_monitor",
+    {
+      description: "Monitor closer situations - your closers, available closers by ownership %, and MLB saves leaders",
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async () => {
+      try {
+        const data = await apiGet<CloserMonitorResponse>("/api/closer-monitor");
+        const lines = ["Closer Monitor:"];
+        if (data.my_closers && data.my_closers.length > 0) {
+          lines.push("Your Closers/RPs:");
+          for (const p of data.my_closers) {
+            const status = p.status ? " [" + p.status + "]" : "";
+            lines.push("  " + str(p.name).padEnd(25) + " " + p.percent_owned + "% owned" + status);
+          }
+          lines.push("");
+        }
+        if (data.available_closers && data.available_closers.length > 0) {
+          lines.push("Available Closers:");
+          for (const p of data.available_closers.slice(0, 10)) {
+            const status = p.status ? " [" + p.status + "]" : "";
+            lines.push("  " + str(p.name).padEnd(25) + " " + p.percent_owned + "% owned" + status + "  (id:" + p.player_id + ")");
+          }
+        }
+        if (data.saves_leaders && data.saves_leaders.length > 0) {
+          lines.push("");
+          lines.push("MLB Saves Leaders:");
+          for (const [i, p] of data.saves_leaders.slice(0, 10).entries()) {
+            lines.push("  " + String(i + 1).padStart(2) + ". " + str(p.name).padEnd(25) + " " + p.saves + " saves");
+          }
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "closer-monitor", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+
+  // yahoo_pitcher_matchup
+  registerAppTool(
+    server,
+    "yahoo_pitcher_matchup",
+    {
+      description: "Show pitcher matchup quality for your rostered SPs based on opponent team batting stats",
+      inputSchema: { week: z.string().default("") },
+      _meta: { ui: { resourceUri: SEASON_URI } },
+    },
+    async ({ week }) => {
+      try {
+        const params: Record<string, string> = {};
+        if (week) params.week = week;
+        const data = await apiGet<PitcherMatchupResponse>("/api/pitcher-matchup", params);
+        const lines = [
+          "Pitcher Matchups (week " + data.week + "):",
+          "  " + "Pitcher".padEnd(22) + "Start".padEnd(12) + "Opponent".padEnd(15) + "Grade",
+          "  " + "-".repeat(55),
+        ];
+        for (const p of data.pitchers || []) {
+          const ha = p.home_away === "home" ? "vs " : "@ ";
+          const ts = p.two_start ? " [2S]" : "";
+          lines.push("  " + str(p.name).padEnd(22) + str(p.next_start_date).slice(0, 10).padEnd(12)
+            + (ha + str(p.opponent)).slice(0, 15).padEnd(15) + p.matchup_grade + ts);
+        }
+        return {
+          content: [{ type: "text" as const, text: lines.join("\n") }],
+          structuredContent: { type: "pitcher-matchup", ...data },
+        };
+      } catch (e) { return toolError(e); }
+    },
+  );
+}

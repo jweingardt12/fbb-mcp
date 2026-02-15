@@ -1,0 +1,186 @@
+import { useState } from "react";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { useCallTool } from "../shared/use-call-tool";
+import { PlayerName } from "../shared/player-name";
+import { mlbHeadshotUrl } from "../shared/mlb-images";
+import { UserPlus, Loader2, ShieldCheck } from "lucide-react";
+
+interface CloserPlayer {
+  name: string;
+  player_id: string;
+  positions: string[];
+  percent_owned: number;
+  status: string;
+  mlb_id?: number;
+  ownership: string;
+}
+
+interface SavesLeader {
+  name: string;
+  saves: string;
+}
+
+interface CloserMonitorData {
+  my_closers: CloserPlayer[];
+  available_closers: CloserPlayer[];
+  saves_leaders: SavesLeader[];
+}
+
+export function CloserMonitorView({ data, app, navigate }: { data: CloserMonitorData; app: any; navigate: (data: any) => void }) {
+  var { callTool, loading } = useCallTool(app);
+  var [tab, setTab] = useState("my");
+  var myClosers = data.my_closers || [];
+  var available = data.available_closers || [];
+  var leaders = data.saves_leaders || [];
+
+  var handleAdd = async (playerId: string) => {
+    var result = await callTool("yahoo_add", { player_id: playerId });
+    if (result && result.structuredContent) {
+      navigate(result.structuredContent);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold flex items-center gap-2">
+        <ShieldCheck size={18} />
+        Closer Monitor
+      </h2>
+
+      <Tabs defaultValue="my" onValueChange={setTab}>
+        <TabsList>
+          <TabsTrigger value="my">My Closers ({myClosers.length})</TabsTrigger>
+          <TabsTrigger value="available">Available ({available.length})</TabsTrigger>
+          <TabsTrigger value="leaders">Saves Leaders</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <div className="relative">
+        {loading && (
+          <div className="loading-overlay">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
+        {tab === "my" && (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Player</TableHead>
+                <TableHead>Positions</TableHead>
+                <TableHead className="text-right">Own%</TableHead>
+                <TableHead className="hidden sm:table-cell">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {myClosers.map((p) => (
+                <TableRow key={p.player_id}>
+                  <TableCell className="font-medium">
+                    <span className="flex items-center gap-1.5">
+                      {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
+                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" />
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1 flex-wrap">
+                      {(p.positions || []).map((pos) => (
+                        <Badge key={pos} variant="outline" className="text-[10px]">{pos}</Badge>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs">{p.percent_owned}%</TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {p.status && p.status !== "Healthy" && (
+                      <Badge variant="destructive" className="text-[10px]">{p.status}</Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+              {myClosers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                    No closers/RPs on your roster
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
+
+        {tab === "available" && (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Player</TableHead>
+                <TableHead className="text-right">Own%</TableHead>
+                <TableHead className="hidden sm:table-cell">Status</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {available.map((p) => (
+                <TableRow key={p.player_id}>
+                  <TableCell className="font-medium">
+                    <span className="flex items-center gap-1.5">
+                      {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
+                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="waivers" />
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs">{p.percent_owned}%</TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {p.status && p.status !== "Healthy" && (
+                      <Badge variant="destructive" className="text-[10px]">{p.status}</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Button size="sm" onClick={() => handleAdd(p.player_id)} disabled={loading} title="Add player">
+                      <UserPlus size={14} />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {available.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                    No available closers found
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
+
+        {tab === "leaders" && (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10">#</TableHead>
+                <TableHead>Player</TableHead>
+                <TableHead className="text-right">Saves</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {leaders.map((p, i) => (
+                <TableRow key={i}>
+                  <TableCell className="font-mono text-sm text-muted-foreground">{i + 1}</TableCell>
+                  <TableCell className="font-medium">{p.name}</TableCell>
+                  <TableCell className="text-right font-mono font-semibold">{p.saves}</TableCell>
+                </TableRow>
+              ))}
+              {leaders.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                    No saves leaders data available
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </div>
+  );
+}

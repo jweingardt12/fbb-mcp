@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "fbb-mcp": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "mcp-apps/main.ts",
+        "--stdio"
+      ],
+      "cwd": "/path/to/fbb-mcp",
+      "env": {
+        "PYTHON_API_URL": "http://localhost:8766"
+      }
+    }
+  }
+}

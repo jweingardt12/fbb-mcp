@@ -1,0 +1,106 @@
+#!/bin/bash
+# Yahoo Fantasy helper script
+# Usage: ./yf <command> [args]
+
+export PATH="/usr/local/bin:$PATH"
+CONTAINER="fbb-mcp"
+
+case "$1" in
+    # League management (yahoo-fantasy.py)
+    info|standings|roster|search|add|drop|matchups|scoreboard|transactions|stat-categories|swap)
+        docker exec $CONTAINER python3 /app/scripts/yahoo-fantasy.py "$@"
+        ;;
+    free-agents|fa)
+        shift
+        docker exec $CONTAINER python3 /app/scripts/yahoo-fantasy.py free-agents "$@"
+        ;;
+    # Draft assistant (draft-assistant.py)
+    status|recommend|cheatsheet|best-available)
+        docker exec $CONTAINER python3 /app/scripts/draft-assistant.py "$@"
+        ;;
+    watch)
+        shift
+        docker exec -it $CONTAINER python3 /app/scripts/draft-assistant.py watch "${1:-30}"
+        ;;
+    # Valuations engine (valuations.py)
+    rankings|compare|value|import-csv|generate)
+        docker exec $CONTAINER python3 /app/scripts/valuations.py "$@"
+        ;;
+    # In-season manager (season-manager.py)
+    lineup-optimize|category-check|injury-report|waiver-analyze|streaming|trade-eval|daily-update)
+        docker exec $CONTAINER python3 /app/scripts/season-manager.py "$@"
+        ;;
+    # MLB data (mlb-data.py)
+    mlb)
+        shift
+        docker exec $CONTAINER python3 /app/scripts/mlb-data.py "$@"
+        ;;
+    # Docker management
+    shell)
+        docker exec -it $CONTAINER /bin/bash
+        ;;
+    logs)
+        docker logs $CONTAINER
+        ;;
+    restart)
+        cd "$(dirname "$0")" && docker compose restart
+        ;;
+    build)
+        cd "$(dirname "$0")" && docker compose up -d --build
+        ;;
+    *)
+        echo "Yahoo Fantasy CLI"
+        echo ""
+        echo "Usage: ./yf <command> [args]"
+        echo ""
+        echo "League:"
+        echo "  info              - League info"
+        echo "  standings         - League standings"
+        echo "  roster            - Your roster"
+        echo "  fa B/P [n]        - Free agents (batters/pitchers)"
+        echo "  search <name>     - Search players"
+        echo "  add <id>          - Add player"
+        echo "  drop <id>         - Drop player"
+        echo "  swap <add> <drop> - Atomic add+drop"
+        echo "  matchups [week]   - Weekly matchups"
+        echo "  scoreboard        - Live scores"
+        echo "  transactions [type] [n] - Recent moves"
+        echo "  stat-categories   - Scoring categories"
+        echo ""
+        echo "Draft:"
+        echo "  status            - Draft status"
+        echo "  recommend         - Get recommendation"
+        echo "  watch [sec]       - Watch draft live"
+        echo "  cheatsheet        - Strategy reference"
+        echo "  best-available [B|P] [n] - Ranked by z-score"
+        echo ""
+        echo "Valuations:"
+        echo "  rankings [B|P] [n]      - Top players by z-score"
+        echo "  compare <name1> <name2> - Compare two players"
+        echo "  value <name>            - Player z-score breakdown"
+        echo "  import-csv <file>       - Import FanGraphs projections"
+        echo "  generate                - Generate rankings from data"
+        echo ""
+        echo "In-Season:"
+        echo "  lineup-optimize [--apply] - Optimize daily lineup"
+        echo "  category-check          - Category rankings vs league"
+        echo "  injury-report           - Check roster injuries"
+        echo "  waiver-analyze [B|P] [n] - Waiver recommendations"
+        echo "  streaming [week]        - Streaming pitcher picks"
+        echo "  trade-eval <give> <get> - Evaluate a trade"
+        echo "  daily-update            - Run all daily checks"
+        echo ""
+        echo "MLB Data:"
+        echo "  mlb teams       - MLB teams"
+        echo "  mlb roster <tm> - Team roster"
+        echo "  mlb stats <id>  - Player stats"
+        echo "  mlb schedule    - Today's games"
+        echo "  mlb injuries    - Current injuries"
+        echo ""
+        echo "Docker:"
+        echo "  build       - Build container"
+        echo "  restart     - Restart container"
+        echo "  shell       - Enter container"
+        echo "  logs        - View logs"
+        ;;
+esac

@@ -1,0 +1,25 @@
+{
+  "title": "DRAFT CHEAT SHEET",
+  "strategy": {
+    "rounds_1_6": "ALL HITTERS",
+    "rounds_7_9": "First pitcher (ace only)",
+    "rounds_10_12": "Fill roster, maybe 1-2 more pitchers",
+    "rounds_13_plus": "Holds guys, closers, sleepers"
+  },
+  "targets": {
+    "rounds_1_3": ["Top tier batter 1", "Top tier batter 2"],
+    "rounds_4_6": ["Mid tier batter 1", "Mid tier batter 2"],
+    "rounds_7_9": ["Ace pitcher 1", "Ace pitcher 2"],
+    "rounds_10_12": ["OBP guys", "value hitters"],
+    "rounds_13_15": ["Holds specialists", "Setup men"],
+    "rounds_16_plus": ["Closers", "IL stashes"]
+  },
+  "avoid": [
+    "Pitchers too early",
+    "Closers before round 13"
+  ],
+  "opponents": [
+    {"name": "Opponent 1", "tendency": "Tends to overdraft pitchers"},
+    {"name": "Opponent 2", "tendency": "Reaches for closers"}
+  ]
+}

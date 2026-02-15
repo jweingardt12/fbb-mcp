@@ -1,0 +1,22 @@
+# Example docker-compose for pulling the published image.
+# Copy this file to docker-compose.yml and configure .env before running.
+services:
+  fbb-mcp:
+    image: ghcr.io/jweingardt12/fbb-mcp:latest
+    container_name: fbb-mcp
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+    environment:
+      - OAUTH_FILE=/app/config/yahoo_oauth.json
+      - LEAGUE_ID=${LEAGUE_ID}
+      - TEAM_ID=${TEAM_ID}
+      - PYTHON_API_URL=http://localhost:8766
+      - MCP_SERVER_URL=${MCP_SERVER_URL}
+      - MCP_AUTH_PASSWORD=${MCP_AUTH_PASSWORD}
+      - PORT=4951
+    ports:
+      - "4951:4951"
+    tty: true
+    stdin_open: true
+    restart: unless-stopped

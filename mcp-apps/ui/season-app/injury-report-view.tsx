@@ -1,0 +1,145 @@
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { useCallTool } from "../shared/use-call-tool";
+import { mlbHeadshotUrl } from "../shared/mlb-images";
+import { IntelBadge } from "../shared/intel-badge";
+import { PlayerName } from "../shared/player-name";
+import { Search, Loader2, CheckCircle } from "lucide-react";
+
+interface InjuredPlayer {
+  name: string;
+  position: string;
+  status: string;
+  description?: string;
+  location: string;
+  mlb_id?: number;
+  intel?: any;
+}
+
+interface InjuryReportData {
+  injured_active: InjuredPlayer[];
+  healthy_il: InjuredPlayer[];
+  injured_bench: InjuredPlayer[];
+  il_proper: InjuredPlayer[];
+}
+
+function PlayerRow({ player, showFind, onFind, readyToActivate, loading, app, navigate }: { player: InjuredPlayer; showFind?: boolean; onFind?: () => void; readyToActivate?: boolean; loading?: boolean; app?: any; navigate?: (data: any) => void }) {
+  return (
+    <div className="flex items-center gap-2 py-1.5 border-b last:border-0">
+      {player.mlb_id && <img src={mlbHeadshotUrl(player.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
+      <Badge variant="outline" className="text-[10px] w-8 justify-center">{player.position}</Badge>
+      <span className="font-medium text-sm flex-1"><PlayerName name={player.name} mlbId={player.mlb_id} app={app} navigate={navigate} context="roster" /></span>
+      {player.intel && <IntelBadge intel={player.intel} size="sm" />}
+      <Badge variant="destructive" className="text-[10px]">{player.status}</Badge>
+      {player.description && <span className="text-xs text-muted-foreground hidden sm:inline">{player.description}</span>}
+      {readyToActivate && (
+        <Badge className="text-[10px] bg-green-600 text-white gap-1">
+          <CheckCircle className="h-3 w-3" />
+          Ready to Activate
+        </Badge>
+      )}
+      {showFind && onFind && (
+        <Button variant="outline" size="sm" onClick={onFind} disabled={loading} className="h-6 text-[10px] px-2 gap-1">
+          <Search className="h-3 w-3" />
+          Find FA
+        </Button>
+      )}
+    </div>
+  );
+}
+
+export function InjuryReportView({ data, app, navigate }: { data: InjuryReportData; app?: any; navigate?: (data: any) => void }) {
+  const { callTool, loading } = useCallTool(app);
+  const hasAnyIssues = data.injured_active.length > 0 || data.healthy_il.length > 0;
+
+  const handleFindReplacement = async (player: InjuredPlayer) => {
+    // Determine position type: if position contains SP/RP or is a pitcher position, search pitchers
+    const pitcherPositions = ["SP", "RP", "P"];
+    const isPitcher = pitcherPositions.some((pp) => player.position.includes(pp));
+    const posType = isPitcher ? "P" : "B";
+    const result = await callTool("yahoo_waiver_analyze", { pos_type: posType, count: 10 });
+    if (result && result.structuredContent && navigate) {
+      navigate(result.structuredContent);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold">Injury Report</h2>
+
+      {loading && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Finding replacements...
+        </div>
+      )}
+
+      {data.injured_active.length > 0 && (
+        <Card className="border-destructive/50">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base text-destructive">Injured in Active Lineup</CardTitle>
+              <Badge variant="destructive">{data.injured_active.length}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {data.injured_active.map((p) => (
+              <PlayerRow key={p.name} player={p} showFind={!!app} onFind={() => handleFindReplacement(p)} loading={loading} app={app} navigate={navigate} />
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {data.healthy_il.length > 0 && (
+        <Card className="border-yellow-500/50">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base text-yellow-600 dark:text-yellow-400">On IL - May Be Activatable</CardTitle>
+              <Badge variant="secondary">{data.healthy_il.length}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {data.healthy_il.map((p) => <PlayerRow key={p.name} player={p} readyToActivate app={app} navigate={navigate} />)}
+          </CardContent>
+        </Card>
+      )}
+
+      {data.injured_bench.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base">Injured on Bench</CardTitle>
+              <Badge variant="secondary">{data.injured_bench.length}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {data.injured_bench.map((p) => <PlayerRow key={p.name} player={p} app={app} navigate={navigate} />)}
+          </CardContent>
+        </Card>
+      )}
+
+      {(data.il_proper || []).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base">On IL (Proper)</CardTitle>
+              <Badge variant="secondary">{data.il_proper.length}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {data.il_proper.map((p) => <PlayerRow key={p.name} player={p} app={app} navigate={navigate} />)}
+          </CardContent>
+        </Card>
+      )}
+
+      {!hasAnyIssues && (
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground">No injury issues found. Roster is healthy!</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

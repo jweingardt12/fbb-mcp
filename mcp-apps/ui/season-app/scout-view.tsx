@@ -1,0 +1,209 @@
+import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
+import { useCallTool } from "../shared/use-call-tool";
+import { Shield, TrendingUp, TrendingDown, Target, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
+
+interface ScoutCategory {
+  name: string;
+  my_value: string;
+  opp_value: string;
+  result: "win" | "loss" | "tie";
+  margin: "close" | "comfortable" | "dominant";
+}
+
+interface ScoutOpponentData {
+  week: number;
+  opponent: string;
+  score: { wins: number; losses: number; ties: number };
+  categories: ScoutCategory[];
+  opp_strengths: string[];
+  opp_weaknesses: string[];
+  strategy: string[];
+}
+
+function scoreBadgeColor(wins: number, losses: number): string {
+  if (wins > losses) return "bg-green-600 text-white";
+  if (losses > wins) return "bg-red-500 text-white";
+  return "bg-yellow-500 text-white";
+}
+
+function scoreLabel(wins: number, losses: number): string {
+  if (wins > losses) return "Winning";
+  if (losses > wins) return "Losing";
+  return "Tied";
+}
+
+function rowBg(result: string, margin: string): string {
+  if (result === "win") {
+    if (margin === "close") return "bg-green-500/10";
+    return "bg-green-500/15";
+  }
+  if (result === "loss") {
+    if (margin === "close") return "bg-red-500/10";
+    return "bg-red-500/15";
+  }
+  return "bg-yellow-500/10";
+}
+
+export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; app?: any; navigate?: (data: any) => void }) {
+  const { callTool, loading } = useCallTool(app);
+  const [localData, setLocalData] = useState<ScoutOpponentData | null>(null);
+  const d = localData || data;
+
+  const handleRefresh = async () => {
+    const result = await callTool("yahoo_scout_opponent");
+    if (result && result.structuredContent) {
+      setLocalData(result.structuredContent as ScoutOpponentData);
+    }
+  };
+
+  const score = d.score || { wins: 0, losses: 0, ties: 0 };
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Opponent Scout Report</h2>
+        </div>
+        {app && (
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading} className="h-7 text-xs gap-1">
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+            Refresh
+          </Button>
+        )}
+      </div>
+
+      {/* Opponent + Week */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">Week {d.week}</p>
+          <p className="font-semibold">vs. {d.opponent}</p>
+        </div>
+        <Badge className={"text-sm px-3 py-1 " + scoreBadgeColor(score.wins, score.losses)}>
+          {scoreLabel(score.wins, score.losses)}{" "}
+          {score.wins}-{score.losses}{score.ties > 0 ? "-" + score.ties : ""}
+        </Badge>
+      </div>
+
+      {/* Score Card */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-around">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Wins</p>
+              <p className="text-2xl font-bold font-mono text-green-600 dark:text-green-400">{score.wins}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Losses</p>
+              <p className="text-2xl font-bold font-mono text-red-500">{score.losses}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Ties</p>
+              <p className="text-2xl font-bold font-mono text-yellow-500">{score.ties}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Category Breakdown Table */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Category Breakdown</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Category</TableHead>
+                <TableHead className="text-right">You</TableHead>
+                <TableHead className="text-right">Opp</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-center hidden sm:table-cell">Margin</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(d.categories || []).map((c, i) => (
+                <TableRow key={i + "-" + c.name} className={rowBg(c.result, c.margin)}>
+                  <TableCell className="font-medium text-sm">{c.name}</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{c.my_value}</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{c.opp_value}</TableCell>
+                  <TableCell className="text-center">
+                    {c.result === "win" && <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400 inline" />}
+                    {c.result === "loss" && <TrendingDown className="h-4 w-4 text-red-500 inline" />}
+                    {c.result === "tie" && <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">TIE</span>}
+                  </TableCell>
+                  <TableCell className="text-center hidden sm:table-cell">
+                    {c.margin === "close" && <Badge variant="outline" className="text-[10px] border-yellow-500 text-yellow-600 dark:text-yellow-400">Close</Badge>}
+                    {c.margin === "comfortable" && <Badge variant="outline" className="text-[10px]">Comf.</Badge>}
+                    {c.margin === "dominant" && <Badge variant="outline" className="text-[10px] border-red-500 text-red-500">Dom.</Badge>}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Strengths / Weaknesses Cards */}
+      <div className="grid grid-cols-2 gap-3">
+        {(d.opp_strengths || []).length > 0 && (
+          <Card className="border-red-500/30 bg-red-500/5">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
+                <p className="text-xs font-semibold text-red-600 dark:text-red-400">Their Strengths</p>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {(d.opp_strengths || []).map((s) => (
+                  <Badge key={s} variant="destructive" className="text-[10px]">{s}</Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {(d.opp_weaknesses || []).length > 0 && (
+          <Card className="border-green-500/30 bg-green-500/5">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Target className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                <p className="text-xs font-semibold text-green-600 dark:text-green-400">Their Weaknesses</p>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {(d.opp_weaknesses || []).map((s) => (
+                  <Badge key={s} className="bg-green-600 text-white text-[10px]">{s}</Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Strategy Section */}
+      {(d.strategy || []).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">Strategy Suggestions</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ol className="space-y-2">
+              {(d.strategy || []).map((s, idx) => (
+                <li key={idx} className="flex gap-2 text-sm">
+                  <span className="font-mono text-xs text-muted-foreground mt-0.5">{idx + 1}.</span>
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ol>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

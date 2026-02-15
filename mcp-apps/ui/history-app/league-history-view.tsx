@@ -1,0 +1,272 @@
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Trophy, TrendingUp } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+
+interface SeasonResult {
+  year: number;
+  champion: string;
+  your_finish?: string;
+  your_record?: string;
+}
+
+// Parse a record string like "10-4-0" into { wins, losses, ties }
+function parseRecord(record: string): { wins: number; losses: number; ties: number } | null {
+  if (!record || record === "-") {
+    return null;
+  }
+  var parts = record.split("-");
+  if (parts.length < 2) {
+    return null;
+  }
+  var wins = parseInt(parts[0], 10);
+  var losses = parseInt(parts[1], 10);
+  var ties = parts.length > 2 ? parseInt(parts[2], 10) : 0;
+  if (isNaN(wins) || isNaN(losses)) {
+    return null;
+  }
+  return { wins: wins, losses: losses, ties: ties };
+}
+
+// Parse finish string like "1st", "2nd", "3rd", "4th" into a number
+function parseFinish(finish: string): number | null {
+  if (!finish || finish === "-") {
+    return null;
+  }
+  var num = parseInt(finish, 10);
+  return isNaN(num) ? null : num;
+}
+
+function getFinishBorderClass(finish: string | undefined): string {
+  var rank = parseFinish(finish || "");
+  if (rank === 1) {
+    return "border-amber-500 bg-amber-500/5";
+  }
+  if (rank !== null && rank <= 3) {
+    return "border-blue-500/50 bg-blue-500/5";
+  }
+  return "";
+}
+
+function getFinishBadgeVariant(finish: string | undefined): "default" | "secondary" | "outline" {
+  var rank = parseFinish(finish || "");
+  if (rank === 1) {
+    return "default";
+  }
+  if (rank !== null && rank <= 3) {
+    return "secondary";
+  }
+  return "outline";
+}
+
+export function LeagueHistoryView({ data }: { data: { seasons: SeasonResult[] } }) {
+  var seasons = data.seasons || [];
+
+  // Build win percentage data for the chart
+  var winPctData = seasons
+    .map(function (s) {
+      var record = parseRecord(s.your_record || "");
+      if (!record) {
+        return null;
+      }
+      var totalGames = record.wins + record.losses + record.ties;
+      if (totalGames === 0) {
+        return null;
+      }
+      var pct = Math.round((record.wins / totalGames) * 1000) / 10;
+      return {
+        year: s.year,
+        pct: pct,
+        record: s.your_record,
+        finish: s.your_finish || "-",
+      };
+    })
+    .filter(function (d) { return d !== null; }) as Array<{
+      year: number;
+      pct: number;
+      record: string | undefined;
+      finish: string;
+    }>;
+
+  // Sort seasons by year descending for timeline (most recent first)
+  var sortedSeasons = seasons.slice().sort(function (a, b) { return b.year - a.year; });
+
+  // Sort chart data by year ascending for the bar chart
+  var sortedChartData = winPctData.slice().sort(function (a, b) { return a.year - b.year; });
+
+  // Summary stats
+  var championships = seasons.filter(function (s) { return parseFinish(s.your_finish || "") === 1; }).length;
+  var top3Finishes = seasons.filter(function (s) {
+    var rank = parseFinish(s.your_finish || "");
+    return rank !== null && rank <= 3;
+  }).length;
+  var seasonsPlayed = seasons.filter(function (s) {
+    return s.your_finish && s.your_finish !== "-";
+  }).length;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold">League History</h2>
+
+      {/* Summary Stats */}
+      {seasonsPlayed > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="bg-amber-500/5 border-amber-500/30">
+            <CardContent className="p-3 text-center">
+              <p className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">{championships}</p>
+              <p className="text-xs text-muted-foreground">Titles</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 text-center">
+              <p className="text-2xl font-bold font-mono">{top3Finishes}</p>
+              <p className="text-xs text-muted-foreground">Top 3</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 text-center">
+              <p className="text-2xl font-bold font-mono">{seasonsPlayed}</p>
+              <p className="text-xs text-muted-foreground">Seasons</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Season Timeline */}
+      <div className="space-y-2">
+        {sortedSeasons.map(function (s) {
+          var rank = parseFinish(s.your_finish || "");
+          var isChampion = rank === 1;
+          var isTop3 = rank !== null && rank <= 3;
+          var borderClass = getFinishBorderClass(s.your_finish);
+
+          return (
+            <Card key={s.year} className={borderClass}>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-3">
+                  {/* Year badge */}
+                  <div className={
+                    "flex items-center justify-center w-14 h-14 rounded-lg font-bold text-sm shrink-0 " +
+                    (isChampion
+                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-2 border-amber-500"
+                      : isTop3
+                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/50"
+                        : "bg-muted text-muted-foreground border border-transparent")
+                  }>
+                    {s.year}
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <Trophy size={14} className="text-amber-500 shrink-0" />
+                      <span className="font-medium text-sm truncate">{s.champion}</span>
+                    </div>
+                    {s.your_record && s.your_record !== "-" && (
+                      <p className="text-xs text-muted-foreground mt-0.5 font-mono">{s.your_record}</p>
+                    )}
+                  </div>
+
+                  {/* Your finish */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {s.your_finish && s.your_finish !== "-" ? (
+                      <Badge variant={getFinishBadgeVariant(s.your_finish)} className="text-xs">
+                        {s.your_finish}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">-</span>
+                    )}
+                    {isChampion && <span>🏆</span>}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Win % Trend Chart */}
+      {sortedChartData.length > 1 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-base">Win % by Season</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sortedChartData} margin={{ top: 5, right: 5, bottom: 5, left: -10 }}>
+                  <XAxis
+                    dataKey="year"
+                    tick={{ fontSize: 10 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    domain={[0, 100]}
+                    tick={{ fontSize: 10 }}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={function (v: number) { return v + "%"; }}
+                  />
+                  <Tooltip
+                    formatter={function (value: number, name: string) {
+                      return [value + "%", "Win %"];
+                    }}
+                    labelFormatter={function (label: number) { return "Season " + label; }}
+                    contentStyle={{
+                      background: "var(--color-card)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                    }}
+                  />
+                  <Bar dataKey="pct" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                    {sortedChartData.map(function (entry) {
+                      var finish = parseFinish(entry.finish);
+                      var color = "#6b7280"; // default gray
+                      if (finish === 1) {
+                        color = "#f59e0b"; // amber for champion
+                      } else if (finish !== null && finish <= 3) {
+                        color = "#3b82f6"; // blue for top 3
+                      } else if (entry.pct >= 60) {
+                        color = "#22c55e"; // green for good seasons
+                      } else if (entry.pct < 40) {
+                        color = "#ef4444"; // red for bad seasons
+                      }
+                      return <Cell key={entry.year} fill={color} />;
+                    })}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-wrap gap-3 mt-2 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <div className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
+                Champion
+              </span>
+              <span className="flex items-center gap-1">
+                <div className="w-2.5 h-2.5 rounded-sm bg-blue-500" />
+                Top 3
+              </span>
+              <span className="flex items-center gap-1">
+                <div className="w-2.5 h-2.5 rounded-sm bg-green-500" />
+                {"60%+"}
+              </span>
+              <span className="flex items-center gap-1">
+                <div className="w-2.5 h-2.5 rounded-sm bg-gray-500" />
+                Other
+              </span>
+              <span className="flex items-center gap-1">
+                <div className="w-2.5 h-2.5 rounded-sm bg-red-500" />
+                {"<40%"}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,48 @@
+{
+  "name": "fbb-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build:ui": "node build-ui.js",
+    "build:server": "tsc -p tsconfig.json",
+    "build:preview": "vite build --config vite.preview.build.config.ts",
+    "build": "npm run build:ui && npm run build:preview && npm run build:server",
+    "start": "node dist/main.js",
+    "dev": "npx tsx main.ts",
+    "preview": "vite --config vite.preview.config.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.0.1",
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "express": "^5.1.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.3",
+    "@tailwindcss/vite": "^4.1.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/preact": "^3.2.4",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "happy-dom": "^20.6.1",
+    "lucide-react": "^0.469.0",
+    "preact": "^10.28.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "recharts": "^2.15.0",
+    "tailwind-merge": "^3.0.0",
+    "tailwindcss": "^4.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.3.0",
+    "vite-plugin-singlefile": "^2.0.0",
+    "vitest": "^4.0.18"
+  }
+}
