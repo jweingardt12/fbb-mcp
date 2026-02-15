@@ -338,7 +338,7 @@ The `./yf` helper script provides quick access to all functionality:
 │  │  (Flask :8766)    │──│  (Express :4951)    │  │
 │  │                   │  │                     │  │
 │  │  yahoo_fantasy_api│  │  MCP SDK + ext-apps │  │
-│  │  pybaseball       │  │  36+ tool defs      │  │
+│  │  pybaseball       │  │  71 tool defs       │  │
 │  │  MLB-StatsAPI     │  │  8 inline HTML UIs  │  │
 │  │  Playwright       │  │                     │  │
 │  └──────────────────┘  └─────────────────────┘  │
@@ -382,7 +382,8 @@ fbb-mcp/
 │   ├── history.py                  # Historical records
 │   ├── intel.py                    # Fantasy intelligence
 │   ├── valuations.py               # Z-score valuation engine
-│   └── mlb-data.py                 # MLB Stats API helper
+│   ├── mlb-data.py                 # MLB Stats API helper
+│   └── mlb_id_cache.py             # Player name → MLB ID mapping
 └── mcp-apps/                       # TypeScript MCP server + UI apps
     ├── server.ts                   # MCP server setup + tool registration
     ├── main.ts                     # Entry point (stdio + HTTP)
