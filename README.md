@@ -108,24 +108,20 @@ This opens a browser window — log into Yahoo manually (handles CAPTCHA, 2FA). 
 
 ### Claude Code (local, stdio)
 
-Add to your project's `.mcp.json`:
+With the Docker container running, add to your project's `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "fbb-mcp": {
-      "command": "npx",
-      "args": ["tsx", "mcp-apps/main.ts", "--stdio"],
-      "cwd": "/path/to/fbb-mcp",
-      "env": {
-        "PYTHON_API_URL": "http://localhost:8766"
-      }
+      "command": "docker",
+      "args": ["exec", "-i", "fbb-mcp", "node", "/app/mcp-apps/dist/main.js", "--stdio"]
     }
   }
 }
 ```
 
-The Python API server must be running separately (via Docker or `python scripts/api-server.py`).
+This runs the MCP server inside the Docker container via stdio. The Python API is already running in the container — no additional setup needed.
 
 ### Claude.ai (remote, HTTP)
 
