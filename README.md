@@ -1,6 +1,61 @@
 # fbb-mcp
 
-Fantasy Baseball MCP Server for Claude. Manage your Yahoo Fantasy Baseball league through Claude with rich inline UI apps.
+Fantasy Baseball MCP Server for Claude. Manage your Yahoo Fantasy Baseball league through natural conversation — ask Claude to optimize your lineup, analyze trades, scout opponents, find waiver pickups, and make roster moves, all backed by real-time data and rendered in rich inline UIs.
+
+## What It Does
+
+This MCP server gives Claude direct access to your Yahoo Fantasy Baseball league, real-time MLB data, and advanced analytics. Instead of switching between Yahoo's app, Baseball Savant, Reddit, and spreadsheets, you just talk to Claude.
+
+**Ask things like:**
+- "Who should I pick up this week to help my batting average?"
+- "Is it worth trading Soto for two mid-tier pitchers?"
+- "Set my lineup for today — bench anyone without a game"
+- "Who are the best streaming pitchers for next week?"
+- "What's the buzz on Reddit about [player]?"
+
+### How It Works
+
+Claude calls the MCP tools to pull live data, run analysis, and take action on your behalf. Behind the scenes:
+
+1. **Yahoo Fantasy API** — Your roster, standings, matchups, free agents, transactions, and league settings come from Yahoo's OAuth API in real time. Every tool call fetches current data, not cached snapshots.
+
+2. **Analytics engine** — The server doesn't just relay raw data. It computes analysis that Yahoo doesn't provide:
+   - **Z-score valuations** rank every player by how many standard deviations above average they are in each scoring category, tuned to your league's specific stat categories (not generic rankings)
+   - **Category gap analysis** identifies where your team is weakest relative to the league and scores free agents by how much they'd specifically improve those categories
+   - **Matchup strategy** breaks down your current H2H matchup category by category, classifying each as "target" (winnable), "protect" (close lead), "concede" (too far behind), or "lock" (safe lead)
+   - **Trade evaluation** computes net z-score value for both sides of a trade, factoring in positional scarcity
+   - **Trade finder** scans every team in the league for complementary category strengths/weaknesses and suggests mutually beneficial trade packages
+
+3. **Player intelligence** — Every player surface (roster, free agents, search results, recommendations) is enriched with data from multiple sources:
+   - **Statcast** (Baseball Savant) — xwOBA, exit velocity, barrel rate, hard hit rate, sprint speed, with percentile ranks and quality tiers (elite/great/above-avg/average/below-avg)
+   - **Trends** — Last 7/14/30 day splits from MLB game logs, hot/cold streak detection
+   - **Plate discipline** (FanGraphs via pybaseball) — BB%, K%, O-Swing%, Z-Contact%
+   - **Reddit** (r/fantasybaseball) — Mention counts, sentiment, trending player posts
+   - **MLB transactions** — Recent call-ups, IL stints, DFA, trades that affect fantasy value
+
+4. **Browser automation** — Write operations (add, drop, trade, lineup changes) use Playwright to automate the Yahoo Fantasy website directly, since Yahoo's API no longer grants write scope to new developer apps. Read operations still use the fast OAuth API.
+
+5. **Inline UI apps** — Tool results aren't just text. Eight Preact + Tailwind HTML apps render interactive tables, charts, and dashboards directly inside Claude's response using MCP Apps (`@modelcontextprotocol/ext-apps`).
+
+### Data Flow
+
+When you ask Claude a question, here's what happens:
+
+```
+You: "Should I drop Player X for Player Y?"
+
+Claude calls:
+  1. yahoo_roster          → your current roster + intel overlays
+  2. yahoo_category_check  → your weak/strong categories
+  3. yahoo_value (X)       → Player X z-score breakdown
+  4. yahoo_value (Y)       → Player Y z-score breakdown
+  5. yahoo_category_simulate → projected category rank changes
+
+Claude synthesizes all 5 results and gives you a recommendation
+with specific category-level reasoning.
+```
+
+Claude decides which tools to call and in what order based on your question. Complex questions may chain 3-8 tool calls. Simple lookups ("show my roster") are a single call.
 
 ## Prerequisites
 
