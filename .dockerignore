@@ -1,6 +1,7 @@
 # Secrets and personal data - never bake into image
 .env
 config/yahoo_oauth.json
+config/yahoo_session.json
 config/league-history.json
 config/draft-cheatsheet.json
 

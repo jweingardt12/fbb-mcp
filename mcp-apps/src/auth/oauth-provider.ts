@@ -139,7 +139,9 @@ export class YahooFantasyOAuthProvider implements OAuthServerProvider {
     if (!pending) {
       throw new Error("Invalid state");
     }
-    if (password !== this.password) {
+    const a = Buffer.from(password);
+    const b = Buffer.from(this.password);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
       throw new Error("Wrong password");
     }
     const code = "yf_" + crypto.randomBytes(16).toString("hex");

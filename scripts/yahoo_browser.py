@@ -460,7 +460,11 @@ def change_team_logo(image_path):
     Uploads image to Cloudinary through Yahoo's upload flow, selects it, and saves."""
     if not TEAM_NUM:
         return {"success": False, "method": "browser", "message": "TEAM_ID env var not set"}
-    if not os.path.exists(image_path):
+    resolved = os.path.realpath(image_path)
+    allowed_dirs = ["/app/data", "/app/config", "/tmp"]
+    if not any(resolved.startswith(d + "/") or resolved == d for d in allowed_dirs):
+        return {"success": False, "method": "browser", "message": "Image path must be within /app/data, /app/config, or /tmp"}
+    if not os.path.exists(resolved):
         return {"success": False, "method": "browser", "message": "Image file not found: " + image_path}
 
     pw, browser, context = _get_browser_context()

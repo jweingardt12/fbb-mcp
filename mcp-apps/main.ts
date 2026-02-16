@@ -9,6 +9,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 import http from "http";
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 async function handleMcp(req: Request, res: Response): Promise<void> {
   const server = createServer();
   const transport = new StreamableHTTPServerTransport({
@@ -26,13 +31,17 @@ async function main() {
     await server.connect(transport);
   } else {
     const SERVER_URL = process.env.MCP_SERVER_URL || "http://localhost:4951";
-    const AUTH_PASSWORD = process.env.MCP_AUTH_PASSWORD || "dev";
+    const AUTH_PASSWORD = process.env.MCP_AUTH_PASSWORD;
+    if (!AUTH_PASSWORD || AUTH_PASSWORD.length < 8) {
+      console.error("ERROR: MCP_AUTH_PASSWORD must be set to a value of 8+ characters in HTTP mode.");
+      process.exit(1);
+    }
     const provider = new YahooFantasyOAuthProvider(SERVER_URL, AUTH_PASSWORD);
 
     const app = express();
     app.set("trust proxy", 1);
 
-    // Preview app — static files + API proxy (before auth)
+    // Preview app — static files (before auth, public assets only)
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const previewDir = path.join(__dirname, "preview");
 
@@ -42,16 +51,6 @@ async function main() {
     });
 
     app.use(express.json());
-    app.use("/api", (req, res) => {
-      const url = "http://localhost:8766" + req.originalUrl;
-      const proxyReq = http.request(url, { method: req.method, headers: { "Content-Type": "application/json" } }, (proxyRes) => {
-        res.status(proxyRes.statusCode || 500);
-        proxyRes.pipe(res);
-      });
-      proxyReq.on("error", () => res.status(502).json({ error: "Python API unavailable" }));
-      if (req.method === "POST" && req.body) proxyReq.write(JSON.stringify(req.body));
-      proxyReq.end();
-    });
 
     app.use(mcpAuthRouter({
       provider,
@@ -61,7 +60,7 @@ async function main() {
     }));
 
     app.get("/login", (req, res) => {
-      const state = (req.query.state as string) || "";
+      const state = escapeHtml((req.query.state as string) || "");
       res.type("html").send(
         "<!DOCTYPE html><html><head><title>Fantasy Baseball MCP</title>"
         + "<style>body{font-family:system-ui;max-width:400px;margin:60px auto;"
@@ -87,7 +86,7 @@ async function main() {
         res.redirect(302, redirectUri);
       } catch (e: any) {
         res.status(401).type("html").send(
-          "<h2>Error</h2><p>" + (e.message || String(e)) + "</p>"
+          "<h2>Error</h2><p>" + escapeHtml(e.message || String(e)) + "</p>"
           + "<a href='javascript:history.back()'>Try again</a>"
         );
       }
@@ -98,6 +97,18 @@ async function main() {
     app.get("/mcp", auth, handleMcp);
     app.delete("/mcp", async (_req, res) => {
       res.status(405).send("Method not allowed");
+    });
+
+    // API proxy — behind auth so it's not publicly accessible
+    app.use("/api", auth, (req, res) => {
+      const url = "http://localhost:8766" + req.originalUrl;
+      const proxyReq = http.request(url, { method: req.method, headers: { "Content-Type": "application/json" } }, (proxyRes) => {
+        res.status(proxyRes.statusCode || 500);
+        proxyRes.pipe(res);
+      });
+      proxyReq.on("error", () => res.status(502).json({ error: "Python API unavailable" }));
+      if (req.method === "POST" && req.body) proxyReq.write(JSON.stringify(req.body));
+      proxyReq.end();
     });
 
     const port = parseInt(process.env.PORT || "4951");
