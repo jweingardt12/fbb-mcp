@@ -2,6 +2,21 @@
 
 Fantasy Baseball MCP Server for Claude. Manage your Yahoo Fantasy Baseball league through natural conversation — ask Claude to optimize your lineup, analyze trades, scout opponents, find waiver pickups, and make roster moves, all backed by real-time data and rendered in rich inline UIs.
 
+## Table of Contents
+
+- [What It Does](#what-it-does)
+- [Quick Start](#quick-start)
+- [Connecting to Claude](#connecting-to-claude)
+  - [Claude Code](#claude-code)
+  - [Claude Desktop](#claude-desktop)
+  - [Claude.ai (remote)](#claudeai-remote-access)
+- [MCP Tools](#mcp-tools)
+- [CLI Commands](#cli-commands)
+- [Architecture](#architecture)
+- [Environment Variables](#environment-variables)
+- [Optional Config Files](#optional-config-files)
+- [Project Files](#project-files)
+
 ## What It Does
 
 This MCP server gives Claude direct access to your Yahoo Fantasy Baseball league, real-time MLB data, and advanced analytics. Instead of switching between Yahoo's app, Baseball Savant, Reddit, and spreadsheets, you just talk to Claude.
@@ -57,25 +72,11 @@ with specific category-level reasoning.
 
 Claude decides which tools to call and in what order based on your question. Complex questions may chain 3-8 tool calls. Simple lookups ("show my roster") are a single call.
 
-## Prerequisites
+## Quick Start
 
-- Docker and Docker Compose
-- A Yahoo Developer app (free) for Fantasy Sports API access
+### 1. Get Yahoo API credentials
 
-## Setup
-
-### 1. Yahoo OAuth Credentials
-
-Request an API key from Yahoo:
-
-1. Go to [https://developer.yahoo.com/apps/create](https://developer.yahoo.com/apps/create) and sign in
-2. Fill in:
-   - **Application Name**: anything (e.g., "Fantasy Baseball")
-   - **API Permissions**: select **Fantasy Sports** (Read)
-   - **Redirect URI(s)**: `oob`
-3. Copy your **Consumer Key** and **Consumer Secret**
-
-Create `config/yahoo_oauth.json` with your credentials:
+Go to [developer.yahoo.com/apps/create](https://developer.yahoo.com/apps/create), create an app with **Fantasy Sports** read permissions and `oob` as the redirect URI. Save your consumer key and secret to `config/yahoo_oauth.json`:
 
 ```json
 {
@@ -84,93 +85,29 @@ Create `config/yahoo_oauth.json` with your credentials:
 }
 ```
 
-On the first API call, the `yahoo-oauth` library will open a browser asking you to authorize the app. Yahoo provides a verification code — paste it back into the prompt. This generates a bearer token saved to the same file. Tokens refresh automatically after that.
-
-### 2. Configure Environment Variables
+### 2. Configure and run
 
 ```bash
+cp docker-compose.example.yml docker-compose.yml
 cp .env.example .env
-```
-
-Edit `.env` with your values:
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `LEAGUE_ID` | Yes | — | Yahoo Fantasy league key (e.g., `469.l.16960`) |
-| `TEAM_ID` | Yes | — | Your team key (e.g., `469.l.16960.t.12`) |
-| `MCP_SERVER_URL` | For remote | — | Public URL where the MCP server is reachable |
-| `MCP_AUTH_PASSWORD` | For remote | — | Password for the MCP OAuth 2.1 login page on Claude.ai |
-| `ENABLE_WRITE_OPS` | No | `false` | Set to `true` to enable write operation tools (add, drop, trade, lineup changes) |
-
-**Finding your IDs**: The game key changes each MLB season (e.g., `469` for 2026). Check your Yahoo Fantasy league URL for the league number. Your team number is your position in the league (1-based).
-
-### 3. Run
-
-Create a `docker-compose.yml`:
-
-```yaml
-services:
-  fbb-mcp:
-    image: ghcr.io/jweingardt12/fbb-mcp:latest
-    container_name: fbb-mcp
-    volumes:
-      - ./config:/app/config
-      - ./data:/app/data
-    environment:
-      - OAUTH_FILE=/app/config/yahoo_oauth.json
-      - LEAGUE_ID=${LEAGUE_ID}
-      - TEAM_ID=${TEAM_ID}
-      - PYTHON_API_URL=http://localhost:8766
-      - MCP_SERVER_URL=${MCP_SERVER_URL}
-      - MCP_AUTH_PASSWORD=${MCP_AUTH_PASSWORD}
-      - ENABLE_WRITE_OPS=${ENABLE_WRITE_OPS:-false}
-      - PORT=4951
-    ports:
-      - "4951:4951"
-    shm_size: '2gb'
-    init: true
-    tty: true
-    stdin_open: true
-    restart: unless-stopped
-```
-
-Then run:
-
-```bash
+# Edit .env — set LEAGUE_ID and TEAM_ID (see Environment Variables below)
 mkdir -p config data
 docker compose up -d
 ```
 
-The container runs two processes:
-- **Python API server** (port 8766, internal) — Flask backend calling Yahoo Fantasy API + Playwright browser automation
-- **TypeScript MCP server** (port 4951, exposed) — MCP SDK with inline HTML UI apps
+### 3. Authorize with Yahoo
 
-### 4. Browser Session (for write operations)
-
-Write operations (add, drop, trade, lineup changes) use Playwright browser automation. A one-time login is required:
+On the first API call, Yahoo will ask you to authorize the app. Run any command to trigger it:
 
 ```bash
-./yf browser-login
+docker exec -it fbb-mcp python3 /app/scripts/yahoo-fantasy.py info
 ```
 
-This opens a browser window — log into Yahoo manually (handles CAPTCHA, 2FA). The session is saved to `config/yahoo_session.json` and lasts 2-4 weeks. Check session status anytime:
+Follow the prompt — open the URL, log in, paste the verification code. Tokens refresh automatically after that.
 
-```bash
-./yf browser-status
-```
+### 4. Connect to Claude
 
-## Connecting to Claude
-
-The MCP server supports two transport modes:
-
-- **stdio** — For Claude Code and Claude Desktop. The client launches the MCP server as a subprocess and communicates over stdin/stdout. Runs entirely on your machine.
-- **Streamable HTTP** — For Claude.ai (remote). The MCP server runs as an HTTP endpoint with OAuth 2.1 authentication. Claude.ai connects to it over the internet.
-
-Both modes use the same tools and the same Python API backend inside the Docker container.
-
-### Claude Code
-
-With the Docker container running, add to your project's `.mcp.json`:
+Add to your `.mcp.json` (Claude Code) or `claude_desktop_config.json` (Claude Desktop):
 
 ```json
 {
@@ -183,13 +120,42 @@ With the Docker container running, add to your project's `.mcp.json`:
 }
 ```
 
-This runs a second Node process inside the already-running container in stdio mode. The Python API server is already running in the same container — no additional setup, no ports to expose for local use.
+That's it. Everything runs inside Docker — no local dependencies beyond Docker itself.
 
-Restart Claude Code (or run `/mcp` to refresh) after adding the config. You should see 59 tools (or 71 with `ENABLE_WRITE_OPS=true`).
+### 5. Enable write operations (optional)
+
+To let Claude make roster moves (add, drop, trade, set lineup), set `ENABLE_WRITE_OPS=true` in `.env`, rebuild with `docker compose up -d`, and set up a browser session:
+
+```bash
+./yf browser-login
+```
+
+This opens a browser — log into Yahoo manually. The session saves to `config/yahoo_session.json` and lasts 2-4 weeks.
+
+## Connecting to Claude
+
+The MCP server supports two transports: **stdio** (local, for Claude Code and Claude Desktop) and **Streamable HTTP** (remote, for Claude.ai). Both use the same tools and backend.
+
+### Claude Code
+
+Add to your project's `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "fbb-mcp": {
+      "command": "docker",
+      "args": ["exec", "-i", "fbb-mcp", "node", "/app/mcp-apps/dist/main.js", "--stdio"]
+    }
+  }
+}
+```
+
+Restart Claude Code (or run `/mcp`) to pick up the config.
 
 ### Claude Desktop
 
-Add to your Claude Desktop config file:
+Add to your config file:
 
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -205,44 +171,40 @@ Add to your Claude Desktop config file:
 }
 ```
 
-Restart Claude Desktop after saving. The server appears in the MCP tools menu (hammer icon). Same setup as Claude Code — everything runs inside Docker.
+Restart Claude Desktop after saving.
 
 ### Claude.ai (remote access)
 
-Claude.ai can't run local processes, so the MCP server needs to be reachable over the internet as an HTTP endpoint. This requires:
+Claude.ai can't run local processes, so the MCP server needs to be reachable over the internet. You need a machine running Docker, a domain name, and a reverse proxy for HTTPS.
 
-1. A machine running the Docker container (home server, VPS, etc.)
-2. A domain name pointing to that machine
-3. A reverse proxy terminating TLS and forwarding to the container's port 4951
-
-#### Step 1: Set environment variables
-
-Add to your `.env`:
+**1. Set env vars** in `.env`:
 
 ```bash
-MCP_SERVER_URL=https://your-domain.com    # Your public URL (must be HTTPS)
-MCP_AUTH_PASSWORD=your_secure_password     # Password for the login page
+MCP_SERVER_URL=https://your-domain.com
+MCP_AUTH_PASSWORD=your_secure_password
 ```
 
-`MCP_SERVER_URL` must match exactly what Claude.ai will connect to — the MCP server uses it to generate OAuth callback URLs. If it doesn't match, authentication will fail.
+`MCP_SERVER_URL` must match exactly what Claude.ai connects to — it's used to generate OAuth callback URLs.
 
-#### Step 2: Configure a reverse proxy
+**2. Set up a reverse proxy** to forward HTTPS to the container's port 4951:
 
-The container listens on port 4951 (HTTP). You need a reverse proxy in front of it to handle TLS. Any reverse proxy works — here are examples for common setups:
+<details>
+<summary>Caddy (automatic HTTPS)</summary>
 
-**Caddy** (automatic HTTPS):
 ```
 your-domain.com {
     reverse_proxy localhost:4951
 }
 ```
+</details>
 
-**nginx**:
+<details>
+<summary>nginx</summary>
+
 ```nginx
 server {
     listen 443 ssl;
     server_name your-domain.com;
-
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
 
@@ -254,30 +216,22 @@ server {
     }
 }
 ```
+</details>
 
-**Pangolin / Cloudflare Tunnel / Tailscale Funnel** also work — anything that forwards HTTPS traffic to `localhost:4951`.
+Cloudflare Tunnel, Tailscale Funnel, and Pangolin also work.
 
-#### Step 3: Rebuild the container
+**3. Rebuild and connect:**
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
-The MCP server starts in HTTP mode (not stdio) and listens on port 4951 with OAuth 2.1 authentication.
+In Claude.ai, go to Settings > Integrations > Add MCP Server, enter `https://your-domain.com/mcp`. You'll be redirected to a login page — enter your `MCP_AUTH_PASSWORD` to authorize. The token persists across sessions.
 
-#### Step 4: Connect from Claude.ai
+<details>
+<summary>How the auth flow works</summary>
 
-1. Go to [claude.ai](https://claude.ai) and open Settings > MCP Servers (or Integrations)
-2. Click "Add MCP Server" and enter your URL: `https://your-domain.com/mcp`
-3. Claude.ai will redirect you to a login page served by the MCP server
-4. Enter your `MCP_AUTH_PASSWORD` and click Authorize
-5. You're connected — Claude now has access to all the fantasy baseball tools
-
-The OAuth token persists across sessions. You only need to re-authenticate if the token expires or you change the password.
-
-#### How the auth flow works
-
-The MCP server implements the full MCP OAuth 2.1 spec using `@modelcontextprotocol/sdk`:
+The MCP server implements MCP OAuth 2.1 using `@modelcontextprotocol/sdk`. No third-party auth provider needed — the password is checked directly against `MCP_AUTH_PASSWORD`.
 
 ```
 Claude.ai → GET /mcp → 401 Unauthorized
@@ -287,12 +241,11 @@ Claude.ai → GET /mcp → 401 Unauthorized
          → issues authorization code → Claude.ai exchanges for bearer token
          → GET/POST /mcp with Authorization: Bearer <token> → tools work
 ```
-
-No third-party auth provider needed. The password is checked directly against `MCP_AUTH_PASSWORD`.
+</details>
 
 ## MCP Tools
 
-All tools include rich inline HTML UI apps rendered directly in Claude. Tools are organized into 8 categories with 71 total tools (59 read-only + 12 write operations).
+71 total tools (59 read-only + 12 write operations), each with rich inline HTML UI apps rendered directly in Claude.
 
 ### Roster Management
 
@@ -413,82 +366,21 @@ The following 12 tools require `ENABLE_WRITE_OPS=true` and a valid browser sessi
 
 ## CLI Commands
 
-The `./yf` helper script provides quick access to all functionality:
+The `./yf` helper script provides direct CLI access to all functionality:
 
 ```
 ./yf <command> [args]
 ```
 
-### League
-| Command | Description |
-|---------|-------------|
-| `info` | League info |
-| `standings` | League standings |
-| `roster` | Your roster |
-| `fa B/P [n]` | Free agents (batters/pitchers) |
-| `search <name>` | Search players |
-| `add <id>` | Add player |
-| `drop <id>` | Drop player |
-| `swap <add> <drop>` | Atomic add+drop |
-| `matchups [week]` | Weekly matchups |
-| `scoreboard` | Live scores |
-| `transactions [type] [n]` | Recent moves |
-| `stat-categories` | Scoring categories |
-
-### Draft
-| Command | Description |
-|---------|-------------|
-| `status` | Draft status |
-| `recommend` | Get recommendation |
-| `watch [sec]` | Watch draft live |
-| `cheatsheet` | Strategy reference |
-| `best-available [B\|P] [n]` | Ranked by z-score |
-
-### Valuations
-| Command | Description |
-|---------|-------------|
-| `rankings [B\|P] [n]` | Top players by z-score |
-| `compare <name1> <name2>` | Compare two players |
-| `value <name>` | Player z-score breakdown |
-| `import-csv <file>` | Import FanGraphs projections |
-| `generate` | Generate rankings from data |
-
-### In-Season
-| Command | Description |
-|---------|-------------|
-| `lineup-optimize [--apply]` | Optimize daily lineup |
-| `category-check` | Category rankings vs league |
-| `injury-report` | Check roster injuries |
-| `waiver-analyze [B\|P] [n]` | Waiver recommendations |
-| `streaming [week]` | Streaming pitcher picks |
-| `trade-eval <give> <get>` | Evaluate a trade |
-| `daily-update` | Run all daily checks |
-
-### MLB Data
-| Command | Description |
-|---------|-------------|
-| `mlb teams` | MLB teams |
-| `mlb roster <tm>` | Team roster |
-| `mlb stats <id>` | Player stats |
-| `mlb schedule` | Today's games |
-| `mlb injuries` | Current injuries |
-
-### Browser (Write Operations)
-| Command | Description |
-|---------|-------------|
-| `browser-login` | Log into Yahoo for browser writes |
-| `browser-status` | Check browser session status |
-| `browser-test` | Test browser session |
-| `change-team-name <name>` | Change team name |
-| `change-team-logo <path>` | Change team logo image |
-
-### Docker
-| Command | Description |
-|---------|-------------|
-| `build` | Build container |
-| `restart` | Restart container |
-| `shell` | Enter container |
-| `logs` | View logs |
+| Category | Commands |
+|----------|----------|
+| **League** | `info`, `standings`, `roster`, `fa B/P [n]`, `search <name>`, `add <id>`, `drop <id>`, `swap <add> <drop>`, `matchups [week]`, `scoreboard`, `transactions [type] [n]`, `stat-categories` |
+| **Draft** | `status`, `recommend`, `watch [sec]`, `cheatsheet`, `best-available [B\|P] [n]` |
+| **Valuations** | `rankings [B\|P] [n]`, `compare <name1> <name2>`, `value <name>`, `import-csv <file>`, `generate` |
+| **In-Season** | `lineup-optimize [--apply]`, `category-check`, `injury-report`, `waiver-analyze [B\|P] [n]`, `streaming [week]`, `trade-eval <give> <get>`, `daily-update` |
+| **MLB** | `mlb teams`, `mlb roster <tm>`, `mlb stats <id>`, `mlb schedule`, `mlb injuries` |
+| **Browser** | `browser-login`, `browser-status`, `browser-test`, `change-team-name <name>`, `change-team-logo <path>` |
+| **Docker** | `build`, `restart`, `shell`, `logs` |
 
 ## Architecture
 
@@ -514,6 +406,18 @@ The `./yf` helper script provides quick access to all functionality:
 - **Read operations**: Yahoo Fantasy OAuth API (fast, reliable)
 - **Write operations**: Playwright browser automation against Yahoo Fantasy website
 - **MCP Apps**: Inline HTML UIs (Preact + Tailwind) rendered directly in Claude via `@modelcontextprotocol/ext-apps`
+
+## Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `LEAGUE_ID` | Yes | — | Yahoo Fantasy league key (e.g., `469.l.16960`) |
+| `TEAM_ID` | Yes | — | Your team key (e.g., `469.l.16960.t.12`) |
+| `ENABLE_WRITE_OPS` | No | `false` | Enable write operation tools (add, drop, trade, lineup) |
+| `MCP_SERVER_URL` | For Claude.ai | — | Public HTTPS URL for remote access |
+| `MCP_AUTH_PASSWORD` | For Claude.ai | — | Password for the OAuth login page |
+
+The game key changes each MLB season (e.g., `469` for 2026). Find your league and team numbers in your Yahoo Fantasy league URL.
 
 ## Optional Config Files
 
