@@ -2,14 +2,13 @@
 
 Fantasy Baseball MCP Server for Claude. Manage your Yahoo Fantasy Baseball league through natural conversation — ask Claude to optimize your lineup, analyze trades, scout opponents, find waiver pickups, and make roster moves, all backed by real-time data and rendered in rich inline UIs.
 
+**Built with:** [yahoo_fantasy_api](https://github.com/uberfastman/yahoo_fantasy_api) | [pybaseball](https://github.com/jldbc/pybaseball) | [MLB-StatsAPI](https://github.com/toddrob99/MLB-StatsAPI) | [MCP Apps (ext-apps)](https://github.com/anthropics/model-context-protocol/tree/main/packages/ext-apps) | [Playwright](https://playwright.dev/) | [MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+
 ## Table of Contents
 
 - [What It Does](#what-it-does)
 - [Quick Start](#quick-start)
 - [Connecting to Claude](#connecting-to-claude)
-  - [Claude Code](#claude-code)
-  - [Claude Desktop](#claude-desktop)
-  - [Claude.ai (remote)](#claudeai-remote-access)
 - [MCP Tools](#mcp-tools)
 - [CLI Commands](#cli-commands)
 - [Architecture](#architecture)
@@ -34,19 +33,9 @@ Claude calls the MCP tools to pull live data, run analysis, and take action on y
 
 1. **Yahoo Fantasy API** — Your roster, standings, matchups, free agents, transactions, and league settings come from Yahoo's OAuth API in real time. Every tool call fetches current data, not cached snapshots.
 
-2. **Analytics engine** — The server doesn't just relay raw data. It computes analysis that Yahoo doesn't provide:
-   - **Z-score valuations** rank every player by how many standard deviations above average they are in each scoring category, tuned to your league's specific stat categories (not generic rankings)
-   - **Category gap analysis** identifies where your team is weakest relative to the league and scores free agents by how much they'd specifically improve those categories
-   - **Matchup strategy** breaks down your current H2H matchup category by category, classifying each as "target" (winnable), "protect" (close lead), "concede" (too far behind), or "lock" (safe lead)
-   - **Trade evaluation** computes net z-score value for both sides of a trade, factoring in positional scarcity
-   - **Trade finder** scans every team in the league for complementary category strengths/weaknesses and suggests mutually beneficial trade packages
+2. **Analytics engine** — Z-score valuations tuned to your league's stat categories, category gap analysis to find your weaknesses, H2H matchup strategy (target/protect/concede/lock), trade evaluation with positional scarcity, and a trade finder that scans every team for complementary deals.
 
-3. **Player intelligence** — Every player surface (roster, free agents, search results, recommendations) is enriched with data from multiple sources:
-   - **Statcast** (Baseball Savant) — xwOBA, exit velocity, barrel rate, hard hit rate, sprint speed, with percentile ranks and quality tiers (elite/great/above-avg/average/below-avg)
-   - **Trends** — Last 7/14/30 day splits from MLB game logs, hot/cold streak detection
-   - **Plate discipline** (FanGraphs via pybaseball) — BB%, K%, O-Swing%, Z-Contact%
-   - **Reddit** (r/fantasybaseball) — Mention counts, sentiment, trending player posts
-   - **MLB transactions** — Recent call-ups, IL stints, DFA, trades that affect fantasy value
+3. **Player intelligence** — Every player surface is enriched with Statcast data (xwOBA, exit velocity, barrel rate), recent trend splits (7/14/30 day), plate discipline metrics (FanGraphs), Reddit sentiment from r/fantasybaseball, and MLB transaction alerts.
 
 4. **Browser automation** — Write operations (add, drop, trade, lineup changes) use Playwright to automate the Yahoo Fantasy website directly, since Yahoo's API no longer grants write scope to new developer apps. Read operations still use the fast OAuth API.
 
@@ -136,42 +125,11 @@ This opens a browser — log into Yahoo manually. The session saves to `config/y
 
 The MCP server supports two transports: **stdio** (local, for Claude Code and Claude Desktop) and **Streamable HTTP** (remote, for Claude.ai). Both use the same tools and backend.
 
-### Claude Code
-
-Add to your project's `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "fbb-mcp": {
-      "command": "docker",
-      "args": ["exec", "-i", "fbb-mcp", "node", "/app/mcp-apps/dist/main.js", "--stdio"]
-    }
-  }
-}
-```
-
-Restart Claude Code (or run `/mcp`) to pick up the config.
-
-### Claude Desktop
-
-Add to your config file:
-
+**Claude Code / Claude Desktop** — Add the config from [Quick Start step 4](#4-connect-to-claude) to `.mcp.json` (Claude Code) or `claude_desktop_config.json` (Claude Desktop). Config file paths for Claude Desktop:
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
-```json
-{
-  "mcpServers": {
-    "fbb-mcp": {
-      "command": "docker",
-      "args": ["exec", "-i", "fbb-mcp", "node", "/app/mcp-apps/dist/main.js", "--stdio"]
-    }
-  }
-}
-```
-
-Restart Claude Desktop after saving.
+Restart the app after saving.
 
 ### Claude.ai (remote access)
 
@@ -247,7 +205,8 @@ Claude.ai → GET /mcp → 401 Unauthorized
 
 71 total tools (59 read-only + 12 write operations), each with rich inline HTML UI apps rendered directly in Claude.
 
-### Roster Management
+<details>
+<summary><strong>Roster Management</strong> (12 tools)</summary>
 
 | Tool | Description |
 |------|-------------|
@@ -264,7 +223,10 @@ Claude.ai → GET /mcp → 401 Unauthorized
 | `yahoo_change_team_name` | Change your fantasy team name |
 | `yahoo_change_team_logo` | Change your fantasy team logo (PNG/JPG image) |
 
-### League & Standings
+</details>
+
+<details>
+<summary><strong>League & Standings</strong> (11 tools)</summary>
 
 | Tool | Description |
 |------|-------------|
@@ -280,7 +242,10 @@ Claude.ai → GET /mcp → 401 Unauthorized
 | `yahoo_power_rankings` | Teams ranked by estimated roster strength |
 | `yahoo_season_pace` | Projected season pace, playoff probability, and magic numbers |
 
-### In-Season Management
+</details>
+
+<details>
+<summary><strong>In-Season Management</strong> (19 tools)</summary>
 
 | Tool | Description |
 |------|-------------|
@@ -305,7 +270,10 @@ Claude.ai → GET /mcp → 401 Unauthorized
 | `yahoo_closer_monitor` | Monitor closer situations — your closers, available closers, saves leaders |
 | `yahoo_pitcher_matchup` | Pitcher matchup quality for your SPs based on opponent batting stats |
 
-### Valuations
+</details>
+
+<details>
+<summary><strong>Valuations</strong> (3 tools)</summary>
 
 | Tool | Description |
 |------|-------------|
@@ -313,7 +281,10 @@ Claude.ai → GET /mcp → 401 Unauthorized
 | `yahoo_compare` | Compare two players side by side with z-score breakdowns |
 | `yahoo_value` | Full z-score breakdown for a player across all categories |
 
-### Draft
+</details>
+
+<details>
+<summary><strong>Draft</strong> (4 tools)</summary>
 
 | Tool | Description |
 |------|-------------|
@@ -322,7 +293,10 @@ Claude.ai → GET /mcp → 401 Unauthorized
 | `yahoo_draft_cheatsheet` | Draft strategy cheat sheet with round-by-round targets |
 | `yahoo_best_available` | Best available players ranked by z-score |
 
-### Intelligence
+</details>
+
+<details>
+<summary><strong>Intelligence</strong> (7 tools)</summary>
 
 | Tool | Description |
 |------|-------------|
@@ -334,7 +308,10 @@ Claude.ai → GET /mcp → 401 Unauthorized
 | `fantasy_prospect_watch` | Recent MLB prospect call-ups and roster moves |
 | `fantasy_transactions` | Recent fantasy-relevant MLB transactions (IL, call-up, DFA, trade) |
 
-### MLB Data
+</details>
+
+<details>
+<summary><strong>MLB Data</strong> (7 tools)</summary>
 
 | Tool | Description |
 |------|-------------|
@@ -346,7 +323,10 @@ Claude.ai → GET /mcp → 401 Unauthorized
 | `mlb_standings` | MLB division standings |
 | `mlb_schedule` | MLB game schedule (today or specific date) |
 
-### League History
+</details>
+
+<details>
+<summary><strong>League History</strong> (7 tools)</summary>
 
 | Tool | Description |
 |------|-------------|
@@ -358,13 +338,16 @@ Claude.ai → GET /mcp → 401 Unauthorized
 | `yahoo_past_trades` | Trade history for a past season |
 | `yahoo_past_matchup` | Matchup results for a specific week in a past season |
 
+</details>
+
 ### Write Operations
 
 The following 12 tools require `ENABLE_WRITE_OPS=true` and a valid browser session. When `ENABLE_WRITE_OPS=false` (default), these tools are hidden entirely:
 
 `yahoo_add`, `yahoo_drop`, `yahoo_swap`, `yahoo_waiver_claim`, `yahoo_waiver_claim_swap`, `yahoo_set_lineup`, `yahoo_propose_trade`, `yahoo_accept_trade`, `yahoo_reject_trade`, `yahoo_browser_status`, `yahoo_change_team_name`, `yahoo_change_team_logo`
 
-## CLI Commands
+<details>
+<summary><strong>CLI Commands</strong></summary>
 
 The `./yf` helper script provides direct CLI access to all functionality:
 
@@ -381,6 +364,8 @@ The `./yf` helper script provides direct CLI access to all functionality:
 | **MLB** | `mlb teams`, `mlb roster <tm>`, `mlb stats <id>`, `mlb schedule`, `mlb injuries` |
 | **Browser** | `browser-login`, `browser-status`, `browser-test`, `change-team-name <name>`, `change-team-logo <path>` |
 | **Docker** | `build`, `restart`, `shell`, `logs` |
+
+</details>
 
 ## Architecture
 
@@ -419,13 +404,17 @@ The `./yf` helper script provides direct CLI access to all functionality:
 
 The game key changes each MLB season (e.g., `469` for 2026). Find your league and team numbers in your Yahoo Fantasy league URL.
 
-## Optional Config Files
+<details>
+<summary><strong>Optional Config Files</strong></summary>
 
 - `config/league-history.json` — Map of year to league key for historical records
 - `config/draft-cheatsheet.json` — Draft strategy and targets (see `.example`)
 - `data/player-rankings-YYYY.json` — Hand-curated player rankings (fallback for valuations engine)
 
-## Project Files
+</details>
+
+<details>
+<summary><strong>Project Files</strong></summary>
 
 ```
 fbb-mcp/
@@ -458,3 +447,5 @@ fbb-mcp/
     ├── src/api/                    # Python API client
     └── ui/                         # 8 inline HTML apps (Preact + Tailwind)
 ```
+
+</details>
