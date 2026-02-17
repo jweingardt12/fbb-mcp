@@ -121,6 +121,16 @@ To let Claude make roster moves (add, drop, trade, set lineup), set `ENABLE_WRIT
 
 This opens a browser — log into Yahoo manually. The session saves to `config/yahoo_session.json` and lasts 2-4 weeks.
 
+### 6. Enable preview dashboard (optional)
+
+To browse all 60+ UI views in your browser, set `ENABLE_PREVIEW=true` in `.env` and rebuild:
+
+```bash
+docker compose up -d --build
+```
+
+Then open `http://localhost:4951/preview` (or your `MCP_SERVER_URL/preview`). The preview app lets you switch between mock and live data, toggle dark/light mode, and explore every view the MCP server can render.
+
 ## Connecting to Claude
 
 The MCP server supports two transports: **stdio** (local, for Claude Code and Claude Desktop) and **Streamable HTTP** (remote, for Claude.ai). Both use the same tools and backend.
@@ -399,6 +409,7 @@ The `./yf` helper script provides direct CLI access to all functionality:
 | `LEAGUE_ID` | Yes | — | Yahoo Fantasy league key (e.g., `469.l.16960`) |
 | `TEAM_ID` | Yes | — | Your team key (e.g., `469.l.16960.t.12`) |
 | `ENABLE_WRITE_OPS` | No | `false` | Enable write operation tools (add, drop, trade, lineup) |
+| `ENABLE_PREVIEW` | No | `false` | Serve the preview dashboard at `/preview` |
 | `MCP_SERVER_URL` | For Claude.ai | — | Public HTTPS URL for remote access |
 | `MCP_AUTH_PASSWORD` | For Claude.ai | — | Password for the OAuth login page |
 
