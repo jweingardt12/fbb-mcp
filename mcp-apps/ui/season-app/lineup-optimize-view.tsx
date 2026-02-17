@@ -9,7 +9,7 @@ import { mlbHeadshotUrl } from "../shared/mlb-images";
 import { TeamLogo } from "../shared/team-logo";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
-import { Play, Loader2, ArrowRightLeft, AlertTriangle, CheckCircle, ArrowRight, Copy, Check } from "lucide-react";
+import { Play, Loader2, ArrowRightLeft, AlertTriangle, CheckCircle, ArrowRight, Copy, Check } from "@/shared/icons";
 
 interface Player {
   name: string;

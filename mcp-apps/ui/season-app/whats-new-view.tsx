@@ -6,7 +6,7 @@ import { useCallTool } from "../shared/use-call-tool";
 import { RefreshButton } from "../shared/refresh-button";
 import { PlayerName } from "../shared/player-name";
 import { TrendIndicator } from "../shared/trend-indicator";
-import { AlertTriangle, ArrowRightLeft, Activity, TrendingUp, Star, UserPlus, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowRightLeft, Activity, TrendingUp, Star, UserPlus, Loader2 } from "@/shared/icons";
 import { TeamLogo } from "../shared/team-logo";
 
 interface WhatsNewInjury {
@@ -204,7 +204,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
               </TableHeader>
               <TableBody>
                 {data.trending.slice(0, 10).map((t, i) => (
-                  <TableRow key={i} className={i < 3 ? "bg-green-500/5" : ""}>
+                  <TableRow key={i} className={i < 3 ? "bg-sem-success-subtle" : ""}>
                     <TableCell className="font-medium">
                       <PlayerName name={t.name} app={app} navigate={navigate} context="waivers" />
                     </TableCell>

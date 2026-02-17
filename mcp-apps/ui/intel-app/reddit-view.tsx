@@ -1,6 +1,6 @@
 import { Badge } from "../components/ui/badge";
 import { useCallTool } from "../shared/use-call-tool";
-import { Loader2, MessageSquare, ArrowUp } from "lucide-react";
+import { Loader2, MessageSquare, ArrowUp } from "@/shared/icons";
 import { Button } from "../components/ui/button";
 
 interface RedditPost {

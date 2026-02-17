@@ -3,7 +3,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { mlbHeadshotUrl } from "../shared/mlb-images";
 import { TeamLogo } from "../shared/team-logo";
-import { UserPlus, UserMinus, ArrowRightLeft, HelpCircle } from "lucide-react";
+import { UserPlus, UserMinus, ArrowRightLeft, HelpCircle } from "@/shared/icons";
 
 interface TransactionEntry {
   type: string;
@@ -22,7 +22,7 @@ interface TransactionsData {
 function TypeIcon({ type }: { type: string }) {
   const cls = "h-3.5 w-3.5 flex-shrink-0";
   if (type === "add") return <UserPlus className={cls + " text-green-600"} />;
-  if (type === "drop") return <UserMinus className={cls + " text-red-500"} />;
+  if (type === "drop") return <UserMinus className={cls + " text-sem-risk"} />;
   if (type === "trade") return <ArrowRightLeft className={cls + " text-blue-500"} />;
   return <HelpCircle className={cls + " text-muted-foreground"} />;
 }

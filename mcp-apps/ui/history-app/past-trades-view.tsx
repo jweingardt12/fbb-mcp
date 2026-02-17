@@ -2,7 +2,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useCallTool } from "../shared/use-call-tool";
-import { ChevronLeft, ChevronRight, Loader2, ArrowRightLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, ArrowRightLeft } from "@/shared/icons";
 
 interface PastTrade {
   team1: string;

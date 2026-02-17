@@ -6,7 +6,7 @@ import { mlbHeadshotUrl } from "../shared/mlb-images";
 import { getTier, ZScoreBar } from "../shared/z-score";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/shared/icons";
 
 interface BestAvailablePlayer {
   rank: number;

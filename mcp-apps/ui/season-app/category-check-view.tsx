@@ -51,7 +51,7 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
   const medianValue = filtered.length > 0 ? Math.ceil(filtered[0].total / 2) : 6;
 
   const strengthColor = (s: string) => {
-    if (s === "strong") return "text-green-600 dark:text-green-400";
+    if (s === "strong") return "text-sem-success";
     if (s === "weak") return "text-red-600 dark:text-red-400";
     return "";
   };
@@ -65,9 +65,9 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
   const rankBg = (rank: number, total: number) => {
     const pct = rank / total;
     if (pct <= 0.25) return "bg-green-500/15";
-    if (pct <= 0.5) return "bg-green-500/5";
+    if (pct <= 0.5) return "bg-sem-success-subtle";
     if (pct >= 0.75) return "bg-red-500/15";
-    if (pct > 0.5) return "bg-red-500/5";
+    if (pct > 0.5) return "bg-sem-risk-subtle";
     return "";
   };
 
@@ -76,14 +76,14 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
       <h2 className="text-lg font-semibold">Category Check - Week {data.week}</h2>
 
       {/* Strongest / Weakest summary cards */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {(data.strongest || []).length > 0 && (
           <Card className="border-green-500/30 border-t-2 border-t-green-500">
             <CardContent className="p-3">
               <p className="text-xs text-muted-foreground mb-1.5">Strongest</p>
               <div className="flex flex-wrap gap-1">
                 {(data.strongest || []).map((s) => (
-                  <Badge key={s} className="bg-green-600 text-white text-[10px]">{s}</Badge>
+                  <Badge key={s} className="bg-sem-success text-[10px]">{s}</Badge>
                 ))}
               </div>
             </CardContent>

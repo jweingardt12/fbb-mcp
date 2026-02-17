@@ -7,7 +7,7 @@ import { useCallTool } from "../shared/use-call-tool";
 import { mlbHeadshotUrl } from "../shared/mlb-images";
 import { TeamLogo } from "../shared/team-logo";
 import { IntelBadge } from "../shared/intel-badge";
-import { FlaskConical, Search, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { FlaskConical, Search, Loader2, TrendingUp, TrendingDown, Minus } from "@/shared/icons";
 
 interface SimulatePlayer {
   name: string;
@@ -47,19 +47,19 @@ interface RosterPlayer {
 }
 
 function ChangeIcon({ change }: { change: number }) {
-  if (change > 0) return <TrendingUp size={14} className="text-green-600 dark:text-green-400" />;
+  if (change > 0) return <TrendingUp size={14} className="text-sem-success" />;
   if (change < 0) return <TrendingDown size={14} className="text-red-600 dark:text-red-400" />;
   return <Minus size={14} className="text-muted-foreground" />;
 }
 
 function netBadgeColor(n: number): string {
-  if (n > 0) return "bg-green-600 text-white";
+  if (n > 0) return "bg-sem-success";
   if (n < 0) return "bg-red-600 text-white";
   return "bg-muted text-muted-foreground";
 }
 
 function ChangeText({ change }: { change: number }) {
-  if (change > 0) return <span className="text-green-600 dark:text-green-400 font-medium">{"+" + change}</span>;
+  if (change > 0) return <span className="text-sem-success font-medium">{"+" + change}</span>;
   if (change < 0) return <span className="text-red-600 dark:text-red-400 font-medium">{String(change)}</span>;
   return <span className="text-muted-foreground">--</span>;
 }
@@ -238,8 +238,8 @@ export function SimulateView({ data, app, navigate }: { data: SimulateData; app:
               var sr = (data.simulated_ranks || [])[idx] || { name: cr.name, rank: cr.rank, total: cr.total, change: 0 };
               var hasChange = sr.change !== 0;
               var rowClass = "";
-              if (sr.change > 0) rowClass = "bg-green-500/5";
-              if (sr.change < 0) rowClass = "bg-red-500/5";
+              if (sr.change > 0) rowClass = "bg-sem-success-subtle";
+              if (sr.change < 0) rowClass = "bg-sem-risk-subtle";
               return (
                 <TableRow key={cr.name + "-" + idx} className={rowClass}>
                   <TableCell className="font-medium">{cr.name}</TableCell>

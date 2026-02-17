@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight } from "@/shared/icons";
 import { StatBar } from "./stat-bar";
 import { type PlayerIntel, qualityColor, hotColdIcon, hotColdColor } from "./intel-badge";
 

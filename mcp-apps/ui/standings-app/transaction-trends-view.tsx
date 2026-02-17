@@ -2,7 +2,7 @@ import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { mlbHeadshotUrl, teamLogoFromAbbrev } from "../shared/mlb-images";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown } from "@/shared/icons";
 
 interface TrendPlayer {
   name: string;
@@ -33,7 +33,7 @@ function DeltaBadge({ delta }: { delta: string }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-0.5 text-xs font-mono text-red-500">
+    <span className="inline-flex items-center gap-0.5 text-xs font-mono text-sem-risk">
       <TrendingDown className="h-3 w-3" />
       {delta}
     </span>
@@ -138,7 +138,7 @@ export function TransactionTrendsView({ data }: { data: TransactionTrendsData })
       <Card>
         <CardContent className="p-0">
           <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-            <TrendingDown className="h-4 w-4 text-red-500" />
+            <TrendingDown className="h-4 w-4 text-sem-risk" />
             <h3 className="text-sm font-semibold">Most Dropped</h3>
           </div>
           <TrendTable players={dropped} direction="dropped" />

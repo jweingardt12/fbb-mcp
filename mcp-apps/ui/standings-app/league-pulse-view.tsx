@@ -57,7 +57,7 @@ export function LeaguePulseView({ data }: { data: { teams: LeaguePulseTeam[] } }
       <h2 className="text-lg font-semibold">League Pulse</h2>
 
       <div className="flex gap-2 flex-wrap">
-        {mostActive && <Badge className="text-xs bg-green-600 text-white">Most Active: {mostActive.name} ({mostActive.total})</Badge>}
+        {mostActive && <Badge className="text-xs bg-sem-success">Most Active: {mostActive.name} ({mostActive.total})</Badge>}
         {leastActive && <Badge variant="secondary" className="text-xs">Least Active: {leastActive.name} ({leastActive.total})</Badge>}
       </div>
 

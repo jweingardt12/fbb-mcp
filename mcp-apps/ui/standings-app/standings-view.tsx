@@ -18,9 +18,9 @@ interface StandingsEntry {
 const MY_TEAM = "You Can Clip These Wings";
 
 function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <Badge className="text-xs bg-yellow-600 text-white">{rank}</Badge>;
-  if (rank === 2) return <Badge className="text-xs bg-slate-500 text-white">{rank}</Badge>;
-  if (rank === 3) return <Badge className="text-xs bg-amber-700 text-white">{rank}</Badge>;
+  if (rank === 1) return <Badge className="text-xs bg-sem-warning">{rank}</Badge>;
+  if (rank === 2) return <Badge className="text-xs bg-sem-neutral">{rank}</Badge>;
+  if (rank === 3) return <Badge className="text-xs bg-sem-info">{rank}</Badge>;
   return <Badge variant="secondary" className="text-xs">{rank}</Badge>;
 }
 
@@ -88,15 +88,15 @@ function PointsDistributionChart({ standings, playoffLine }: { standings: Standi
           {cutoffPoints > 0 && (
             <ReferenceLine
               x={cutoffPoints}
-              stroke="#94a3b8"
+              stroke="var(--sem-neutral)"
               strokeDasharray="4 4"
               strokeWidth={1.5}
-              label={{ value: "Playoff line", position: "top", fontSize: 10, fill: "#94a3b8" }}
+              label={{ value: "Playoff line", position: "top", fontSize: 10, fill: "var(--sem-neutral)" }}
             />
           )}
           <Bar dataKey="points" radius={[0, 4, 4, 0]} barSize={20}>
             {chartData.map((entry, idx) => {
-              let fill = entry.inPlayoffs ? "#22c55e" : "#ef4444";
+              let fill = entry.inPlayoffs ? "var(--sem-success)" : "var(--sem-risk)";
               if (entry.isMyTeam) fill = "hsl(var(--primary))";
               return <Cell key={"cell-" + idx} fill={fill} fillOpacity={entry.isMyTeam ? 1 : 0.7} />;
             })}

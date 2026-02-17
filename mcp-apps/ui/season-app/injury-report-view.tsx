@@ -5,7 +5,7 @@ import { useCallTool } from "../shared/use-call-tool";
 import { mlbHeadshotUrl } from "../shared/mlb-images";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
-import { Search, Loader2, CheckCircle } from "lucide-react";
+import { Search, Loader2, CheckCircle } from "@/shared/icons";
 
 interface InjuredPlayer {
   name: string;
@@ -34,7 +34,7 @@ function PlayerRow({ player, showFind, onFind, readyToActivate, loading, app, na
       <Badge variant="destructive" className="text-[10px]">{player.status}</Badge>
       {player.description && <span className="text-xs text-muted-foreground hidden sm:inline">{player.description}</span>}
       {readyToActivate && (
-        <Badge className="text-[10px] bg-green-600 text-white gap-1">
+        <Badge className="text-[10px] bg-sem-success gap-1">
           <CheckCircle className="h-3 w-3" />
           Ready to Activate
         </Badge>
@@ -95,7 +95,7 @@ export function InjuryReportView({ data, app, navigate }: { data: InjuryReportDa
         <Card className="border-yellow-500/50">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-base text-yellow-600 dark:text-yellow-400">On IL - May Be Activatable</CardTitle>
+              <CardTitle className="text-base text-sem-warning">On IL - May Be Activatable</CardTitle>
               <Badge variant="secondary">{(data.healthy_il || []).length}</Badge>
             </div>
           </CardHeader>

@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { Trophy, TrendingUp } from "lucide-react";
+import { Trophy, TrendingUp } from "@/shared/icons";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface SeasonResult {
@@ -110,7 +110,7 @@ export function LeagueHistoryView({ data }: { data: { seasons: SeasonResult[] } 
 
       {/* Summary Stats */}
       {seasonsPlayed > 0 && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card className="bg-amber-500/5 border-amber-500/30">
             <CardContent className="p-3 text-center">
               <p className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">{championships}</p>
@@ -226,15 +226,15 @@ export function LeagueHistoryView({ data }: { data: { seasons: SeasonResult[] } 
                   <Bar dataKey="pct" radius={[4, 4, 0, 0]} maxBarSize={32}>
                     {sortedChartData.map(function (entry) {
                       var finish = parseFinish(entry.finish);
-                      var color = "#6b7280"; // default gray
+                      var color = "var(--sem-neutral)";
                       if (finish === 1) {
-                        color = "#f59e0b"; // amber for champion
+                        color = "var(--sem-warning)";
                       } else if (finish !== null && finish <= 3) {
-                        color = "#3b82f6"; // blue for top 3
+                        color = "var(--sem-info)";
                       } else if (entry.pct >= 60) {
-                        color = "#22c55e"; // green for good seasons
+                        color = "var(--sem-success)";
                       } else if (entry.pct < 40) {
-                        color = "#ef4444"; // red for bad seasons
+                        color = "var(--sem-risk)";
                       }
                       return <Cell key={entry.year} fill={color} />;
                     })}

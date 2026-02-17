@@ -7,7 +7,8 @@ import { useCallTool } from "../shared/use-call-tool";
 import { RefreshButton } from "../shared/refresh-button";
 import { PlayerName } from "../shared/player-name";
 import { EmptyState } from "../shared/empty-state";
-import { ArrowRightLeft, BarChart3, Send, Loader2, Search } from "lucide-react";
+import { ArrowRightLeft, BarChart3, Send, Loader2, Search } from "@/shared/icons";
+import { formatFixed } from "../shared/number-format";
 
 interface TradePackagePlayer {
   name: string;
@@ -97,7 +98,7 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs text-muted-foreground">Strong:</span>
             {data.strong_categories.map((c) => (
-              <Badge key={c} className="text-[10px] bg-green-600 text-white">{c}</Badge>
+              <Badge key={c} className="text-[10px] bg-sem-success">{c}</Badge>
             ))}
           </div>
         )}
@@ -118,7 +119,7 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
             <CardTitle className="text-sm flex items-center gap-2">
               {partner.team_name}
               <Badge variant="outline" className="text-[10px]">
-                Score: {partner.score.toFixed(1)}
+                Score: {formatFixed(partner.score, 1, "0.0")}
               </Badge>
             </CardTitle>
             <div className="flex items-center gap-1 flex-wrap mt-1">
@@ -131,7 +132,7 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
           <CardContent className="space-y-3">
             {(partner.packages || []).map((pkg, i) => (
               <div key={i} className="border rounded-lg p-3 space-y-2">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Give</p>
                     {(pkg.give || []).map((p, j) => (

@@ -2,7 +2,8 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from ".
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import { Tooltip } from "../components/ui/tooltip";
-import { Info } from "lucide-react";
+import { Info } from "@/shared/icons";
+import { formatFixed } from "../shared/number-format";
 
 interface SeasonPaceTeam {
   rank: number;
@@ -30,8 +31,8 @@ interface SeasonPaceData {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === "in") return <Badge className="text-[10px] bg-green-600 text-white">In</Badge>;
-  if (status === "bubble") return <Badge className="text-[10px] bg-yellow-600 text-white">Bubble</Badge>;
+  if (status === "in") return <Badge className="text-[10px] bg-sem-success">In</Badge>;
+  if (status === "bubble") return <Badge className="text-[10px] bg-sem-warning">Bubble</Badge>;
   if (status === "out") return <Badge variant="destructive" className="text-[10px]">Out</Badge>;
   return <Badge variant="secondary" className="text-[10px]">{status}</Badge>;
 }
@@ -98,7 +99,7 @@ export function SeasonPaceView({ data }: { data: SeasonPaceData }) {
                 <TableCell className="text-center font-mono text-sm">
                   {t.wins}-{t.losses}{t.ties > 0 ? "-" + t.ties : ""}
                 </TableCell>
-                <TableCell className="text-right font-mono text-sm hidden sm:table-cell">{(t.win_pct * 100).toFixed(1)}%</TableCell>
+                <TableCell className="text-right font-mono text-sm hidden sm:table-cell">{formatFixed(t.win_pct * 100, 1, "0.0")}%</TableCell>
                 <TableCell className="text-right font-mono text-sm font-semibold">{t.projected_wins}</TableCell>
                 <TableCell className="text-right font-mono text-sm hidden sm:table-cell">
                   {t.magic_number > 0 ? t.magic_number : "-"}

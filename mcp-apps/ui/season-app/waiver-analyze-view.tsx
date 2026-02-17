@@ -10,7 +10,8 @@ import { IntelBadge } from "../shared/intel-badge";
 import { IntelPanel } from "../shared/intel-panel";
 import { PlayerName } from "../shared/player-name";
 import { TrendIndicator } from "../shared/trend-indicator";
-import { UserPlus, ArrowRightLeft, Loader2, TrendingUp } from "lucide-react";
+import { UserPlus, ArrowRightLeft, Loader2, TrendingUp } from "@/shared/icons";
+import { formatFixed } from "../shared/number-format";
 
 interface WaiverPlayer {
   name: string;
@@ -52,7 +53,7 @@ function ScoreBar({ score, maxScore }: { score: number; maxScore: number }) {
       <div className="flex h-2 w-16 rounded-full overflow-hidden bg-muted">
         <div className={"rounded-full " + scoreBarColor(pct)} style={{ width: pct + "%" }} />
       </div>
-      <span className="font-mono text-xs font-medium w-8">{score.toFixed(1)}</span>
+      <span className="font-mono text-xs font-medium w-8">{formatFixed(score, 1, "0.0")}</span>
     </div>
   );
 }
@@ -136,7 +137,7 @@ export function WaiverAnalyzeView({ data, app, navigate }: { data: WaiverData; a
               const ownPct = p.pct != null ? p.pct : p.percent_owned;
               return (
                 <React.Fragment key={playerId || i}>
-                <TableRow className={i < 3 ? "bg-green-500/5" : ""}>
+                <TableRow className={i < 3 ? "bg-sem-success-subtle" : ""}>
                   <TableCell className="font-medium">
                     <span className="flex items-center" style={{ gap: "4px" }}>
                       {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}

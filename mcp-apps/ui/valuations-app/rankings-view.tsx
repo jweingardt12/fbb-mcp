@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { mlbHeadshotUrl } from "../shared/mlb-images";
 import { TeamLogo } from "../shared/team-logo";
-import { BarChart3, Loader2 } from "lucide-react";
+import { BarChart3, Loader2 } from "@/shared/icons";
 import { useCallTool } from "../shared/use-call-tool";
 import { ZScoreBar, ZScoreExplainer, getTier } from "../shared/z-score";
 import { IntelBadge } from "../shared/intel-badge";

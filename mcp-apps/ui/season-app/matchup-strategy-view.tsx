@@ -10,7 +10,7 @@ import { TeamLogo } from "../shared/team-logo";
 import {
   Swords, TrendingUp, TrendingDown, Target, Shield, Lock, XCircle,
   Calendar, ArrowRightLeft, Loader2, RefreshCw, UserPlus,
-} from "lucide-react";
+} from "@/shared/icons";
 
 interface StrategyCategory {
   name: string;
@@ -66,9 +66,9 @@ function resultColor(wins: number, losses: number): "green" | "red" | "yellow" {
 
 function scoreBadgeColor(wins: number, losses: number): string {
   var color = resultColor(wins, losses);
-  if (color === "green") return "bg-green-600 text-white";
-  if (color === "red") return "bg-red-500 text-white";
-  return "bg-yellow-500 text-white";
+  if (color === "green") return "bg-sem-success";
+  if (color === "red") return "bg-sem-risk";
+  return "bg-sem-warning";
 }
 
 function scoreLabel(wins: number, losses: number): string {
@@ -80,13 +80,13 @@ function scoreLabel(wins: number, losses: number): string {
 function classificationBadge(cls: string) {
   switch (cls) {
     case "target":
-      return <Badge className="bg-blue-600 text-white text-[10px]"><Target className="h-2.5 w-2.5 mr-0.5 inline" />Target</Badge>;
+      return <Badge className="bg-sem-info text-[10px]"><Target className="h-2.5 w-2.5 mr-0.5 inline" />Target</Badge>;
     case "protect":
-      return <Badge className="bg-yellow-500 text-white text-[10px]"><Shield className="h-2.5 w-2.5 mr-0.5 inline" />Protect</Badge>;
+      return <Badge className="bg-sem-warning text-[10px]"><Shield className="h-2.5 w-2.5 mr-0.5 inline" />Protect</Badge>;
     case "concede":
       return <Badge variant="outline" className="text-[10px] text-muted-foreground"><XCircle className="h-2.5 w-2.5 mr-0.5 inline" />Concede</Badge>;
     case "lock":
-      return <Badge className="bg-green-600 text-white text-[10px]"><Lock className="h-2.5 w-2.5 mr-0.5 inline" />Lock</Badge>;
+      return <Badge className="bg-sem-success text-[10px]"><Lock className="h-2.5 w-2.5 mr-0.5 inline" />Lock</Badge>;
     default:
       return <Badge variant="outline" className="text-[10px]">{cls}</Badge>;
   }
@@ -94,10 +94,10 @@ function classificationBadge(cls: string) {
 
 function rowBg(classification: string): string {
   switch (classification) {
-    case "target": return "bg-blue-500/10";
-    case "protect": return "bg-yellow-500/10";
+    case "target": return "bg-sem-info-subtle";
+    case "protect": return "bg-sem-warning-subtle";
     case "concede": return "bg-muted/30";
-    case "lock": return "bg-green-500/10";
+    case "lock": return "bg-sem-success-subtle";
     default: return "";
   }
 }
@@ -145,7 +145,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
       </div>
 
       {/* Opponent + Score */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="text-sm text-muted-foreground">Week {d.week}</p>
           <p className="font-semibold">vs. {d.opponent}</p>
@@ -174,7 +174,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="text-center">
               <p className="text-xs text-muted-foreground mb-1">You</p>
               <p className="text-xl font-bold font-mono">{myTotal}</p>
@@ -188,7 +188,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
           </div>
           {sched.advantage !== "neutral" && (
             <div className="mt-3 text-center">
-              <Badge className={sched.advantage === "you" ? "bg-green-600 text-white" : "bg-red-500 text-white"}>
+              <Badge className={sched.advantage === "you" ? "bg-sem-success" : "bg-sem-risk"}>
                 {sched.advantage === "you"
                   ? "+" + gameDiff + " game advantage"
                   : "Opponent +" + gameDiff + " games"}
@@ -199,12 +199,12 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
       </Card>
 
       {/* Strategy Summary Badges */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {([
           { key: "target" as const, label: "Target", Icon: Target, border: "border-blue-500/30 bg-blue-500/5", icon: "text-blue-500", text: "text-blue-600 dark:text-blue-400" },
-          { key: "protect" as const, label: "Protect", Icon: Shield, border: "border-yellow-500/30 bg-yellow-500/5", icon: "text-yellow-500", text: "text-yellow-600 dark:text-yellow-400" },
+          { key: "protect" as const, label: "Protect", Icon: Shield, border: "border-yellow-500/30 bg-yellow-500/5", icon: "text-yellow-500", text: "text-sem-warning" },
           { key: "concede" as const, label: "Concede", Icon: XCircle, border: "border-muted", icon: "text-muted-foreground", text: "text-muted-foreground" },
-          { key: "lock" as const, label: "Lock", Icon: Lock, border: "border-green-500/30 bg-green-500/5", icon: "text-green-600 dark:text-green-400", text: "text-green-600 dark:text-green-400" },
+          { key: "lock" as const, label: "Lock", Icon: Lock, border: "border-green-500/30 bg-sem-success-subtle", icon: "text-sem-success", text: "text-sem-success" },
         ]).map(function (s) {
           if (strat[s.key].length === 0) return null;
           return (
@@ -212,7 +212,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
               <CardContent className="p-2 text-center">
                 <s.Icon className={"h-3.5 w-3.5 mx-auto mb-1 " + s.icon} />
                 <p className={"text-[10px] font-semibold " + s.text}>{s.label}</p>
-                <p className="text-[10px] text-muted-foreground">{strat[s.key].join(", ")}</p>
+                <p className="text-[10px] text-muted-foreground break-words">{strat[s.key].join(", ")}</p>
               </CardContent>
             </Card>
           );
@@ -243,9 +243,9 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
                     <TableCell className="text-right font-mono text-sm">{c.my_value}</TableCell>
                     <TableCell className="text-right font-mono text-sm">{c.opp_value}</TableCell>
                     <TableCell className="text-center">
-                      {c.result === "win" && <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400 inline" />}
-                      {c.result === "loss" && <TrendingDown className="h-4 w-4 text-red-500 inline" />}
-                      {c.result === "tie" && <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">TIE</span>}
+                      {c.result === "win" && <TrendingUp className="h-4 w-4 text-sem-success inline" />}
+                      {c.result === "loss" && <TrendingDown className="h-4 w-4 text-sem-risk inline" />}
+                      {c.result === "tie" && <span className="text-xs text-sem-warning font-medium">TIE</span>}
                     </TableCell>
                     <TableCell className="text-center">{classificationBadge(c.classification)}</TableCell>
                   </TableRow>

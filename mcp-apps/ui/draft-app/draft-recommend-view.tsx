@@ -3,6 +3,7 @@ import { Badge } from "../components/ui/badge";
 import { mlbHeadshotUrl } from "../shared/mlb-images";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
+import { formatFixed } from "../shared/number-format";
 
 interface DraftRecommendation {
   name: string;
@@ -52,7 +53,7 @@ function ZScoreBar({ z }: { z: number | null }) {
       <div className="flex h-1.5 w-12 rounded-full overflow-hidden bg-muted">
         <div className={"rounded-full " + tierColor(z)} style={{ width: pct + "%" }} />
       </div>
-      <span className="font-mono text-xs">{z.toFixed(2)}</span>
+      <span className="font-mono text-xs">{formatFixed(z, 2, "0.00")}</span>
     </div>
   );
 }

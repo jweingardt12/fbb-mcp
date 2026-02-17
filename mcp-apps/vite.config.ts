@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import preact from "@preact/preset-vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import tailwindcss from "@tailwindcss/vite";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 // CSP eval-elimination plugin: replaces all Function() eval patterns with safe equivalents.
 //
@@ -36,8 +38,19 @@ const noNewFunction = {
   },
 };
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
   plugins: [preact(), viteSingleFile(), tailwindcss(), noNewFunction],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "ui"),
+      react: "preact/compat",
+      "react-dom": "preact/compat",
+      "react/jsx-runtime": "preact/jsx-runtime",
+      "react-dom/test-utils": "preact/test-utils",
+    },
+  },
   build: {
     outDir: "dist",
     emptyOutDir: false,

@@ -1,3 +1,5 @@
+import { formatFixed } from "./number-format";
+
 export function getTier(z: number | null): string {
   if (z == null) return "?";
   if (z >= 2.0) return "Elite";
@@ -30,7 +32,7 @@ export function ZScoreBar({ z }: { z: number | null }) {
       <div className="flex h-2 w-14 rounded-full overflow-hidden bg-muted">
         <div className={"rounded-full " + tierColor(z)} style={{ width: pct + "%" }} />
       </div>
-      <span className="font-mono text-xs w-10 text-right">{z.toFixed(2)}</span>
+      <span className="font-mono text-xs w-10 text-right">{formatFixed(z, 2, "0.00")}</span>
     </div>
   );
 }
@@ -41,7 +43,7 @@ export function ZScoreBadge({ z, size }: { z: number | null; size?: "sm" | "md" 
   return (
     <span className={"inline-flex items-center gap-1 rounded-md font-mono " + tierColor(z) + " text-white " + (isSmall ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-0.5 text-xs")}>
       <span className="font-medium">{getTier(z)}</span>
-      <span>{z.toFixed(2)}</span>
+      <span>{formatFixed(z, 2, "0.00")}</span>
     </span>
   );
 }

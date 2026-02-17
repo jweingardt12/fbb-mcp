@@ -8,7 +8,7 @@ import { teamLogoFromAbbrev, mlbHeadshotUrl } from "../shared/mlb-images";
 import { IntelBadge } from "../shared/intel-badge";
 import { IntelPanel } from "../shared/intel-panel";
 import { PlayerName } from "../shared/player-name";
-import { Users, UserMinus, Loader2 } from "lucide-react";
+import { Users, UserMinus, Loader2 } from "@/shared/icons";
 
 interface Player {
   name: string;

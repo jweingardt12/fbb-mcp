@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card"
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useCallTool } from "../shared/use-call-tool";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2 } from "@/shared/icons";
 
 interface WhoOwnsData {
   player_key: string;

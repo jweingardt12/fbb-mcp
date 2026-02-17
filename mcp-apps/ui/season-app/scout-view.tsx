@@ -4,7 +4,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { useCallTool } from "../shared/use-call-tool";
-import { Shield, TrendingUp, TrendingDown, Target, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
+import { Shield, TrendingUp, TrendingDown, Target, AlertTriangle, Loader2, RefreshCw } from "@/shared/icons";
 
 interface ScoutCategory {
   name: string;
@@ -25,9 +25,9 @@ interface ScoutOpponentData {
 }
 
 function scoreBadgeColor(wins: number, losses: number): string {
-  if (wins > losses) return "bg-green-600 text-white";
-  if (losses > wins) return "bg-red-500 text-white";
-  return "bg-yellow-500 text-white";
+  if (wins > losses) return "bg-sem-success";
+  if (losses > wins) return "bg-sem-risk";
+  return "bg-sem-warning";
 }
 
 function scoreLabel(wins: number, losses: number): string {
@@ -38,14 +38,14 @@ function scoreLabel(wins: number, losses: number): string {
 
 function rowBg(result: string, margin: string): string {
   if (result === "win") {
-    if (margin === "close") return "bg-green-500/10";
+    if (margin === "close") return "bg-sem-success-subtle";
     return "bg-green-500/15";
   }
   if (result === "loss") {
     if (margin === "close") return "bg-red-500/10";
     return "bg-red-500/15";
   }
-  return "bg-yellow-500/10";
+  return "bg-sem-warning-subtle";
 }
 
 export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; app?: any; navigate?: (data: any) => void }) {
@@ -96,11 +96,11 @@ export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; ap
           <div className="flex items-center justify-around">
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Wins</p>
-              <p className="text-2xl font-bold font-mono text-green-600 dark:text-green-400">{score.wins}</p>
+              <p className="text-2xl font-bold font-mono text-sem-success">{score.wins}</p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Losses</p>
-              <p className="text-2xl font-bold font-mono text-red-500">{score.losses}</p>
+              <p className="text-2xl font-bold font-mono text-sem-risk">{score.losses}</p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Ties</p>
@@ -133,14 +133,14 @@ export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; ap
                   <TableCell className="text-right font-mono text-sm">{c.my_value}</TableCell>
                   <TableCell className="text-right font-mono text-sm">{c.opp_value}</TableCell>
                   <TableCell className="text-center">
-                    {c.result === "win" && <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400 inline" />}
-                    {c.result === "loss" && <TrendingDown className="h-4 w-4 text-red-500 inline" />}
-                    {c.result === "tie" && <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">TIE</span>}
+                    {c.result === "win" && <TrendingUp className="h-4 w-4 text-sem-success inline" />}
+                    {c.result === "loss" && <TrendingDown className="h-4 w-4 text-sem-risk inline" />}
+                    {c.result === "tie" && <span className="text-xs text-sem-warning font-medium">TIE</span>}
                   </TableCell>
                   <TableCell className="text-center hidden sm:table-cell">
-                    {c.margin === "close" && <Badge variant="outline" className="text-[10px] border-yellow-500 text-yellow-600 dark:text-yellow-400">Close</Badge>}
+                    {c.margin === "close" && <Badge variant="outline" className="text-[10px] border-yellow-500 text-sem-warning">Close</Badge>}
                     {c.margin === "comfortable" && <Badge variant="outline" className="text-[10px]">Comf.</Badge>}
-                    {c.margin === "dominant" && <Badge variant="outline" className="text-[10px] border-red-500 text-red-500">Dom.</Badge>}
+                    {c.margin === "dominant" && <Badge variant="outline" className="text-[10px] border-red-500 text-sem-risk">Dom.</Badge>}
                   </TableCell>
                 </TableRow>
               ))}
@@ -150,12 +150,12 @@ export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; ap
       </Card>
 
       {/* Strengths / Weaknesses Cards */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {(d.opp_strengths || []).length > 0 && (
-          <Card className="border-red-500/30 bg-red-500/5">
+          <Card className="border-red-500/30 bg-sem-risk-subtle">
             <CardContent className="p-3">
               <div className="flex items-center gap-1.5 mb-2">
-                <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
+                <AlertTriangle className="h-3.5 w-3.5 text-sem-risk" />
                 <p className="text-xs font-semibold text-red-600 dark:text-red-400">Their Strengths</p>
               </div>
               <div className="flex flex-wrap gap-1">
@@ -167,15 +167,15 @@ export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; ap
           </Card>
         )}
         {(d.opp_weaknesses || []).length > 0 && (
-          <Card className="border-green-500/30 bg-green-500/5">
+          <Card className="border-green-500/30 bg-sem-success-subtle">
             <CardContent className="p-3">
               <div className="flex items-center gap-1.5 mb-2">
-                <Target className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                <p className="text-xs font-semibold text-green-600 dark:text-green-400">Their Weaknesses</p>
+                <Target className="h-3.5 w-3.5 text-sem-success" />
+                <p className="text-xs font-semibold text-sem-success">Their Weaknesses</p>
               </div>
               <div className="flex flex-wrap gap-1">
                 {(d.opp_weaknesses || []).map((s) => (
-                  <Badge key={s} className="bg-green-600 text-white text-[10px]">{s}</Badge>
+                  <Badge key={s} className="bg-sem-success text-[10px]">{s}</Badge>
                 ))}
               </div>
             </CardContent>

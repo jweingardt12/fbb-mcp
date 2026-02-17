@@ -24,7 +24,7 @@ describe("Button", () => {
   it("applies ghost variant classes", () => {
     render(<Button variant="ghost">Ghost</Button>);
     const btn = screen.getByText("Ghost");
-    expect(btn.className).toContain("hover:bg-accent");
+    expect(btn.className).toContain("hover:bg-muted");
     expect(btn.className).not.toContain("bg-primary");
   });
 
@@ -37,13 +37,13 @@ describe("Button", () => {
   it("applies sm size classes", () => {
     render(<Button size="sm">Small</Button>);
     const btn = screen.getByText("Small");
-    expect(btn.className).toContain("h-8");
+    expect(btn.className).toContain("h-7");
   });
 
   it("applies lg size classes", () => {
     render(<Button size="lg">Large</Button>);
     const btn = screen.getByText("Large");
-    expect(btn.className).toContain("h-10");
+    expect(btn.className).toContain("h-9");
   });
 
   it("disabled state adds disabled attribute", () => {

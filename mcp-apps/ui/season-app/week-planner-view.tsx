@@ -105,7 +105,7 @@ export function WeekPlannerView({ data }: { data: WeekPlannerData }) {
                 {dates.map((d) => {
                   var count = totals[d] || 0;
                   var pct = count / maxTotal;
-                  var colorClass = pct < 0.4 ? "text-red-500" : pct < 0.7 ? "text-yellow-600" : "text-green-600";
+                  var colorClass = pct < 0.4 ? "text-sem-risk" : pct < 0.7 ? "text-yellow-600" : "text-green-600";
                   return (
                     <td key={d} className={"text-center py-2 px-1 font-mono text-xs font-semibold " + colorClass}>
                       {count}

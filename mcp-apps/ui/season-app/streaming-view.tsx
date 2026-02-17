@@ -5,7 +5,8 @@ import { teamLogoFromAbbrev, mlbHeadshotUrl } from "../shared/mlb-images";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
 import { TrendIndicator } from "../shared/trend-indicator";
-import { UserPlus, Loader2, Zap } from "lucide-react";
+import { UserPlus, Loader2, Zap } from "@/shared/icons";
+import { formatFixed } from "../shared/number-format";
 
 interface StreamingPitcher {
   name: string;
@@ -81,7 +82,7 @@ export function StreamingView({ data, app, navigate }: { data: StreamingData; ap
                     <TrendIndicator trend={p.trend} />
                   </span>
                 </TableCell>
-                <TableCell className="text-right font-mono font-medium">{p.score.toFixed(1)}</TableCell>
+                <TableCell className="text-right font-mono font-medium">{formatFixed(p.score, 1, "0.0")}</TableCell>
                 <TableCell>
                   {p.two_start && <Zap size={14} className="text-amber-500" />}
                 </TableCell>

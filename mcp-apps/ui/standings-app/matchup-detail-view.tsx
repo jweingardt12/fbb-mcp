@@ -20,12 +20,12 @@ interface MatchupDetailData {
   categories: MatchupCategory[];
 }
 
-const PIE_COLORS: Record<string, string> = { Wins: "#22c55e", Losses: "#ef4444", Ties: "#eab308" };
+const PIE_COLORS: Record<string, string> = { Wins: "var(--sem-success)", Losses: "var(--sem-risk)", Ties: "var(--sem-warning)" };
 
 function getMatchupStatus(isWinning: boolean, isTied: boolean) {
-  if (isWinning) return { bg: "bg-green-600", label: "Winning" };
-  if (isTied) return { bg: "bg-yellow-500", label: "Tied" };
-  return { bg: "bg-red-500", label: "Losing" };
+  if (isWinning) return { bg: "bg-sem-success", label: "Winning" };
+  if (isTied) return { bg: "bg-sem-warning", label: "Tied" };
+  return { bg: "bg-sem-risk", label: "Losing" };
 }
 
 function getSwingCategories(categories: MatchupCategory[]) {
@@ -113,7 +113,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Week {data.week} Matchup</h2>
-        <Badge className={"text-sm px-3 py-1 " + status.bg + " text-white"}>
+        <Badge className={"text-sm px-3 py-1 " + status.bg}>
           {status.label} {score.wins}-{score.losses}{score.ties > 0 ? "-" + score.ties : ""}
         </Badge>
       </div>
@@ -124,7 +124,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
           <div className="flex items-center justify-between">
             <div className="flex-1 text-center">
               <p className="font-semibold text-sm truncate">{data.my_team}</p>
-              <p className="text-2xl font-bold font-mono text-green-600 dark:text-green-400">{score.wins}</p>
+              <p className="text-2xl font-bold font-mono text-sem-success">{score.wins}</p>
             </div>
             {total > 0 && (
               <div className="w-24 h-24 mx-2 flex-shrink-0">
@@ -132,7 +132,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
                   <PieChart>
                     <Pie data={pieData} innerRadius={25} outerRadius={40} dataKey="value" startAngle={90} endAngle={-270} strokeWidth={0}>
                       {pieData.map((entry) => (
-                        <Cell key={entry.name} fill={PIE_COLORS[entry.name] || "#64748b"} />
+                        <Cell key={entry.name} fill={PIE_COLORS[entry.name] || "var(--sem-neutral)"} />
                       ))}
                     </Pie>
                   </PieChart>
@@ -141,7 +141,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
             )}
             <div className="flex-1 text-center">
               <p className="font-semibold text-sm truncate">{data.opponent}</p>
-              <p className="text-2xl font-bold font-mono text-red-500">{score.losses}</p>
+              <p className="text-2xl font-bold font-mono text-sem-risk">{score.losses}</p>
             </div>
           </div>
         </CardContent>
@@ -149,20 +149,20 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
 
       {/* Swing Categories Callout */}
       {swingCategories.length > 0 && (
-        <Card className="border-yellow-500/30 bg-yellow-500/5">
+        <Card className="border-sem-warning bg-sem-warning-subtle">
           <CardContent className="p-3">
             <div className="flex items-center gap-1.5 mb-2">
               <SwingIcon />
-              <span className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">Swing Categories</span>
+              <span className="text-xs font-semibold text-sem-warning">Swing Categories</span>
               <span className="text-[10px] text-muted-foreground ml-1">Closest margins - could flip</span>
             </div>
             <div className="flex gap-2 flex-wrap">
               {swingCategories.map((c, i) => {
                 const resultColor = c.result === "win"
-                  ? "bg-green-600/15 text-green-700 dark:text-green-400 border-green-500/30"
+                  ? "bg-sem-success-subtle text-sem-success border-sem-success"
                   : c.result === "loss"
-                    ? "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30"
-                    : "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30";
+                    ? "bg-sem-risk-subtle text-sem-risk border-sem-risk"
+                    : "bg-sem-warning-subtle text-sem-warning border-sem-warning";
                 return (
                   <div key={i + "-" + c.name} className={"flex items-center gap-1.5 rounded-md border px-2 py-1 " + resultColor}>
                     <span className="text-xs font-medium">{c.name}</span>
@@ -195,7 +195,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
             <TabsContent value="batting">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-medium text-muted-foreground">Batting:</span>
-                <Badge className={"text-[10px] " + (battingWins > battingLosses ? "bg-green-600" : battingWins < battingLosses ? "bg-red-500" : "bg-yellow-500") + " text-white"}>
+                <Badge className={"text-[10px] " + (battingWins > battingLosses ? "bg-sem-success" : battingWins < battingLosses ? "bg-sem-risk" : "bg-sem-warning")}>
                   {battingWins + "-" + battingLosses}
                 </Badge>
               </div>
@@ -205,7 +205,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
             <TabsContent value="pitching">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-medium text-muted-foreground">Pitching:</span>
-                <Badge className={"text-[10px] " + (pitchingWins > pitchingLosses ? "bg-green-600" : pitchingWins < pitchingLosses ? "bg-red-500" : "bg-yellow-500") + " text-white"}>
+                <Badge className={"text-[10px] " + (pitchingWins > pitchingLosses ? "bg-sem-success" : pitchingWins < pitchingLosses ? "bg-sem-risk" : "bg-sem-warning")}>
                   {pitchingWins + "-" + pitchingLosses}
                 </Badge>
               </div>
@@ -221,7 +221,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs text-muted-foreground">Strongest:</span>
             {strongWins.slice(0, 3).map((c, i) => (
-              <Badge key={i + "-" + c.name} className="bg-green-600 text-white text-[10px]">{c.name}</Badge>
+              <Badge key={i + "-" + c.name} className="bg-sem-success text-[10px]">{c.name}</Badge>
             ))}
           </div>
         )}
@@ -229,7 +229,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs text-muted-foreground">At risk:</span>
             {closeCategories.slice(0, 3).map((c, i) => (
-              <Badge key={i + "-" + c.name} variant="outline" className="text-[10px] border-yellow-500 text-yellow-600 dark:text-yellow-400">{c.name}</Badge>
+              <Badge key={i + "-" + c.name} variant="outline" className="text-[10px] border-yellow-500 text-sem-warning">{c.name}</Badge>
             ))}
           </div>
         )}

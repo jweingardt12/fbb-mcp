@@ -19,16 +19,16 @@ interface MlbPlayerData {
 
 export function PlayerView({ data, app, navigate }: { data: MlbPlayerData; app?: any; navigate?: (data: any) => void }) {
   return (
-    <Card className="max-w-md mx-auto">
+    <Card className="w-full max-w-lg mx-auto">
       <CardHeader>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <img src={mlbHeadshotUrl(data.mlb_id)} alt={data.name} className="w-16 h-16 rounded-full bg-muted object-cover" />
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <CardTitle><PlayerName name={data.name} mlbId={data.mlb_id} app={app} navigate={navigate} context="default" /></CardTitle>
               {data.intel && <IntelBadge intel={data.intel} size="sm" />}
             </div>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
               <Badge variant="default">{data.position}</Badge>
               <span className="text-sm text-muted-foreground flex items-center gap-1">
                 <TeamLogo abbrev={data.team} />
@@ -39,17 +39,17 @@ export function PlayerView({ data, app, navigate }: { data: MlbPlayerData; app?:
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-2 sm:gap-4 text-center">
           <div>
-            <p className="text-2xl font-bold">{data.age}</p>
+            <p className="text-xl sm:text-2xl font-bold">{data.age}</p>
             <p className="text-xs text-muted-foreground">Age</p>
           </div>
           <div>
-            <p className="text-2xl font-bold">{data.bats}</p>
+            <p className="text-xl sm:text-2xl font-bold">{data.bats}</p>
             <p className="text-xs text-muted-foreground">Bats</p>
           </div>
           <div>
-            <p className="text-2xl font-bold">{data.throws}</p>
+            <p className="text-xl sm:text-2xl font-bold">{data.throws}</p>
             <p className="text-xs text-muted-foreground">Throws</p>
           </div>
         </div>

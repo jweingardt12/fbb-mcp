@@ -1,4 +1,11 @@
-const VIEW_API_MAP: Record<string, { path: string; type: string }> = {
+type ViewApiEntry = {
+  path: string;
+  type: string;
+  method?: "GET" | "POST";
+  body?: Record<string, any>;
+};
+
+const VIEW_API_MAP: Record<string, ViewApiEntry> = {
   "roster":              { path: "/api/roster", type: "roster" },
   "free-agents":         { path: "/api/free-agents?pos_type=B&count=20", type: "free-agents" },
   "standings":           { path: "/api/standings", type: "standings" },
@@ -19,7 +26,7 @@ const VIEW_API_MAP: Record<string, { path: string; type: string }> = {
   "matchup-strategy":    { path: "/api/matchup-strategy", type: "matchup-strategy" },
   "trade-builder":       { path: "/api/roster", type: "roster" },
   "category-simulate":   { path: "/api/category-check", type: "category-check" },
-  "trade-eval":          { path: "/api/category-check", type: "category-check" },
+  "trade-eval":          { path: "/api/trade-eval", type: "trade-eval", method: "POST", body: { give_ids: "0", get_ids: "1" } },
   "draft-status":        { path: "/api/draft-status", type: "draft-status" },
   "draft-recommend":     { path: "/api/draft-recommend", type: "draft-recommend" },
   "best-available":      { path: "/api/best-available?pos_type=B&count=25", type: "best-available" },
@@ -65,7 +72,15 @@ const VIEW_API_MAP: Record<string, { path: string; type: string }> = {
 export async function fetchViewData(viewId: string): Promise<any> {
   const entry = VIEW_API_MAP[viewId];
   if (!entry) return null;
-  const res = await fetch(entry.path);
+  const method = entry.method || "GET";
+  const init = method === "POST"
+    ? {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry.body || {}),
+      }
+    : undefined;
+  const res = await fetch(entry.path, init);
   if (!res.ok) throw new Error("API error: " + res.status);
   const data = await res.json();
   return { type: entry.type, ...data };

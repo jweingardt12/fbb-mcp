@@ -7,7 +7,8 @@ import { useCallTool } from "../shared/use-call-tool";
 import { mlbHeadshotUrl } from "../shared/mlb-images";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
-import { ArrowRightLeft, Search, Loader2, CheckSquare, Square, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowRightLeft, Search, Loader2, CheckSquare, Square, TrendingUp, TrendingDown } from "@/shared/icons";
+import { formatFixed, toFiniteNumber } from "../shared/number-format";
 
 interface RosterPlayer {
   name: string;
@@ -230,24 +231,24 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4 text-center mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-center mb-3">
               <div>
-                <p className="text-lg font-bold font-mono text-destructive">{(evaluation.give_value || 0).toFixed(1)}</p>
+                <p className="text-lg font-bold font-mono text-destructive">{formatFixed(evaluation.give_value, 1, "0.0")}</p>
                 <p className="text-xs text-muted-foreground">Give Value</p>
               </div>
               <div>
-                <p className="text-lg font-bold font-mono text-primary">{(evaluation.get_value || 0).toFixed(1)}</p>
+                <p className="text-lg font-bold font-mono text-primary">{formatFixed(evaluation.get_value, 1, "0.0")}</p>
                 <p className="text-xs text-muted-foreground">Get Value</p>
               </div>
               <div>
-                <p className={"text-lg font-bold font-mono " + (evaluation.net_value >= 0 ? "text-green-600" : "text-red-600")}>
-                  {evaluation.net_value >= 0 ? "+" : ""}{(evaluation.net_value || 0).toFixed(1)}
+                <p className={"text-lg font-bold font-mono " + (toFiniteNumber(evaluation.net_value, 0) >= 0 ? "text-sem-success" : "text-sem-risk")}>
+                  {toFiniteNumber(evaluation.net_value, 0) >= 0 ? "+" : ""}{formatFixed(evaluation.net_value, 1, "0.0")}
                 </p>
                 <p className="text-xs text-muted-foreground">Net Value</p>
               </div>
             </div>
             {evaluation.position_impact && (
-              <div className="flex gap-4 text-xs">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs">
                 {evaluation.position_impact.losing && evaluation.position_impact.losing.length > 0 && (
                   <div className="flex items-center gap-1">
                     <TrendingDown size={12} className="text-destructive" />

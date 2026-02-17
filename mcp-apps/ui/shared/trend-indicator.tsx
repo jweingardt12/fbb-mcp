@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown } from "@/shared/icons";
 
 interface TrendIndicatorProps {
   trend?: { direction: string; delta: string; rank?: number } | null;

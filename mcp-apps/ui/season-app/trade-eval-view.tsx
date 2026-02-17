@@ -6,7 +6,8 @@ import { ComparisonBar } from "../shared/comparison-bar";
 import { mlbHeadshotUrl } from "../shared/mlb-images";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check } from "@/shared/icons";
+import { formatFixed } from "../shared/number-format";
 
 interface Player {
   name: string;
@@ -30,6 +31,19 @@ interface TradeEvalData {
   position_impact?: { losing: string[]; gaining: string[] };
 }
 
+function asNumber(value: unknown, fallback: number = 0): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const n = Number(value);
+    if (Number.isFinite(n)) return n;
+  }
+  return fallback;
+}
+
+function fmtOne(value: unknown): string {
+  return formatFixed(asNumber(value), 1, "0.0");
+}
+
 function tradeResult(netValue: number): "win" | "loss" | "tie" {
   if (netValue > 0.5) return "win";
   if (netValue < -0.5) return "loss";
@@ -37,11 +51,11 @@ function tradeResult(netValue: number): "win" | "loss" | "tie" {
 }
 
 function gradeColor(grade: string): string {
-  if (grade.startsWith("A")) return "bg-green-600 text-white";
-  if (grade.startsWith("B")) return "bg-blue-600 text-white";
-  if (grade.startsWith("C")) return "bg-yellow-600 text-white";
-  if (grade.startsWith("D")) return "bg-orange-600 text-white";
-  return "bg-red-600 text-white";
+  if (grade.startsWith("A")) return "bg-sem-success";
+  if (grade.startsWith("B")) return "bg-sem-info";
+  if (grade.startsWith("C")) return "bg-sem-warning";
+  if (grade.startsWith("D")) return "bg-sem-warning";
+  return "bg-sem-risk";
 }
 
 function PlayerRow({ player, app, navigate }: { player: Player; app?: any; navigate?: (data: any) => void }) {
@@ -57,7 +71,7 @@ function PlayerRow({ player, app, navigate }: { player: Player; app?: any; navig
         ))}
       </div>
       {player.value != null && (
-        <span className="font-mono text-xs text-muted-foreground" title="Z-Value">z={player.value.toFixed(1)}</span>
+        <span className="font-mono text-xs text-muted-foreground" title="Z-Value">z={fmtOne(player.value)}</span>
       )}
     </div>
   );
@@ -67,12 +81,16 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
   const givePlayers = data.give_players || data.giving || [];
   const getPlayers = data.get_players || data.getting || [];
   const impact = data.position_impact;
+  const giveValue = asNumber((data as any).give_value);
+  const getValue = asNumber((data as any).get_value);
+  const netValue = asNumber((data as any).net_value);
+  const grade = typeof (data as any).grade === "string" && (data as any).grade.trim() ? (data as any).grade : "N/A";
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
     const giveNames = givePlayers.map((p) => p.name);
     const getNames = getPlayers.map((p) => p.name);
-    const text = "Trade: Giving " + giveNames.join(", ") + " (z=" + data.give_value.toFixed(1) + ") for " + getNames.join(", ") + " (z=" + data.get_value.toFixed(1) + "). Net: " + (data.net_value >= 0 ? "+" : "") + data.net_value.toFixed(1) + ", Grade: " + data.grade;
+    const text = "Trade: Giving " + giveNames.join(", ") + " (z=" + fmtOne(giveValue) + ") for " + getNames.join(", ") + " (z=" + fmtOne(getValue) + "). Net: " + (netValue >= 0 ? "+" : "") + fmtOne(netValue) + ", Grade: " + grade;
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => { setCopied(false); }, 2000);
@@ -89,16 +107,16 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Net Z-Value</p>
-              <p className={"text-2xl font-bold font-mono " + (data.net_value >= 0 ? "text-green-600" : "text-destructive")}>
-                {data.net_value >= 0 ? "+" : ""}{data.net_value.toFixed(1)}
+              <p className={"text-2xl font-bold font-mono " + (netValue >= 0 ? "text-green-600" : "text-destructive")}>
+                {netValue >= 0 ? "+" : ""}{fmtOne(netValue)}
               </p>
               <p className="text-[11px] text-muted-foreground">Based on z-score projections</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-1">Trade Grade</p>
-                <span className={"inline-flex items-center rounded-md px-4 py-2 text-xl font-bold " + gradeColor(data.grade)}>
-                  {data.grade}
+                <span className={"inline-flex items-center rounded-md px-4 py-2 text-xl font-bold " + gradeColor(grade)}>
+                  {grade}
                 </span>
               </div>
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleCopy}>
@@ -114,9 +132,9 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
         <CardContent className="p-4">
           <ComparisonBar
             label="Total Value"
-            leftValue={data.give_value.toFixed(1)}
-            rightValue={data.get_value.toFixed(1)}
-            result={tradeResult(data.net_value)}
+            leftValue={fmtOne(giveValue)}
+            rightValue={fmtOne(getValue)}
+            result={tradeResult(netValue)}
             leftLabel="Giving"
             rightLabel="Getting"
           />
@@ -129,7 +147,7 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base text-destructive">Giving</CardTitle>
-              <span className="font-mono text-sm text-muted-foreground">z={data.give_value.toFixed(1)}</span>
+              <span className="font-mono text-sm text-muted-foreground">z={fmtOne(giveValue)}</span>
             </div>
           </CardHeader>
           <CardContent>
@@ -140,8 +158,8 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
         <Card className="border-green-600/30 border-t-2 border-t-green-600">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base text-green-600 dark:text-green-400">Getting</CardTitle>
-              <span className="font-mono text-sm text-muted-foreground">z={data.get_value.toFixed(1)}</span>
+              <CardTitle className="text-base text-sem-success">Getting</CardTitle>
+              <span className="font-mono text-sm text-muted-foreground">z={fmtOne(getValue)}</span>
             </div>
           </CardHeader>
           <CardContent>
@@ -160,7 +178,7 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
                 <div>
                   <span className="text-xs text-muted-foreground">Losing: </span>
                   {(impact.losing || []).map((pos) => (
-                    <Badge key={pos} variant="outline" className="text-[10px] mr-1 border-red-500 text-red-500">{pos}</Badge>
+                    <Badge key={pos} variant="outline" className="text-[10px] mr-1 border-red-500 text-sem-risk">{pos}</Badge>
                   ))}
                 </div>
               )}

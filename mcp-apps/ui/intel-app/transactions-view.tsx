@@ -3,7 +3,7 @@ import { Badge } from "../components/ui/badge";
 import { useCallTool } from "../shared/use-call-tool";
 import { TeamLogo } from "../shared/team-logo";
 import { Button } from "../components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/shared/icons";
 
 interface Transaction {
   player: string;

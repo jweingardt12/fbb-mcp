@@ -1,6 +1,6 @@
 import { Button } from "../components/ui/button";
 import { useCallTool } from "./use-call-tool";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw } from "@/shared/icons";
 
 interface RefreshButtonProps {
   app: any;

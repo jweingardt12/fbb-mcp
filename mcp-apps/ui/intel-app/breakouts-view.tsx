@@ -2,7 +2,8 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from ".
 import { Badge } from "../components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useCallTool } from "../shared/use-call-tool";
-import { TrendingUp, TrendingDown, Loader2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Loader2 } from "@/shared/icons";
+import { formatFixed } from "../shared/number-format";
 
 interface Candidate {
   name: string;
@@ -72,10 +73,10 @@ export function BreakoutsView({ data, app, navigate }: { data: BreakoutsData; ap
               return (
                 <TableRow key={c.name + "-" + i} className={i < 3 ? (isBreakouts ? "bg-green-500/5" : "bg-red-500/5") : ""}>
                   <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell className="text-right font-mono text-xs">{c.woba.toFixed(3)}</TableCell>
-                  <TableCell className="text-right font-mono text-xs">{c.xwoba.toFixed(3)}</TableCell>
+                  <TableCell className="text-right font-mono text-xs">{formatFixed(c.woba, 3, "0.000")}</TableCell>
+                  <TableCell className="text-right font-mono text-xs">{formatFixed(c.xwoba, 3, "0.000")}</TableCell>
                   <TableCell className={"text-right font-mono text-xs font-semibold " + diffColor}>
-                    {(isBreakouts ? "+" : "") + c.diff.toFixed(3)}
+                    {(isBreakouts ? "+" : "") + formatFixed(c.diff, 3, "0.000")}
                   </TableCell>
                   <TableCell className="text-right font-mono text-xs">{c.pa}</TableCell>
                 </TableRow>

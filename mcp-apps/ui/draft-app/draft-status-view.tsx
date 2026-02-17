@@ -107,8 +107,8 @@ export function DraftStatusView({ data }: { data: DraftStatusData }) {
       {/* Current Round - Hero */}
       <Card className="bg-primary/5 border-primary/30">
         <CardContent className="p-6 text-center">
-          <p className="text-sm text-muted-foreground mb-1">Current Round</p>
-          <p className="text-5xl font-bold font-mono text-primary">{data.current_round}</p>
+          <p className="app-kicker mb-1">Current Round</p>
+          <p className="text-4xl sm:text-5xl font-bold font-mono text-primary">{data.current_round}</p>
           <p className="text-xs text-muted-foreground mt-1">{data.total_picks} total picks made</p>
         </CardContent>
       </Card>
@@ -142,9 +142,9 @@ export function DraftStatusView({ data }: { data: DraftStatusData }) {
           <CardTitle className="text-base">Roster Composition</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             {rosterData.length > 0 && (
-              <div className="w-24 h-24 flex-shrink-0">
+              <div className="w-24 h-24 flex-shrink-0 mx-auto sm:mx-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -169,20 +169,20 @@ export function DraftStatusView({ data }: { data: DraftStatusData }) {
               </div>
             )}
             <div className="flex-1 space-y-3">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="app-stat-grid-3">
                 <div className="text-center">
-                  <p className="text-2xl font-bold font-mono">{myPicks}</p>
+                  <p className="text-xl sm:text-2xl font-bold font-mono">{myPicks}</p>
                   <p className="text-xs text-muted-foreground">Total</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold font-mono text-blue-500">{hitters}</p>
+                  <p className="text-xl sm:text-2xl font-bold font-mono text-blue-500">{hitters}</p>
                   <div className="flex items-center justify-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-blue-500" />
                     <p className="text-xs text-muted-foreground">Hitters</p>
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold font-mono text-orange-500">{pitchers}</p>
+                  <p className="text-xl sm:text-2xl font-bold font-mono text-orange-500">{pitchers}</p>
                   <div className="flex items-center justify-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-orange-500" />
                     <p className="text-xs text-muted-foreground">Pitchers</p>

@@ -3,11 +3,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card"
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend } from "recharts";
-import { ArrowRightLeft, TrendingUp, TrendingDown, Users, Loader2, Check } from "lucide-react";
+import { ArrowRightLeft, TrendingUp, TrendingDown, Users, Loader2, Check } from "@/shared/icons";
 import { useCallTool } from "../shared/use-call-tool";
 import { ZScoreBadge, ZScoreExplainer } from "../shared/z-score";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
+import { formatFixed, toFiniteNumber } from "../shared/number-format";
 
 interface ComparePlayer {
   name: string;
@@ -30,10 +31,10 @@ interface RosterPlayer {
 }
 
 function winnerBg(z: number): string {
-  if (z >= 2.0) return "bg-green-500/10";
-  if (z >= 1.0) return "bg-blue-500/10";
-  if (z >= 0) return "bg-yellow-500/10";
-  return "bg-red-400/10";
+  if (z >= 2.0) return "bg-sem-success-subtle";
+  if (z >= 1.0) return "bg-sem-info-subtle";
+  if (z >= 0) return "bg-sem-warning-subtle";
+  return "bg-sem-risk-subtle";
 }
 
 function noop() {}
@@ -185,8 +186,8 @@ export function CompareView({ data, app, navigate }: { data: CompareData; app?: 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-base"><PlayerName name={data.player1.name} app={app} navigate={navigate} context="default" /></CardTitle>
+            <div className="flex items-center gap-2 flex-wrap">
+              <CardTitle className="text-base break-words"><PlayerName name={data.player1.name} app={app} navigate={navigate} context="default" /></CardTitle>
               {data.player1.intel && <IntelBadge intel={data.player1.intel} size="sm" />}
             </div>
           </CardHeader>
@@ -196,8 +197,8 @@ export function CompareView({ data, app, navigate }: { data: CompareData; app?: 
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-base"><PlayerName name={data.player2.name} app={app} navigate={navigate} context="default" /></CardTitle>
+            <div className="flex items-center gap-2 flex-wrap">
+              <CardTitle className="text-base break-words"><PlayerName name={data.player2.name} app={app} navigate={navigate} context="default" /></CardTitle>
               {data.player2.intel && <IntelBadge intel={data.player2.intel} size="sm" />}
             </div>
           </CardHeader>
@@ -222,32 +223,34 @@ export function CompareView({ data, app, navigate }: { data: CompareData; app?: 
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-2">
-        <div className="text-xs font-medium text-muted-foreground">Category</div>
-        <div className="text-xs font-medium text-right">{data.player1.name}</div>
-        <div className="text-xs font-medium text-right">{data.player2.name}</div>
-        {allCats.map((cat) => {
-          const v1 = (data.player1.categories || {})[cat] || 0;
-          const v2 = (data.player2.categories || {})[cat] || 0;
-          const p1Wins = v1 > v2;
-          const p2Wins = v2 > v1;
-          const rowBg = (p1Wins || p2Wins) ? winnerBg(p1Wins ? v1 : v2) : "";
-          return (
-            <div key={cat} className="contents">
-              <div className={"text-sm rounded-l px-1 " + rowBg}>{cat}</div>
-              <div className={"text-sm text-right font-mono flex items-center justify-end gap-1 px-1 " + rowBg + " " + (p1Wins ? "font-bold text-primary" : "")}>
-                {v1.toFixed(2)}
-                {p1Wins && <TrendingUp size={12} className="text-primary" />}
-                {p2Wins && <TrendingDown size={12} className="text-muted-foreground" />}
+      <div className="mcp-app-scroll-x">
+        <div className="grid grid-cols-[minmax(132px,1fr)_minmax(80px,0.8fr)_minmax(80px,0.8fr)] sm:grid-cols-3 gap-2">
+          <div className="text-xs font-medium text-muted-foreground">Category</div>
+          <div className="text-xs font-medium text-right truncate">{data.player1.name}</div>
+          <div className="text-xs font-medium text-right truncate">{data.player2.name}</div>
+          {allCats.map((cat) => {
+            const v1 = toFiniteNumber((data.player1.categories || {})[cat], 0);
+            const v2 = toFiniteNumber((data.player2.categories || {})[cat], 0);
+            const p1Wins = v1 > v2;
+            const p2Wins = v2 > v1;
+            const rowBg = (p1Wins || p2Wins) ? winnerBg(p1Wins ? v1 : v2) : "";
+            return (
+              <div key={cat} className="contents">
+                <div className={"text-sm rounded-l px-1 " + rowBg}>{cat}</div>
+                <div className={"text-sm text-right font-mono flex items-center justify-end gap-1 px-1 " + rowBg + " " + (p1Wins ? "font-bold text-primary" : "")}>
+                  {formatFixed(v1, 2, "0.00")}
+                  {p1Wins && <TrendingUp size={12} className="text-primary" />}
+                  {p2Wins && <TrendingDown size={12} className="text-muted-foreground" />}
+                </div>
+                <div className={"text-sm text-right font-mono flex items-center justify-end gap-1 rounded-r px-1 " + rowBg + " " + (p2Wins ? "font-bold text-primary" : "")}>
+                  {formatFixed(v2, 2, "0.00")}
+                  {p2Wins && <TrendingUp size={12} className="text-primary" />}
+                  {p1Wins && <TrendingDown size={12} className="text-muted-foreground" />}
+                </div>
               </div>
-              <div className={"text-sm text-right font-mono flex items-center justify-end gap-1 rounded-r px-1 " + rowBg + " " + (p2Wins ? "font-bold text-primary" : "")}>
-                {v2.toFixed(2)}
-                {p2Wins && <TrendingUp size={12} className="text-primary" />}
-                {p1Wins && <TrendingDown size={12} className="text-muted-foreground" />}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

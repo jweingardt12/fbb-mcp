@@ -1,5 +1,5 @@
 import * as React from "react";
-import { MessageSquare, ExternalLink, Search, FileText } from "lucide-react";
+import { MessageSquare, ExternalLink, Search, FileText } from "@/shared/icons";
 import {
   DropdownMenu,
   DropdownMenuTrigger,

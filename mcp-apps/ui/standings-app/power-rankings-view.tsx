@@ -1,5 +1,6 @@
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { Badge } from "../components/ui/badge";
+import { formatFixed } from "../shared/number-format";
 
 interface PowerRankingTeam {
   rank: number;
@@ -16,9 +17,9 @@ interface PowerRankingTeam {
 }
 
 function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <Badge className="text-xs bg-yellow-600 text-white">{rank}</Badge>;
-  if (rank === 2) return <Badge className="text-xs bg-slate-500 text-white">{rank}</Badge>;
-  if (rank === 3) return <Badge className="text-xs bg-amber-700 text-white">{rank}</Badge>;
+  if (rank === 1) return <Badge className="text-xs bg-sem-warning">{rank}</Badge>;
+  if (rank === 2) return <Badge className="text-xs bg-sem-neutral">{rank}</Badge>;
+  if (rank === 3) return <Badge className="text-xs bg-sem-info">{rank}</Badge>;
   return <Badge variant="secondary" className="text-xs">{rank}</Badge>;
 }
 
@@ -28,7 +29,7 @@ function OwnershipBar({ pct }: { pct: number }) {
       <div className="flex h-2 w-16 rounded-full overflow-hidden bg-muted">
         <div className="bg-blue-500 rounded-full" style={{ width: Math.min(100, pct) + "%" }} />
       </div>
-      <span className="font-mono text-xs w-10">{pct.toFixed(1)}%</span>
+      <span className="font-mono text-xs w-10">{formatFixed(pct, 1, "0.0")}%</span>
     </div>
   );
 }

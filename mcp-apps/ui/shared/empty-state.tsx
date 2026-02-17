@@ -1,9 +1,9 @@
 import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
-import type { LucideIcon } from "lucide-react";
+import type { AppIcon } from "@/shared/icons";
 
 interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: AppIcon;
   title: string;
   description?: string;
   action?: { label: string; onClick: () => void };

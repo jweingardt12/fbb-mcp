@@ -3,7 +3,8 @@ import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
-import { Trophy, TrendingUp, Target, Award } from "lucide-react";
+import { Trophy, TrendingUp, Target, Award } from "@/shared/icons";
+import { formatFixed } from "../shared/number-format";
 
 interface CareerEntry {
   manager: string;
@@ -40,7 +41,7 @@ export function RecordBookView({ data }: { data: RecordBookData }) {
       <h2 className="text-lg font-semibold">Record Book</h2>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex-wrap">
+        <TabsList behavior="wrap">
           <TabsTrigger value="champions">
             <span className="flex items-center gap-1"><Trophy className="h-3.5 w-3.5" />Champions</span>
           </TabsTrigger>
@@ -100,7 +101,7 @@ export function RecordBookView({ data }: { data: RecordBookData }) {
                   <TableCell className="text-center font-mono">{c.wins}</TableCell>
                   <TableCell className="text-center font-mono">{c.losses}</TableCell>
                   <TableCell className="hidden sm:table-cell text-center font-mono">{c.ties}</TableCell>
-                  <TableCell className="text-right font-mono">{c.win_pct.toFixed(1)}%</TableCell>
+                  <TableCell className="text-right font-mono">{formatFixed(c.win_pct, 1, "0.0")}%</TableCell>
                   <TableCell className="hidden sm:table-cell text-center font-mono">{c.playoffs}</TableCell>
                   <TableCell className="hidden sm:table-cell text-center">
                     <Badge variant="secondary" className="text-[10px]">#{c.best_finish} ({c.best_year})</Badge>

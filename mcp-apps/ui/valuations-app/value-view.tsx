@@ -1,11 +1,12 @@
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { BarChart3 } from "lucide-react";
+import { BarChart3 } from "@/shared/icons";
 import { ZScoreBadge, ZScoreExplainer, tierTextColor } from "../shared/z-score";
 import { IntelBadge } from "../shared/intel-badge";
 import { IntelPanel } from "../shared/intel-panel";
 import { PlayerName } from "../shared/player-name";
+import { formatFixed, toFiniteNumber } from "../shared/number-format";
 
 interface ValueCategory {
   category: string;
@@ -25,7 +26,7 @@ interface ValueData {
 
 function formatRawStat(val: number | null): string {
   if (val == null) return "-";
-  if (val >= 0 && val < 1 && val !== 0) return val.toFixed(3).replace(/^0/, "");
+  if (val >= 0 && val < 1 && val !== 0) return formatFixed(val, 3, "0.000").replace(/^0/, "");
   return String(val);
 }
 
@@ -86,7 +87,7 @@ export function ValueView({ data, app, navigate }: { data: ValueData; app?: any;
                 )}
               </div>
               <span className={"font-mono text-sm font-medium " + tierTextColor(c.z_score)}>
-                {c.z_score >= 0 ? "+" : ""}{c.z_score.toFixed(2)}
+                {c.z_score >= 0 ? "+" : ""}{formatFixed(toFiniteNumber(c.z_score, 0), 2, "0.00")}
               </span>
             </div>
           );

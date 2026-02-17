@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from "react";
 import { fetchViewData, createLiveApp } from "./live-data";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 // Lazy-load all view components
 // Standings
@@ -217,12 +221,9 @@ class ViewErrorBoundary extends React.Component<
           <pre className="text-[11px] text-muted-foreground bg-muted rounded p-3 max-w-full overflow-x-auto mb-4 text-left">
             {this.state.error.stack}
           </pre>
-          <button
-            onClick={() => this.setState({ error: null })}
-            className="px-4 py-2 text-sm rounded-md bg-primary text-primary-foreground border-none cursor-pointer"
-          >
+          <Button size="sm" onClick={() => this.setState({ error: null })}>
             Retry
-          </button>
+          </Button>
         </div>
       );
     }
@@ -245,28 +246,29 @@ function DataSourceToggle({ dataSource, setDataSource, className }: {
   className?: string;
 }) {
   return (
-    <div className={"flex items-center gap-0 " + (className || "")}>
-      <button
+    <div className={cn("inline-flex items-center rounded-lg border border-border bg-muted/70 p-0.5", className)}>
+      <Button
         onClick={() => setDataSource("mock")}
-        className={"px-3 py-1.5 text-xs font-medium rounded-l-md border cursor-pointer transition-colors "
-          + (dataSource === "mock"
-            ? "bg-blue-500 text-white border-blue-500"
-            : "bg-white/10 text-white/70 border-white/20 hover:bg-white/20")}
-      >Mock</button>
-      <button
+        variant={dataSource === "mock" ? "secondary" : "ghost"}
+        size="sm"
+        className="h-7 rounded-md px-2.5 text-[11px] font-semibold"
+      >
+        Mock
+      </Button>
+      <Button
         onClick={() => setDataSource("live")}
-        className={"px-3 py-1.5 text-xs font-medium rounded-r-md border border-l-0 cursor-pointer transition-colors "
-          + (dataSource === "live"
-            ? "bg-blue-500 text-white border-blue-500"
-            : "bg-white/10 text-white/70 border-white/20 hover:bg-white/20")}
-      >Live</button>
+        variant={dataSource === "live" ? "secondary" : "ghost"}
+        size="sm"
+        className="h-7 rounded-md px-2.5 text-[11px] font-semibold"
+      >
+        Live
+      </Button>
     </div>
   );
 }
 
 function PreviewApp() {
   const [activeView, setActiveView] = useState("matchup-detail");
-  const [darkMode, setDarkMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [dataSource, setDataSource] = useState<"mock" | "live">("mock");
   const [liveData, setLiveData] = useState<any>(null);
@@ -310,6 +312,12 @@ function PreviewApp() {
     }
   }, [dataSource, mockData]);
 
+  // Preview should stay in a consistent light-neutral Nova baseline.
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.style.colorScheme = "light";
+  }, []);
+
   useEffect(() => {
     if (dataSource !== "live") return;
     setLiveLoading(true);
@@ -332,12 +340,6 @@ function PreviewApp() {
 
   const currentData = dataSource === "live" ? liveData : (mockData ? mockData[activeView] : null);
   const handleNavigate = useCallback((newData: any) => setLiveData(newData), []);
-
-  const toggleDarkMode = () => {
-    const next = !darkMode;
-    setDarkMode(next);
-    document.documentElement.style.colorScheme = next ? "dark" : "light";
-  };
 
   const toggleGroup = (groupName: string) => {
     setCollapsedGroups(prev => {
@@ -365,32 +367,30 @@ function PreviewApp() {
   };
 
   return (
-    <div className="flex h-[100dvh] -m-3 overflow-hidden">
+    <div className="preview-shell flex h-[100dvh] -m-3 overflow-hidden bg-background text-foreground">
       {/* Mobile top bar */}
       <div
-        className="sm:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-3 py-2 bg-[#0f1419]"
+        className="sm:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between gap-2 border-b border-border bg-card/95 px-3 py-2 supports-backdrop-filter:backdrop-blur-md"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="border-none bg-transparent cursor-pointer text-lg text-white/80 p-1 flex-shrink-0">
+          <Button variant="ghost" size="icon-sm" className="h-7 w-7" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? "\u2715" : "\u2630"}
-          </button>
-          <span className="text-[13px] font-semibold text-white/90 truncate">
-            {activeGroup ? activeGroup.name : ""} / {view ? view.label : ""}
-          </span>
+          </Button>
+          <div className="min-w-0">
+            <p className="app-kicker leading-none">{activeGroup ? activeGroup.name : "Preview"}</p>
+            <p className="text-sm font-semibold truncate">{view ? view.label : "Select a view"}</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <DataSourceToggle dataSource={dataSource} setDataSource={setDataSource} />
-          <button onClick={toggleDarkMode} className="border border-white/20 rounded-md bg-white/10 cursor-pointer px-2 py-1 text-xs text-white/80">
-            {darkMode ? "\u2600" : "\u263E"}
-          </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <DataSourceToggle dataSource={dataSource} setDataSource={setDataSource} className="hidden min-[420px]:inline-flex" />
         </div>
       </div>
 
       {/* Mobile sidebar overlay backdrop */}
       {sidebarOpen && (
         <div
-          className="sm:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
+          className="sm:hidden fixed inset-0 z-40 bg-background/70 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -398,7 +398,7 @@ function PreviewApp() {
       {/* Sidebar */}
       <nav
         className={
-          "w-64 flex-shrink-0 bg-[#0f1419] flex flex-col z-50 "
+          "w-72 max-w-[86vw] flex-shrink-0 border-r border-border bg-card/95 supports-backdrop-filter:backdrop-blur-sm flex flex-col z-50 "
           + "sm:relative sm:block sm:h-full "
           + (sidebarOpen
             ? "fixed top-0 left-0 bottom-0"
@@ -407,21 +407,19 @@ function PreviewApp() {
         style={sidebarOpen ? { paddingTop: "env(safe-area-inset-top)" } : undefined}
       >
         {/* Sidebar header — sticky */}
-        <div className="flex-shrink-0 px-4 pt-4 pb-3 border-b border-white/10">
+        <div className="flex-shrink-0 border-b border-border p-3 sm:p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <button onClick={() => setSidebarOpen(false)} className="sm:hidden border-none bg-transparent cursor-pointer text-lg text-white/80 p-0">
+              <Button variant="ghost" size="icon-sm" className="sm:hidden h-7 w-7" onClick={() => setSidebarOpen(false)}>
                 {"\u2715"}
-              </button>
-              <h1 className="text-sm font-bold text-white m-0 tracking-wide">
-                Fantasy Preview
-              </h1>
+              </Button>
+              <h1 className="text-sm font-semibold tracking-wide">Fantasy Preview</h1>
             </div>
-            <button onClick={toggleDarkMode} className="border border-white/20 rounded-md bg-white/10 cursor-pointer px-2 py-1 text-xs text-white/80 hover:bg-white/20 transition-colors">
-              {darkMode ? "\u2600" : "\u263E"}
-            </button>
+            <Badge variant="outline" className="text-[10px]">{allViews.length} views</Badge>
           </div>
-          <DataSourceToggle dataSource={dataSource} setDataSource={setDataSource} />
+          <div className="flex items-center gap-2">
+            <DataSourceToggle dataSource={dataSource} setDataSource={setDataSource} className="flex-1 justify-start" />
+          </div>
         </div>
 
         {/* Scrollable groups */}
@@ -437,19 +435,20 @@ function PreviewApp() {
               <div key={group.name} className="mb-1">
                 <button
                   onClick={() => toggleGroup(group.name)}
-                  className={
-                    "w-full flex items-center justify-between px-3 py-2 rounded-md text-left border-none cursor-pointer transition-colors "
-                    + (isActiveGroup
-                      ? "bg-white/10 text-white"
-                      : "bg-transparent text-white/60 hover:bg-white/5 hover:text-white/80")
-                  }
+                  className={cn(
+                    "w-full flex items-center justify-between px-3 py-2 rounded-md text-left border-none cursor-pointer transition-colors",
+                    "text-xs font-semibold uppercase tracking-wide",
+                    isActiveGroup
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                  )}
                 >
-                  <span className="text-xs font-semibold uppercase tracking-wider">{group.name}</span>
+                  <span>{group.name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] bg-white/10 rounded-full px-1.5 py-px font-medium text-white/50">
+                    <span className="text-[10px] bg-muted text-muted-foreground rounded-full px-1.5 py-px font-medium">
                       {group.views.length}
                     </span>
-                    <span className={"text-[10px] text-white/40 transition-transform duration-150 " + (isCollapsed ? "" : "rotate-90")}>
+                    <span className={cn("text-[10px] text-muted-foreground transition-transform duration-150", isCollapsed ? "" : "rotate-90")}>
                       {"\u25B6"}
                     </span>
                   </div>
@@ -461,12 +460,12 @@ function PreviewApp() {
                         key={v.id}
                         ref={activeView === v.id ? activeItemRef : undefined}
                         onClick={() => handleSelectView(v.id)}
-                        className={
-                          "block w-full text-left pl-4 pr-3 py-2 rounded-r-md text-sm transition-colors mb-px border-none cursor-pointer "
-                          + (activeView === v.id
-                            ? "bg-blue-500/10 text-blue-400 font-semibold border-l-2 border-l-blue-400"
-                            : "text-white/70 hover:bg-white/5 hover:text-white/90 bg-transparent border-l-2 border-l-transparent")
-                        }
+                        className={cn(
+                          "block w-full text-left pl-4 pr-3 py-2 rounded-r-md text-sm transition-colors mb-px border-none cursor-pointer border-l-2",
+                          activeView === v.id
+                            ? "bg-primary/10 text-primary font-semibold border-l-primary"
+                            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground bg-transparent border-l-transparent"
+                        )}
                         style={{ borderLeftStyle: "solid" }}
                       >
                         {v.label}
@@ -477,33 +476,37 @@ function PreviewApp() {
               </div>
             );
           })}
-          <div className="text-[10px] text-white/30 mt-3 mb-2 text-center">
-            {allViews.length} views
-          </div>
         </div>
       </nav>
 
       {/* Main content */}
       <main
-        className="flex-1 min-w-0 overflow-y-auto overscroll-contain bg-background h-full pt-[env(safe-area-inset-top)]"
+        className="flex-1 min-w-0 overflow-y-auto overscroll-contain bg-[color:var(--color-surface-2)] h-full pt-[env(safe-area-inset-top)]"
         style={{ WebkitOverflowScrolling: "touch" } as any}
       >
         <div className="p-4 sm:p-6 pt-14 sm:pt-6">
-          <div className="max-w-3xl mx-auto">
-            {/* Breadcrumb */}
-            <div className="text-[11px] text-muted-foreground mb-3 flex items-center gap-1">
-              {activeGroup && <span>{activeGroup.name}</span>}
-              {activeGroup && <span className="opacity-50">/</span>}
-              {view && <span className="font-medium">{view.label}</span>}
-            </div>
+          <div className="max-w-4xl mx-auto">
+            <Card size="sm" className="mb-4">
+              <CardContent className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="app-kicker">{activeGroup ? activeGroup.name : "Preview"}</p>
+                  <h2 className="truncate text-base font-semibold">{view ? view.label : "Select a view"}</h2>
+                </div>
+                <div className="hidden sm:flex items-center gap-2">
+                  <DataSourceToggle dataSource={dataSource} setDataSource={setDataSource} />
+                </div>
+              </CardContent>
+            </Card>
 
             {dataSource === "live" && liveLoading ? (
               <LoadingSpinner />
             ) : dataSource === "live" && liveError ? (
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                <p className="text-destructive text-sm font-medium">Failed to load live data</p>
-                <p className="text-muted-foreground text-xs mt-1">{liveError}</p>
-              </div>
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                  <p className="text-destructive text-sm font-medium">Failed to load live data</p>
+                  <p className="text-muted-foreground text-xs mt-1">{liveError}</p>
+                </CardContent>
+              </Card>
             ) : dataSource === "mock" && !mockData ? (
               <LoadingSpinner />
             ) : view && currentData ? (
@@ -513,14 +516,16 @@ function PreviewApp() {
                 </Suspense>
               </ViewErrorBoundary>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                <p className="text-muted-foreground text-sm">
-                  {dataSource === "live" ? "No API mapping for this view." : "No mock data for this view yet."}
-                </p>
-                <p className="text-muted-foreground text-xs mt-1">
-                  {view ? "View: " + view.id : "Select a view from the sidebar."}
-                </p>
-              </div>
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                  <p className="text-muted-foreground text-sm">
+                    {dataSource === "live" ? "No API mapping for this view." : "No mock data for this view yet."}
+                  </p>
+                  <p className="text-muted-foreground text-xs mt-1">
+                    {view ? "View: " + view.id : "Select a view from the sidebar."}
+                  </p>
+                </CardContent>
+              </Card>
             )}
           </div>
         </div>
@@ -532,7 +537,11 @@ function PreviewApp() {
 function ViewRenderer({ view, data, app, navigate }: { view: ViewDef; data: any; app: any; navigate: (d: any) => void }) {
   const Component = view.component;
   const extraProps = { ...(view.props || {}), app, navigate };
-  return <Component data={data} {...extraProps} />;
+  return (
+    <div className="mcp-app-root">
+      <Component data={data} {...extraProps} />
+    </div>
+  );
 }
 
 import { createRoot } from "react-dom/client";

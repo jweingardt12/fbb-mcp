@@ -3,7 +3,7 @@ import { IntelPanel } from "../shared/intel-panel";
 import { IntelBadge, type PlayerIntel } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
 import { Button } from "../components/ui/button";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check } from "@/shared/icons";
 
 // Data comes from /api/intel/player — it IS the PlayerIntel object with a name
 interface PlayerReportData extends PlayerIntel {

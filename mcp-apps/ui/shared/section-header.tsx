@@ -1,9 +1,9 @@
 import { cn } from "../lib/utils";
 import { Badge } from "../components/ui/badge";
-import type { LucideIcon } from "lucide-react";
+import type { AppIcon } from "@/shared/icons";
 
 interface SectionHeaderProps {
-  icon?: LucideIcon;
+  icon?: AppIcon;
   title: string;
   count?: number;
   children?: React.ReactNode;

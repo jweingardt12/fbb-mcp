@@ -7,7 +7,7 @@ import { useCallTool } from "../shared/use-call-tool";
 import { PlayerName } from "../shared/player-name";
 import { EmptyState } from "../shared/empty-state";
 import { RefreshButton } from "../shared/refresh-button";
-import { ArrowRightLeft, Check, X, Loader2, Inbox } from "lucide-react";
+import { ArrowRightLeft, Check, X, Loader2, Inbox } from "@/shared/icons";
 
 interface TradePlayer {
   name: string;
@@ -88,7 +88,7 @@ export function PendingTradesView({ data, app, navigate }: { data: PendingTrades
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">{trade.trader_team_name || "Trader"} sends:</p>
                 {(trade.trader_players || []).map((p, i) => (

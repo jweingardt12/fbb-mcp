@@ -1,6 +1,7 @@
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { Badge } from "../components/ui/badge";
 import { TeamLogo } from "../shared/team-logo";
+import { formatFixed } from "../shared/number-format";
 
 interface PitcherMatchupEntry {
   name: string;
@@ -26,11 +27,11 @@ interface PitcherMatchupData {
 
 function gradeColor(grade: string): string {
   switch (grade) {
-    case "A": return "bg-green-600 text-white";
-    case "B": return "bg-blue-600 text-white";
-    case "C": return "bg-yellow-600 text-white";
-    case "D": return "bg-orange-600 text-white";
-    case "F": return "bg-red-600 text-white";
+    case "A": return "bg-sem-success";
+    case "B": return "bg-sem-info";
+    case "C": return "bg-sem-warning";
+    case "D": return "bg-sem-warning";
+    case "F": return "bg-sem-risk";
     default: return "";
   }
 }
@@ -91,13 +92,13 @@ export function PitcherMatchupView({ data }: { data: PitcherMatchupData }) {
                 </span>
               </TableCell>
               <TableCell className="hidden sm:table-cell text-right font-mono text-xs">
-                {typeof p.opp_avg === "number" ? p.opp_avg.toFixed(3) : "-"}
+                {typeof p.opp_avg === "number" ? formatFixed(p.opp_avg, 3, "-") : "-"}
               </TableCell>
               <TableCell className="hidden sm:table-cell text-right font-mono text-xs">
-                {typeof p.opp_obp === "number" ? p.opp_obp.toFixed(3) : "-"}
+                {typeof p.opp_obp === "number" ? formatFixed(p.opp_obp, 3, "-") : "-"}
               </TableCell>
               <TableCell className="hidden sm:table-cell text-right font-mono text-xs">
-                {typeof p.opp_k_pct === "number" ? (p.opp_k_pct * 100).toFixed(1) + "%" : "-"}
+                {typeof p.opp_k_pct === "number" ? formatFixed(p.opp_k_pct * 100, 1, "-") + "%" : "-"}
               </TableCell>
               <TableCell className="text-center">
                 <Badge className={"text-xs " + gradeColor(p.matchup_grade)}>{p.matchup_grade}</Badge>

@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useCallTool } from "../shared/use-call-tool";
 import { PlayerName } from "../shared/player-name";
 import { mlbHeadshotUrl } from "../shared/mlb-images";
-import { UserPlus, Loader2, ShieldCheck } from "lucide-react";
+import { UserPlus, Loader2, ShieldCheck } from "@/shared/icons";
 
 interface CloserPlayer {
   name: string;

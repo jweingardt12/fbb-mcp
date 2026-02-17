@@ -37,7 +37,7 @@ export function InfoView({ data }: { data: LeagueInfo }) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {rows.map(([label, value]) => (
               <div key={label}>
                 <p className="text-xs text-muted-foreground">{label}</p>

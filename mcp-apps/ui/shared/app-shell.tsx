@@ -2,7 +2,8 @@ import { useState, useCallback, useEffect, useRef, type ReactNode } from "react"
 import { useApp, useHostStyles } from "@modelcontextprotocol/ext-apps/react";
 import { Skeleton } from "../components/ui/skeleton";
 import { Button } from "../components/ui/button";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2 } from "@/shared/icons";
+import { useHostLayout } from "./use-host-layout";
 
 var TOOL_LABELS: Record<string, string> = {
   "yahoo_roster": "roster",
@@ -55,11 +56,11 @@ interface AppShellProps {
 export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
   var [data, setData] = useState<any>(null);
   var [toolName, setToolName] = useState<string>("");
-  var [lastAction, setLastAction] = useState<string | null>(null);
   var [timedOut, setTimedOut] = useState(false);
   var [cancelled, setCancelled] = useState(false);
   var [errorMsg, setErrorMsg] = useState<string | null>(null);
   var [displayMode, setDisplayMode] = useState("inline");
+  var [hostContext, setHostContext] = useState<any>(null);
   var dataRef = useRef(data);
 
   useEffect(function () {
@@ -68,6 +69,9 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
 
   var { app, error } = useApp({
     appInfo: { name, version },
+    capabilities: {
+      availableDisplayModes: ["inline", "fullscreen", "pip"],
+    },
     onAppCreated: useCallback(function (app: any) {
       app.ontoolresult = function (result: any) {
         var sc = result.structuredContent;
@@ -95,7 +99,6 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
             context.action_taken = sc.type;
             context.success = sc.success;
             context.suggestions = ["View updated roster", "Check category impact", "Review lineup"];
-            setLastAction(sc.type);
           }
           var needsAttention: string[] = [];
           if (sc.active_off_day && sc.active_off_day.length > 0) {
@@ -133,6 +136,9 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
       };
 
       app.onhostcontextchanged = function (ctx: any) {
+        setHostContext(function (prev: any) {
+          return { ...(prev || {}), ...(ctx || {}) };
+        });
         if (ctx && ctx.displayMode) {
           setDisplayMode(ctx.displayMode);
         }
@@ -140,7 +146,19 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
     }, []),
   });
 
-  useHostStyles(app, app?.getHostContext());
+  useEffect(function () {
+    if (!app || !app.getHostContext) return;
+    var initial = app.getHostContext();
+    if (initial) {
+      setHostContext(initial);
+      if (initial.displayMode) {
+        setDisplayMode(initial.displayMode);
+      }
+    }
+  }, [app]);
+
+  useHostStyles(app, hostContext || app?.getHostContext?.());
+  var layout = useHostLayout(hostContext || app?.getHostContext?.());
 
   var navigate = useCallback(function (newData: any) {
     if (newData) {
@@ -162,7 +180,7 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
 
   if (error) {
     return (
-      <div className="p-4 space-y-3">
+      <div className="mcp-app-root mcp-app-content">
         <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4">
           <h3 className="text-sm font-medium text-destructive">Connection Error</h3>
           <p className="text-xs text-muted-foreground mt-1">{String(error)}</p>
@@ -176,7 +194,7 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
 
   if (!app) {
     return (
-      <div className="space-y-3 p-4">
+      <div className="mcp-app-root mcp-app-content">
         <Skeleton className="h-6 w-32" />
         <Skeleton className="h-4 w-48" />
         <div className="space-y-2 mt-4">
@@ -193,52 +211,73 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
   if (!data) {
     if (cancelled) {
       return (
-        <div className="flex flex-col items-center justify-center p-8 text-center">
-          <p className="text-sm text-muted-foreground">Tool call was cancelled.</p>
-          <p className="text-xs text-muted-foreground mt-1">Ask Claude to try again.</p>
+        <div className="mcp-app-root">
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <p className="text-sm text-muted-foreground">Tool call was cancelled.</p>
+            <p className="text-xs text-muted-foreground mt-1">Ask Claude to try again.</p>
+          </div>
         </div>
       );
     }
 
     if (errorMsg) {
       return (
-        <div className="flex flex-col items-center justify-center p-8 text-center">
-          <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 max-w-md">
-            <h3 className="text-sm font-medium text-destructive">Something went wrong</h3>
-            <p className="text-xs text-muted-foreground mt-1">{errorMsg}</p>
+        <div className="mcp-app-root">
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 max-w-md">
+              <h3 className="text-sm font-medium text-destructive">Something went wrong</h3>
+              <p className="text-xs text-muted-foreground mt-1">{errorMsg}</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">Ask Claude to try again.</p>
           </div>
-          <p className="text-xs text-muted-foreground mt-3">Ask Claude to try again.</p>
         </div>
       );
     }
 
     var label = toolName ? toolLabel(toolName) : null;
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <div className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-          <span className="text-sm">{label ? "Loading " + label + "..." : "Waiting for data..."}</span>
+      <div className="mcp-app-root">
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+            <span className="text-sm">{label ? "Loading " + label + "..." : "Waiting for data..."}</span>
+          </div>
+          {timedOut && (
+            <p className="text-xs text-muted-foreground mt-3">
+              Taking longer than expected. Make sure a tool has been called.
+            </p>
+          )}
         </div>
-        {timedOut && (
-          <p className="text-xs text-muted-foreground mt-3">
-            Taking longer than expected. Make sure a tool has been called.
-          </p>
-        )}
       </div>
     );
   }
 
+  var rootStyle: Record<string, string> = {
+    "--safe-area-top": layout.safeAreaInsets.top + "px",
+    "--safe-area-right": layout.safeAreaInsets.right + "px",
+    "--safe-area-bottom": layout.safeAreaInsets.bottom + "px",
+    "--safe-area-left": layout.safeAreaInsets.left + "px",
+  };
+
   return (
-    <div style={{ position: "relative", overflow: "hidden" }}>
-      {app.requestDisplayMode && (
-        <div style={{ position: "absolute", top: 8, right: 8, zIndex: 10 }}>
+    <div
+      className={"mcp-app-root mcp-app-content mcp-app-" + layout.widthBucket}
+      data-platform={layout.platform}
+      data-display-mode={layout.displayMode}
+      data-width-bucket={layout.widthBucket}
+      data-touch={layout.touchCapable ? "true" : "false"}
+      style={rootStyle}
+    >
+      {layout.canFullscreen && app.requestDisplayMode && (
+        <div className="mcp-app-shell-controls">
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0"
+            className="h-8 w-8 p-0"
             onClick={function () {
               var newMode = displayMode === "fullscreen" ? "inline" : "fullscreen";
-              app.requestDisplayMode(newMode);
+              if (!layout.availableDisplayModes.includes(newMode as any)) return;
+              app.requestDisplayMode({ mode: newMode }).catch(function () { return undefined; });
             }}
             title={displayMode === "fullscreen" ? "Exit fullscreen" : "Fullscreen"}
           >

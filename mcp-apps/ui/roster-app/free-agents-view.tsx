@@ -11,7 +11,7 @@ import { IntelBadge } from "../shared/intel-badge";
 import { IntelPanel } from "../shared/intel-panel";
 import { PlayerName } from "../shared/player-name";
 import { TrendIndicator } from "../shared/trend-indicator";
-import { Search, UserPlus, Loader2 } from "lucide-react";
+import { Search, UserPlus, Loader2 } from "@/shared/icons";
 
 interface Player {
   name: string;

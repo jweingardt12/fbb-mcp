@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { useCallTool } from "../shared/use-call-tool";
-import { CheckCircle, XCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, ArrowLeft, Loader2 } from "@/shared/icons";
 
 interface ActionData {
   type: string;
