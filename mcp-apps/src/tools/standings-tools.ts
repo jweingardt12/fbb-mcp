@@ -33,6 +33,8 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
           csp: {
             resourceDomains: [
               "img.mlbstatic.com",
+              "www.mlbstatic.com",
+              "s.yimg.com",
               "securea.mlb.com",
             ],
           },

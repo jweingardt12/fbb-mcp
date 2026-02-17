@@ -16,6 +16,7 @@ LEAGUE_ID = os.environ.get("LEAGUE_ID", "")
 TEAM_ID = os.environ.get("TEAM_ID", "")
 GAME_KEY = LEAGUE_ID.split(".")[0] if LEAGUE_ID else ""
 
+
 def get_connection():
     """Get authenticated connection"""
     if not LEAGUE_ID or not TEAM_ID:
@@ -26,7 +27,9 @@ def get_connection():
         sc.refresh_access_token()
     return sc
 
+
 _trend_cache = {"data": None, "time": 0}
+
 
 def _get_trend_lookup():
     """Get a name->trend dict from transaction trends, cached 30 min"""
@@ -75,14 +78,16 @@ def cmd_roster(args, as_json=False):
     if as_json:
         players = []
         for p in roster:
-            players.append({
-                "name": p.get("name", "Unknown"),
-                "player_id": p.get("player_id", ""),
-                "position": p.get("selected_position", {}).get("position", "?"),
-                "eligible_positions": p.get("eligible_positions", []),
-                "status": p.get("status", ""),
-                "mlb_id": get_mlb_id(p.get("name", "")),
-            })
+            players.append(
+                {
+                    "name": p.get("name", "Unknown"),
+                    "player_id": p.get("player_id", ""),
+                    "position": p.get("selected_position", {}).get("position", "?"),
+                    "eligible_positions": p.get("eligible_positions", []),
+                    "status": p.get("status", ""),
+                    "mlb_id": get_mlb_id(p.get("name", "")),
+                }
+            )
         try:
             names = [p.get("name", "") for p in players]
             intel_data = batch_intel(names, include=["statcast", "trends"])
@@ -103,6 +108,7 @@ def cmd_roster(args, as_json=False):
             line += " [" + status + "]"
         print(line)
 
+
 def cmd_free_agents(args, as_json=False):
     """List free agents (B=batters, P=pitchers)"""
     pos_type = args[0] if args else "B"
@@ -116,14 +122,16 @@ def cmd_free_agents(args, as_json=False):
     if as_json:
         players = []
         for p in fa:
-            players.append({
-                "name": p.get("name", "Unknown"),
-                "player_id": p.get("player_id", "?"),
-                "positions": p.get("eligible_positions", ["?"]),
-                "percent_owned": p.get("percent_owned", 0),
-                "status": p.get("status", ""),
-                "mlb_id": get_mlb_id(p.get("name", "")),
-            })
+            players.append(
+                {
+                    "name": p.get("name", "Unknown"),
+                    "player_id": p.get("player_id", "?"),
+                    "positions": p.get("eligible_positions", ["?"]),
+                    "percent_owned": p.get("percent_owned", 0),
+                    "status": p.get("status", ""),
+                    "mlb_id": get_mlb_id(p.get("name", "")),
+                }
+            )
         try:
             names = [p.get("name", "") for p in players]
             intel_data = batch_intel(names, include=["statcast", "trends"])
@@ -151,8 +159,20 @@ def cmd_free_agents(args, as_json=False):
         status = p.get("status", "")
         if status:
             status = " [" + status + "]"
-        line = "  " + name.ljust(25) + " " + positions.ljust(12) + " " + str(pct).rjust(3) + "% owned  (id:" + str(pid) + ")" + status
+        line = (
+            "  "
+            + name.ljust(25)
+            + " "
+            + positions.ljust(12)
+            + " "
+            + str(pct).rjust(3)
+            + "% owned  (id:"
+            + str(pid)
+            + ")"
+            + status
+        )
         print(line)
+
 
 def cmd_standings(args, as_json=False):
     """Show league standings"""
@@ -176,15 +196,17 @@ def cmd_standings(args, as_json=False):
         for i, team in enumerate(standings, 1):
             name = team.get("name", "Unknown")
             meta = team_meta.get(name, {})
-            result.append({
-                "rank": i,
-                "name": name,
-                "wins": team.get("outcome_totals", {}).get("wins", 0),
-                "losses": team.get("outcome_totals", {}).get("losses", 0),
-                "points_for": team.get("points_for", ""),
-                "team_logo": meta.get("team_logo", ""),
-                "manager_image": meta.get("manager_image", ""),
-            })
+            result.append(
+                {
+                    "rank": i,
+                    "name": name,
+                    "wins": team.get("outcome_totals", {}).get("wins", 0),
+                    "losses": team.get("outcome_totals", {}).get("losses", 0),
+                    "points_for": team.get("points_for", ""),
+                    "team_logo": meta.get("team_logo", ""),
+                    "manager_image": meta.get("manager_image", ""),
+                }
+            )
         return {"standings": result}
 
     print("League Standings:")
@@ -193,10 +215,20 @@ def cmd_standings(args, as_json=False):
         wins = team.get("outcome_totals", {}).get("wins", 0)
         losses = team.get("outcome_totals", {}).get("losses", 0)
         pts = team.get("points_for", "")
-        line = "  " + str(i).rjust(2) + ". " + name.ljust(30) + " " + str(wins) + "-" + str(losses)
+        line = (
+            "  "
+            + str(i).rjust(2)
+            + ". "
+            + name.ljust(30)
+            + " "
+            + str(wins)
+            + "-"
+            + str(losses)
+        )
         if pts:
             line += " (" + str(pts) + " pts)"
         print(line)
+
 
 def cmd_info(args, as_json=False):
     """Show league and team info"""
@@ -205,7 +237,11 @@ def cmd_info(args, as_json=False):
     lg = gm.to_league(LEAGUE_ID)
     settings = lg.settings()
     team = lg.to_team(TEAM_ID)
-    team_name = team.team_data.get("name", "Unknown") if hasattr(team, "team_data") else "Unknown"
+    team_name = (
+        team.team_data.get("name", "Unknown")
+        if hasattr(team, "team_data")
+        else "Unknown"
+    )
 
     if as_json:
         return {
@@ -234,6 +270,7 @@ def cmd_info(args, as_json=False):
     print("  Max Weekly Adds: " + str(settings.get("max_weekly_adds", "?")))
     print("  Your Team: " + team_name + " (" + TEAM_ID + ")")
 
+
 def cmd_search(args, as_json=False):
     """Search for a player by name"""
     if not args:
@@ -256,13 +293,15 @@ def cmd_search(args, as_json=False):
     if as_json:
         players = []
         for p in results[:10]:
-            players.append({
-                "name": p.get("name", "Unknown"),
-                "player_id": p.get("player_id", "?"),
-                "positions": p.get("eligible_positions", ["?"]),
-                "percent_owned": p.get("percent_owned", 0),
-                "mlb_id": get_mlb_id(p.get("name", "")),
-            })
+            players.append(
+                {
+                    "name": p.get("name", "Unknown"),
+                    "player_id": p.get("player_id", "?"),
+                    "positions": p.get("eligible_positions", ["?"]),
+                    "percent_owned": p.get("percent_owned", 0),
+                    "mlb_id": get_mlb_id(p.get("name", "")),
+                }
+            )
         try:
             names = [p.get("name", "") for p in players]
             intel_data = batch_intel(names, include=["statcast", "trends"])
@@ -282,10 +321,24 @@ def cmd_search(args, as_json=False):
         positions = ",".join(p.get("eligible_positions", ["?"]))
         pct = p.get("percent_owned", 0)
         pid = p.get("player_id", "?")
-        line = "  " + pname.ljust(25) + " " + positions.ljust(12) + " " + str(pct).rjust(3) + "% owned  (id:" + str(pid) + ")"
+        line = (
+            "  "
+            + pname.ljust(25)
+            + " "
+            + positions.ljust(12)
+            + " "
+            + str(pct).rjust(3)
+            + "% owned  (id:"
+            + str(pid)
+            + ")"
+        )
         print(line)
 
-from yahoo_browser import is_scope_error as _is_scope_error, write_method as _write_method
+
+from yahoo_browser import (
+    is_scope_error as _is_scope_error,
+    write_method as _write_method,
+)
 
 
 def cmd_add(args, as_json=False):
@@ -307,13 +360,21 @@ def cmd_add(args, as_json=False):
             team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
             team.add_player(player_key)
             if as_json:
-                return {"success": True, "player_key": player_key, "message": "Added player " + player_key}
+                return {
+                    "success": True,
+                    "player_key": player_key,
+                    "message": "Added player " + player_key,
+                }
             print("Added player " + player_key)
             return
         except Exception as e:
             if method == "api" or not _is_scope_error(e):
                 if as_json:
-                    return {"success": False, "player_key": player_key, "message": "Error adding player: " + str(e)}
+                    return {
+                        "success": False,
+                        "player_key": player_key,
+                        "message": "Error adding player: " + str(e),
+                    }
                 print("Error adding player: " + str(e))
                 return
             # Fall through to browser
@@ -321,6 +382,7 @@ def cmd_add(args, as_json=False):
     # Browser fallback
     try:
         from yahoo_browser import add_player
+
         result = add_player(player_id)
         if as_json:
             result["player_key"] = player_key
@@ -331,8 +393,13 @@ def cmd_add(args, as_json=False):
             print(result.get("message", "Browser add failed"))
     except Exception as e:
         if as_json:
-            return {"success": False, "player_key": player_key, "message": "Browser fallback error: " + str(e)}
+            return {
+                "success": False,
+                "player_key": player_key,
+                "message": "Browser fallback error: " + str(e),
+            }
         print("Browser fallback error: " + str(e))
+
 
 def cmd_drop(args, as_json=False):
     """Drop a player by player_id"""
@@ -352,30 +419,46 @@ def cmd_drop(args, as_json=False):
             team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
             team.drop_player(player_key)
             if as_json:
-                return {"success": True, "player_key": player_key, "message": "Dropped player " + player_key}
+                return {
+                    "success": True,
+                    "player_key": player_key,
+                    "message": "Dropped player " + player_key,
+                }
             print("Dropped player " + player_key)
             return
         except Exception as e:
             if method == "api" or not _is_scope_error(e):
                 if as_json:
-                    return {"success": False, "player_key": player_key, "message": "Error dropping player: " + str(e)}
+                    return {
+                        "success": False,
+                        "player_key": player_key,
+                        "message": "Error dropping player: " + str(e),
+                    }
                 print("Error dropping player: " + str(e))
                 return
 
     try:
         from yahoo_browser import drop_player
+
         result = drop_player(player_id)
         if as_json:
             result["player_key"] = player_key
             return result
         if result.get("success"):
-            print(result.get("message", "Dropped player " + player_key + " via browser"))
+            print(
+                result.get("message", "Dropped player " + player_key + " via browser")
+            )
         else:
             print(result.get("message", "Browser drop failed"))
     except Exception as e:
         if as_json:
-            return {"success": False, "player_key": player_key, "message": "Browser fallback error: " + str(e)}
+            return {
+                "success": False,
+                "player_key": player_key,
+                "message": "Browser fallback error: " + str(e),
+            }
         print("Browser fallback error: " + str(e))
+
 
 def _extract_team_name(team_data):
     """Extract team name from Yahoo's nested team structure"""
@@ -387,6 +470,7 @@ def _extract_team_name(team_data):
                     return item["name"]
     return "?"
 
+
 def _extract_team_key(team_data):
     """Extract team key from Yahoo's nested team structure"""
     if isinstance(team_data, dict):
@@ -396,6 +480,7 @@ def _extract_team_key(team_data):
                 if isinstance(item, dict) and "team_key" in item:
                     return item.get("team_key", "")
     return ""
+
 
 def _extract_team_meta(team_data):
     """Extract team_logo URL and manager image from lg.teams() entry"""
@@ -409,6 +494,7 @@ def _extract_team_meta(team_data):
         m = managers[0].get("manager", managers[0])
         mgr_image = m.get("image_url", "")
     return logo_url, mgr_image
+
 
 def cmd_matchups(args, as_json=False):
     """Show weekly H2H matchup preview and scores"""
@@ -470,11 +556,15 @@ def cmd_matchups(args, as_json=False):
             status = matchup.get("status", "")
             m1_meta = team_meta.get(name1, {})
             m2_meta = team_meta.get(name2, {})
-            matchup_list.append({
-                "team1": name1, "team2": name2, "status": status,
-                "team1_logo": m1_meta.get("team_logo", ""),
-                "team2_logo": m2_meta.get("team_logo", ""),
-            })
+            matchup_list.append(
+                {
+                    "team1": name1,
+                    "team2": name2,
+                    "status": status,
+                    "team1_logo": m1_meta.get("team_logo", ""),
+                    "team2_logo": m2_meta.get("team_logo", ""),
+                }
+            )
 
         if as_json:
             return {"week": week_label, "matchups": matchup_list}
@@ -489,6 +579,7 @@ def cmd_matchups(args, as_json=False):
         if as_json:
             return {"error": "Error parsing matchups: " + str(e)}
         print("Error parsing matchups: " + str(e))
+
 
 def cmd_scoreboard(args, as_json=False):
     """Show live scoring overview for current week (uses matchups data)"""
@@ -560,11 +651,15 @@ def cmd_scoreboard(args, as_json=False):
             status = matchup.get("status", "")
             m1_meta = team_meta.get(name1, {})
             m2_meta = team_meta.get(name2, {})
-            matchup_list.append({
-                "team1": name1, "team2": name2, "status": status,
-                "team1_logo": m1_meta.get("team_logo", ""),
-                "team2_logo": m2_meta.get("team_logo", ""),
-            })
+            matchup_list.append(
+                {
+                    "team1": name1,
+                    "team2": name2,
+                    "status": status,
+                    "team1_logo": m1_meta.get("team_logo", ""),
+                    "team2_logo": m2_meta.get("team_logo", ""),
+                }
+            )
 
         if as_json:
             return {"week": week, "matchups": matchup_list}
@@ -572,12 +667,19 @@ def cmd_scoreboard(args, as_json=False):
         print("Scoreboard - Week " + str(week) + ":")
         print("")
         for m in matchup_list:
-            line = "  " + m["team1"].ljust(28) + " vs  " + m["team2"].ljust(28) + m["status"]
+            line = (
+                "  "
+                + m["team1"].ljust(28)
+                + " vs  "
+                + m["team2"].ljust(28)
+                + m["status"]
+            )
             print(line)
     except Exception as e:
         if as_json:
             return {"error": "Error parsing scoreboard: " + str(e)}
         print("Error parsing scoreboard: " + str(e))
+
 
 def cmd_matchup_detail(args, as_json=False):
     """Show detailed H2H matchup with per-category comparison"""
@@ -698,7 +800,9 @@ def cmd_matchup_detail(args, as_json=False):
             losses = 0
             ties = 0
 
-            for sid in sorted(cat_results.keys(), key=lambda x: int(x) if x.isdigit() else 0):
+            for sid in sorted(
+                cat_results.keys(), key=lambda x: int(x) if x.isdigit() else 0
+            ):
                 cat_name = stat_id_to_name.get(sid, "Stat " + sid)
                 my_val = my_stats.get(sid, "-")
                 opp_val = opp_stats.get(sid, "-")
@@ -709,12 +813,14 @@ def cmd_matchup_detail(args, as_json=False):
                     losses += 1
                 else:
                     ties += 1
-                categories.append({
-                    "name": cat_name,
-                    "my_value": str(my_val),
-                    "opp_value": str(opp_val),
-                    "result": result,
-                })
+                categories.append(
+                    {
+                        "name": cat_name,
+                        "my_value": str(my_val),
+                        "opp_value": str(opp_val),
+                        "result": result,
+                    }
+                )
 
             my_meta = team_meta.get(my_name, {})
             opp_meta = team_meta.get(opp_name, {})
@@ -736,8 +842,21 @@ def cmd_matchup_detail(args, as_json=False):
             print("Week " + str(week) + " Matchup: " + my_name + " vs " + opp_name)
             print("Score: " + str(wins) + "-" + str(losses) + "-" + str(ties))
             for cat in categories:
-                marker = "W" if cat["result"] == "win" else ("L" if cat["result"] == "loss" else "T")
-                print("  [" + marker + "] " + cat["name"].ljust(10) + " " + cat["my_value"].rjust(8) + " vs " + cat["opp_value"].rjust(8))
+                marker = (
+                    "W"
+                    if cat["result"] == "win"
+                    else ("L" if cat["result"] == "loss" else "T")
+                )
+                print(
+                    "  ["
+                    + marker
+                    + "] "
+                    + cat["name"].ljust(10)
+                    + " "
+                    + cat["my_value"].rjust(8)
+                    + " vs "
+                    + cat["opp_value"].rjust(8)
+                )
             return
 
         # No matchup found
@@ -748,6 +867,7 @@ def cmd_matchup_detail(args, as_json=False):
         if as_json:
             return {"error": "Error parsing matchup detail: " + str(e)}
         print("Error parsing matchup detail: " + str(e))
+
 
 def cmd_transactions(args, as_json=False):
     """Show recent league transaction activity"""
@@ -782,11 +902,13 @@ def cmd_transactions(args, as_json=False):
         trans_list = []
         for t in transactions:
             if isinstance(t, dict):
-                trans_list.append({
-                    "type": t.get("type", "?"),
-                    "player": t.get("player", t.get("name", "Unknown")),
-                    "team": t.get("team", ""),
-                })
+                trans_list.append(
+                    {
+                        "type": t.get("type", "?"),
+                        "player": t.get("player", t.get("name", "Unknown")),
+                        "team": t.get("team", ""),
+                    }
+                )
             else:
                 trans_list.append({"raw": str(t)})
         return {"type": label, "transactions": trans_list}
@@ -807,6 +929,7 @@ def cmd_transactions(args, as_json=False):
             print(line)
         else:
             print("  " + str(t))
+
 
 def cmd_stat_categories(args, as_json=False):
     """Show league scoring categories"""
@@ -833,10 +956,12 @@ def cmd_stat_categories(args, as_json=False):
         if isinstance(categories, list):
             for cat in categories:
                 if isinstance(cat, dict):
-                    cat_list.append({
-                        "name": cat.get("display_name", cat.get("name", "?")),
-                        "position_type": cat.get("position_type", ""),
-                    })
+                    cat_list.append(
+                        {
+                            "name": cat.get("display_name", cat.get("name", "?")),
+                            "position_type": cat.get("position_type", ""),
+                        }
+                    )
         elif isinstance(categories, dict):
             for key, val in categories.items():
                 cat_list.append({"name": str(key), "position_type": str(val)})
@@ -859,6 +984,7 @@ def cmd_stat_categories(args, as_json=False):
             print("  " + str(key) + ": " + str(val))
     else:
         print("  " + str(categories))
+
 
 def _parse_trend_players(raw_json):
     """Parse Yahoo's nested player response from sort=AR/DR endpoints"""
@@ -946,8 +1072,12 @@ def cmd_transaction_trends(args, as_json=False):
 
     count = 25
     try:
-        added_raw = gm.yhandler.get("game/mlb/players;sort=AR;count=" + str(count) + "/percent_owned")
-        dropped_raw = gm.yhandler.get("game/mlb/players;sort=DR;count=" + str(count) + "/percent_owned")
+        added_raw = gm.yhandler.get(
+            "game/mlb/players;sort=AR;count=" + str(count) + "/percent_owned"
+        )
+        dropped_raw = gm.yhandler.get(
+            "game/mlb/players;sort=DR;count=" + str(count) + "/percent_owned"
+        )
     except Exception as e:
         if as_json:
             return {"error": "Error fetching transaction trends: " + str(e)}
@@ -984,7 +1114,12 @@ def cmd_swap(args, as_json=False):
     """Atomic add+drop (swap players)"""
     if len(args) < 2:
         if as_json:
-            return {"success": False, "add_key": "", "drop_key": "", "message": "Usage: swap ADD_ID DROP_ID"}
+            return {
+                "success": False,
+                "add_key": "",
+                "drop_key": "",
+                "message": "Usage: swap ADD_ID DROP_ID",
+            }
         print("Usage: swap ADD_ID DROP_ID")
         return
     add_id = args[0]
@@ -1001,19 +1136,30 @@ def cmd_swap(args, as_json=False):
             team.add_and_drop_players(add_key, drop_key)
             msg = "Swapped: added " + add_key + ", dropped " + drop_key
             if as_json:
-                return {"success": True, "add_key": add_key, "drop_key": drop_key, "message": msg}
+                return {
+                    "success": True,
+                    "add_key": add_key,
+                    "drop_key": drop_key,
+                    "message": msg,
+                }
             print(msg)
             return
         except Exception as e:
             if method == "api" or not _is_scope_error(e):
                 msg = "Error swapping players: " + str(e)
                 if as_json:
-                    return {"success": False, "add_key": add_key, "drop_key": drop_key, "message": msg}
+                    return {
+                        "success": False,
+                        "add_key": add_key,
+                        "drop_key": drop_key,
+                        "message": msg,
+                    }
                 print(msg)
                 return
 
     try:
         from yahoo_browser import swap_players
+
         result = swap_players(add_id, drop_id)
         if as_json:
             result["add_key"] = add_key
@@ -1026,8 +1172,14 @@ def cmd_swap(args, as_json=False):
     except Exception as e:
         msg = "Browser fallback error: " + str(e)
         if as_json:
-            return {"success": False, "add_key": add_key, "drop_key": drop_key, "message": msg}
+            return {
+                "success": False,
+                "add_key": add_key,
+                "drop_key": drop_key,
+                "message": msg,
+            }
         print(msg)
+
 
 def cmd_waiver_claim(args, as_json=False):
     """Submit a waiver claim with optional FAAB bid"""
@@ -1044,7 +1196,10 @@ def cmd_waiver_claim(args, as_json=False):
             faab = int(args[1])
         except (ValueError, TypeError):
             if as_json:
-                return {"success": False, "message": "Invalid FAAB bid: " + str(args[1])}
+                return {
+                    "success": False,
+                    "message": "Invalid FAAB bid: " + str(args[1]),
+                }
             print("Invalid FAAB bid: " + str(args[1]))
             return
     method = _write_method()
@@ -1056,24 +1211,41 @@ def cmd_waiver_claim(args, as_json=False):
             team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
             if faab is not None:
                 team.claim_player(player_key, faab=faab)
-                msg = "Waiver claim submitted for " + player_key + " with $" + str(faab) + " FAAB bid"
+                msg = (
+                    "Waiver claim submitted for "
+                    + player_key
+                    + " with $"
+                    + str(faab)
+                    + " FAAB bid"
+                )
             else:
                 team.claim_player(player_key)
                 msg = "Waiver claim submitted for " + player_key
             if as_json:
-                return {"success": True, "player_key": player_key, "faab": faab, "message": msg}
+                return {
+                    "success": True,
+                    "player_key": player_key,
+                    "faab": faab,
+                    "message": msg,
+                }
             print(msg)
             return
         except Exception as e:
             if method == "api" or not _is_scope_error(e):
                 msg = "Error submitting waiver claim: " + str(e)
                 if as_json:
-                    return {"success": False, "player_key": player_key, "faab": faab, "message": msg}
+                    return {
+                        "success": False,
+                        "player_key": player_key,
+                        "faab": faab,
+                        "message": msg,
+                    }
                 print(msg)
                 return
 
     try:
         from yahoo_browser import waiver_claim
+
         result = waiver_claim(player_id, faab=faab)
         if as_json:
             result["player_key"] = player_key
@@ -1086,7 +1258,12 @@ def cmd_waiver_claim(args, as_json=False):
     except Exception as e:
         msg = "Browser fallback error: " + str(e)
         if as_json:
-            return {"success": False, "player_key": player_key, "faab": faab, "message": msg}
+            return {
+                "success": False,
+                "player_key": player_key,
+                "faab": faab,
+                "message": msg,
+            }
         print(msg)
 
 
@@ -1094,7 +1271,10 @@ def cmd_waiver_claim_swap(args, as_json=False):
     """Submit a waiver claim + drop with optional FAAB bid"""
     if len(args) < 2:
         if as_json:
-            return {"success": False, "message": "Usage: waiver-claim-swap ADD_ID DROP_ID [FAAB_BID]"}
+            return {
+                "success": False,
+                "message": "Usage: waiver-claim-swap ADD_ID DROP_ID [FAAB_BID]",
+            }
         print("Usage: waiver-claim-swap ADD_ID DROP_ID [FAAB_BID]")
         return
     add_id = args[0]
@@ -1107,7 +1287,10 @@ def cmd_waiver_claim_swap(args, as_json=False):
             faab = int(args[2])
         except (ValueError, TypeError):
             if as_json:
-                return {"success": False, "message": "Invalid FAAB bid: " + str(args[2])}
+                return {
+                    "success": False,
+                    "message": "Invalid FAAB bid: " + str(args[2]),
+                }
             print("Invalid FAAB bid: " + str(args[2]))
             return
     method = _write_method()
@@ -1119,24 +1302,47 @@ def cmd_waiver_claim_swap(args, as_json=False):
             team = gm.to_league(LEAGUE_ID).to_team(TEAM_ID)
             if faab is not None:
                 team.claim_and_drop_players(add_key, drop_key, faab=faab)
-                msg = "Waiver claim+drop submitted: add " + add_key + ", drop " + drop_key + " with $" + str(faab) + " FAAB"
+                msg = (
+                    "Waiver claim+drop submitted: add "
+                    + add_key
+                    + ", drop "
+                    + drop_key
+                    + " with $"
+                    + str(faab)
+                    + " FAAB"
+                )
             else:
                 team.claim_and_drop_players(add_key, drop_key)
-                msg = "Waiver claim+drop submitted: add " + add_key + ", drop " + drop_key
+                msg = (
+                    "Waiver claim+drop submitted: add " + add_key + ", drop " + drop_key
+                )
             if as_json:
-                return {"success": True, "add_key": add_key, "drop_key": drop_key, "faab": faab, "message": msg}
+                return {
+                    "success": True,
+                    "add_key": add_key,
+                    "drop_key": drop_key,
+                    "faab": faab,
+                    "message": msg,
+                }
             print(msg)
             return
         except Exception as e:
             if method == "api" or not _is_scope_error(e):
                 msg = "Error submitting waiver claim+drop: " + str(e)
                 if as_json:
-                    return {"success": False, "add_key": add_key, "drop_key": drop_key, "faab": faab, "message": msg}
+                    return {
+                        "success": False,
+                        "add_key": add_key,
+                        "drop_key": drop_key,
+                        "faab": faab,
+                        "message": msg,
+                    }
                 print(msg)
                 return
 
     try:
         from yahoo_browser import waiver_claim_swap
+
         result = waiver_claim_swap(add_id, drop_id, faab=faab)
         if as_json:
             result["add_key"] = add_key
@@ -1150,7 +1356,13 @@ def cmd_waiver_claim_swap(args, as_json=False):
     except Exception as e:
         msg = "Browser fallback error: " + str(e)
         if as_json:
-            return {"success": False, "add_key": add_key, "drop_key": drop_key, "faab": faab, "message": msg}
+            return {
+                "success": False,
+                "add_key": add_key,
+                "drop_key": drop_key,
+                "faab": faab,
+                "message": msg,
+            }
         print(msg)
 
 
@@ -1170,7 +1382,11 @@ def cmd_who_owns(args, as_json=False):
         ownership = lg.ownership([player_key])
         if not ownership:
             if as_json:
-                return {"player_key": player_key, "ownership_type": "unknown", "owner": ""}
+                return {
+                    "player_key": player_key,
+                    "ownership_type": "unknown",
+                    "owner": "",
+                }
             print("No ownership info for " + player_key)
             return
         info = ownership.get(player_key, ownership.get(player_id, {}))
@@ -1208,31 +1424,139 @@ def cmd_league_pulse(args, as_json=False):
         team_list = []
         for team_key, team_data in teams.items():
             logo_url, mgr_image = _extract_team_meta(team_data)
-            team_list.append({
-                "team_key": team_key,
-                "name": team_data.get("name", "Unknown"),
-                "moves": team_data.get("number_of_moves", 0),
-                "trades": team_data.get("number_of_trades", 0),
-                "total": team_data.get("number_of_moves", 0) + team_data.get("number_of_trades", 0),
-                "team_logo": logo_url,
-                "manager_image": mgr_image,
-            })
+            team_list.append(
+                {
+                    "team_key": team_key,
+                    "name": team_data.get("name", "Unknown"),
+                    "moves": team_data.get("number_of_moves", 0),
+                    "trades": team_data.get("number_of_trades", 0),
+                    "total": team_data.get("number_of_moves", 0)
+                    + team_data.get("number_of_trades", 0),
+                    "team_logo": logo_url,
+                    "manager_image": mgr_image,
+                }
+            )
         team_list.sort(key=lambda t: t.get("total", 0), reverse=True)
         if as_json:
             return {"teams": team_list}
         print("League Activity Pulse:")
-        print("  " + "Team".ljust(30) + "Moves".rjust(6) + "Trades".rjust(7) + "Total".rjust(6))
+        print(
+            "  "
+            + "Team".ljust(30)
+            + "Moves".rjust(6)
+            + "Trades".rjust(7)
+            + "Total".rjust(6)
+        )
         print("  " + "-" * 49)
         for t in team_list:
-            print("  " + t.get("name", "?").ljust(30) + str(t.get("moves", 0)).rjust(6)
-                  + str(t.get("trades", 0)).rjust(7) + str(t.get("total", 0)).rjust(6))
+            print(
+                "  "
+                + t.get("name", "?").ljust(30)
+                + str(t.get("moves", 0)).rjust(6)
+                + str(t.get("trades", 0)).rjust(7)
+                + str(t.get("total", 0)).rjust(6)
+            )
     except Exception as e:
         if as_json:
             return {"error": "Error fetching league pulse: " + str(e)}
         print("Error fetching league pulse: " + str(e))
 
 
+def cmd_discover(args, as_json=False):
+    """Discover your Yahoo Fantasy leagues and teams for the current season.
+    Does not require LEAGUE_ID or TEAM_ID to be set."""
+    sc = OAuth2(None, None, from_file=OAUTH_FILE)
+    if not sc.token_is_valid():
+        sc.refresh_access_token()
+    gm = yfa.Game(sc, "mlb")
+    game_id = str(gm.game_id())
+    all_ids = gm.league_ids()
+    current_ids = [lid for lid in all_ids if lid.startswith(game_id + ".")]
+
+    if not current_ids:
+        msg = "No MLB leagues found for the " + game_id + " season."
+        if as_json:
+            return {"game_id": game_id, "leagues": [], "message": msg}
+        print(msg)
+        print("Make sure you've joined a Yahoo Fantasy Baseball league for this year.")
+        return
+
+    leagues = []
+    for lid in current_ids:
+        try:
+            lg = gm.to_league(lid)
+            settings = lg.settings()
+            league_name = settings.get("name", "Unknown")
+            season = settings.get("season", "?")
+            num_teams = settings.get("num_teams", "?")
+            teams = lg.teams()
+            my_team_key = ""
+            my_team_name = ""
+            for tk, td in teams.items():
+                if td.get("is_owned_by_current_login"):
+                    my_team_key = tk
+                    my_team_name = td.get("name", "Unknown")
+                    break
+            leagues.append(
+                {
+                    "league_id": lid,
+                    "league_name": league_name,
+                    "season": season,
+                    "num_teams": num_teams,
+                    "team_id": my_team_key,
+                    "team_name": my_team_name,
+                }
+            )
+        except Exception as e:
+            leagues.append(
+                {
+                    "league_id": lid,
+                    "league_name": "Error: " + str(e),
+                    "season": "?",
+                    "num_teams": "?",
+                    "team_id": "",
+                    "team_name": "",
+                }
+            )
+
+    if as_json:
+        return {"game_id": game_id, "leagues": leagues}
+
+    print("")
+    print("Your " + game_id + " MLB Fantasy Leagues:")
+    print("")
+    for i, lg_info in enumerate(leagues, 1):
+        print("  " + str(i) + ". " + lg_info["league_name"])
+        print(
+            "     Season: "
+            + str(lg_info["season"])
+            + "  |  Teams: "
+            + str(lg_info["num_teams"])
+        )
+        print("     LEAGUE_ID=" + lg_info["league_id"])
+        if lg_info["team_id"]:
+            print(
+                "     TEAM_ID="
+                + lg_info["team_id"]
+                + "  ("
+                + lg_info["team_name"]
+                + ")"
+            )
+        else:
+            print("     (could not identify your team)")
+        print("")
+
+    if len(leagues) == 1 and leagues[0]["team_id"]:
+        lg_info = leagues[0]
+        print("Add these to your .env file:")
+        print("")
+        print("  LEAGUE_ID=" + lg_info["league_id"])
+        print("  TEAM_ID=" + lg_info["team_id"])
+        print("")
+
+
 COMMANDS = {
+    "discover": cmd_discover,
     "roster": cmd_roster,
     "free-agents": cmd_free_agents,
     "standings": cmd_standings,

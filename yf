@@ -6,6 +6,10 @@ export PATH="/usr/local/bin:$PATH"
 CONTAINER="fbb-mcp"
 
 case "$1" in
+    # Setup / discovery
+    discover)
+        docker exec $CONTAINER python3 /app/scripts/yahoo-fantasy.py discover
+        ;;
     # League management (yahoo-fantasy.py)
     info|standings|roster|search|add|drop|matchups|scoreboard|transactions|stat-categories|swap)
         docker exec $CONTAINER python3 /app/scripts/yahoo-fantasy.py "$@"
@@ -77,6 +81,9 @@ case "$1" in
         echo "Yahoo Fantasy CLI"
         echo ""
         echo "Usage: ./yf <command> [args]"
+        echo ""
+        echo "Setup:"
+        echo "  discover          - Find your league and team IDs"
         echo ""
         echo "League:"
         echo "  info              - League info"

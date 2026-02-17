@@ -65,34 +65,51 @@ Claude decides which tools to call and in what order based on your question. Com
 
 ### 1. Get Yahoo API credentials
 
-Go to [developer.yahoo.com/apps/create](https://developer.yahoo.com/apps/create), create an app with **Fantasy Sports** read permissions and `oob` as the redirect URI. Save your consumer key and secret to `config/yahoo_oauth.json`:
-
-```json
-{
-    "consumer_key": "YOUR_CONSUMER_KEY",
-    "consumer_secret": "YOUR_CONSUMER_SECRET"
-}
-```
+Go to [developer.yahoo.com/apps/create](https://developer.yahoo.com/apps/create), create an app with **Fantasy Sports** read permissions and `oob` as the redirect URI. Copy the consumer key and secret.
 
 ### 2. Configure and run
 
 ```bash
 cp docker-compose.example.yml docker-compose.yml
 cp .env.example .env
-# Edit .env — set LEAGUE_ID and TEAM_ID (see Environment Variables below)
+# Edit .env — set YAHOO_CONSUMER_KEY and YAHOO_CONSUMER_SECRET
 mkdir -p config data
 docker compose up -d
 ```
 
-### 3. Authorize with Yahoo
+The container auto-generates `config/yahoo_oauth.json` from your env vars on first start. You don't need to create this file manually.
 
-On the first API call, Yahoo will ask you to authorize the app. Run any command to trigger it:
+### 3. Find your league and team IDs
+
+On the first API call, Yahoo will prompt you to authorize the app. Run `discover` to trigger auth and find your IDs in one step:
 
 ```bash
-docker exec -it fbb-mcp python3 /app/scripts/yahoo-fantasy.py info
+./yf discover
 ```
 
-Follow the prompt — open the URL, log in, paste the verification code. Tokens refresh automatically after that.
+Follow the prompt — open the URL, log in, paste the verification code. The command then prints your current-season leagues and teams:
+
+```
+Your 469 MLB Fantasy Leagues:
+
+  1. My League Name
+     Season: 2026  |  Teams: 12
+     LEAGUE_ID=469.l.12345
+     TEAM_ID=469.l.12345.t.7  (My Team Name)
+
+Add these to your .env file:
+
+  LEAGUE_ID=469.l.12345
+  TEAM_ID=469.l.12345.t.7
+```
+
+Copy the values into `.env`, then restart:
+
+```bash
+docker compose up -d
+```
+
+Tokens refresh automatically after the initial authorization.
 
 ### 4. Connect to Claude
 
@@ -367,6 +384,7 @@ The `./yf` helper script provides direct CLI access to all functionality:
 
 | Category | Commands |
 |----------|----------|
+| **Setup** | `discover` |
 | **League** | `info`, `standings`, `roster`, `fa B/P [n]`, `search <name>`, `add <id>`, `drop <id>`, `swap <add> <drop>`, `matchups [week]`, `scoreboard`, `transactions [type] [n]`, `stat-categories` |
 | **Draft** | `status`, `recommend`, `watch [sec]`, `cheatsheet`, `best-available [B\|P] [n]` |
 | **Valuations** | `rankings [B\|P] [n]`, `compare <name1> <name2>`, `value <name>`, `import-csv <file>`, `generate` |
@@ -406,6 +424,8 @@ The `./yf` helper script provides direct CLI access to all functionality:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
+| `YAHOO_CONSUMER_KEY` | Yes | — | Yahoo app consumer key (from developer.yahoo.com) |
+| `YAHOO_CONSUMER_SECRET` | Yes | — | Yahoo app consumer secret |
 | `LEAGUE_ID` | Yes | — | Yahoo Fantasy league key (e.g., `469.l.16960`) |
 | `TEAM_ID` | Yes | — | Your team key (e.g., `469.l.16960.t.12`) |
 | `ENABLE_WRITE_OPS` | No | `false` | Enable write operation tools (add, drop, trade, lineup) |
@@ -413,7 +433,7 @@ The `./yf` helper script provides direct CLI access to all functionality:
 | `MCP_SERVER_URL` | For Claude.ai | — | Public HTTPS URL for remote access |
 | `MCP_AUTH_PASSWORD` | For Claude.ai | — | Password for the OAuth login page |
 
-The game key changes each MLB season (e.g., `469` for 2026). Find your league and team numbers in your Yahoo Fantasy league URL.
+The game key changes each MLB season (e.g., `469` for 2026). Run `./yf discover` to find your league and team IDs automatically.
 
 <details>
 <summary><strong>Optional Config Files</strong></summary>
@@ -434,7 +454,7 @@ fbb-mcp/
 ├── .env.example
 ├── yf                              # CLI helper script
 ├── config/
-│   ├── yahoo_oauth.json            # OAuth tokens (gitignored, auto-refreshes)
+│   ├── yahoo_oauth.json            # OAuth credentials + tokens (gitignored, auto-generated from env vars)
 │   ├── yahoo_session.json          # Browser session (gitignored, for write ops)
 │   ├── league-history.json         # Optional: historical league keys
 │   └── draft-cheatsheet.json       # Optional: draft strategy

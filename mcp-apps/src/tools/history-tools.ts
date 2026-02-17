@@ -29,6 +29,8 @@ export function registerHistoryTools(server: McpServer, distDir: string) {
           csp: {
             resourceDomains: [
               "img.mlbstatic.com",
+              "www.mlbstatic.com",
+              "s.yimg.com",
               "securea.mlb.com",
             ],
           },
@@ -189,10 +191,11 @@ export function registerHistoryTools(server: McpServer, distDir: string) {
       try {
         const data = await apiGet<PastTradesResponse>("/api/past-trades", { year: String(year), count: String(count) });
         const lines = ["Trades for " + year + ":"];
-        if (data.trades.length === 0) {
+        const trades = data.trades || [];
+        if (trades.length === 0) {
           lines.push("  No trades this season.");
         }
-        for (const t of data.trades) {
+        for (const t of trades) {
           lines.push("  " + str(t.trader_team) + " <-> " + str(t.tradee_team));
           for (const p of (t.players || [])) {
             lines.push("    " + str(p.name) + ": " + str(p.from) + " -> " + str(p.to));

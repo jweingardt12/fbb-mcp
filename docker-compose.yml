@@ -7,6 +7,8 @@ services:
       - ./data:/app/data
       - ./scripts:/app/scripts
     environment:
+      - YAHOO_CONSUMER_KEY=${YAHOO_CONSUMER_KEY}
+      - YAHOO_CONSUMER_SECRET=${YAHOO_CONSUMER_SECRET}
       - OAUTH_FILE=/app/config/yahoo_oauth.json
       - LEAGUE_ID=${LEAGUE_ID}
       - TEAM_ID=${TEAM_ID}

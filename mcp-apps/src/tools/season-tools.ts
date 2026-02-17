@@ -41,6 +41,8 @@ export function registerSeasonTools(server: McpServer, distDir: string, writesEn
           csp: {
             resourceDomains: [
               "img.mlbstatic.com",
+              "www.mlbstatic.com",
+              "s.yimg.com",
               "securea.mlb.com",
             ],
           },

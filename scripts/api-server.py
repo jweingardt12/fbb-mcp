@@ -7,6 +7,7 @@ Routes match the TypeScript MCP Apps server's python-client.ts expectations.
 import sys
 import os
 import importlib
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask, jsonify, request
@@ -32,6 +33,7 @@ HEARTBEAT_INTERVAL = int(os.environ.get("BROWSER_HEARTBEAT_HOURS", "6")) * 3600
 def _run_heartbeat():
     """Background loop that refreshes the browser session periodically"""
     import time
+
     # Wait a bit for startup to settle
     time.sleep(30)
     while True:
@@ -45,11 +47,13 @@ def _run_heartbeat():
 
 
 import threading
+
 _heartbeat_thread = threading.Thread(target=_run_heartbeat, daemon=True)
 _heartbeat_thread.start()
 
 
 # --- Health check ---
+
 
 @app.route("/api/health")
 def health():
@@ -94,6 +98,7 @@ def api_change_team_logo():
 
 # --- Yahoo Fantasy (yahoo-fantasy.py) ---
 # TS tools call: /api/roster, /api/free-agents, /api/standings, etc.
+
 
 @app.route("/api/roster")
 def api_roster():
@@ -267,6 +272,7 @@ def api_matchup_detail():
 # --- Draft Assistant (draft-assistant.py) ---
 # TS tools call: /api/draft-status, /api/draft-recommend, /api/draft-cheatsheet, /api/best-available
 
+
 @app.route("/api/draft-status")
 def api_draft_status():
     try:
@@ -310,6 +316,7 @@ def api_best_available():
 # --- Valuations (valuations.py) ---
 # TS tools call: /api/rankings, /api/compare, /api/value
 
+
 @app.route("/api/rankings")
 def api_rankings():
     try:
@@ -352,6 +359,7 @@ def api_value():
 
 # --- Season Manager (season-manager.py) ---
 # TS tools call: /api/lineup-optimize, /api/category-check, etc.
+
 
 @app.route("/api/lineup-optimize")
 def api_lineup_optimize():
@@ -484,7 +492,11 @@ def api_propose_trade():
         their_player_ids = data.get("their_player_ids", "")
         note = data.get("note", "")
         if not their_team_key or not your_player_ids or not their_player_ids:
-            return jsonify({"error": "Missing their_team_key, your_player_ids, or their_player_ids"}), 400
+            return jsonify(
+                {
+                    "error": "Missing their_team_key, your_player_ids, or their_player_ids"
+                }
+            ), 400
         args = [their_team_key, your_player_ids, their_player_ids]
         if note:
             args.append(note)
@@ -552,6 +564,7 @@ def api_set_lineup():
 
 # --- Waiver Claims (yahoo-fantasy.py) ---
 
+
 @app.route("/api/waiver-claim", methods=["POST"])
 def api_waiver_claim():
     try:
@@ -589,6 +602,7 @@ def api_waiver_claim_swap():
 
 # --- Who Owns / League Pulse (yahoo-fantasy.py) ---
 
+
 @app.route("/api/who-owns")
 def api_who_owns():
     try:
@@ -612,6 +626,7 @@ def api_league_pulse():
 
 # --- Phase 3: What's New & Trade Finder ---
 
+
 @app.route("/api/whats-new")
 def api_whats_new():
     try:
@@ -631,6 +646,7 @@ def api_trade_finder():
 
 
 # --- Phase 4: Power Rankings, Week Planner, Season Pace ---
+
 
 @app.route("/api/power-rankings")
 def api_power_rankings():
@@ -665,6 +681,7 @@ def api_season_pace():
 
 # --- Phase 5: Closer Monitor ---
 
+
 @app.route("/api/closer-monitor")
 def api_closer_monitor():
     try:
@@ -675,6 +692,7 @@ def api_closer_monitor():
 
 
 # --- Phase 5: Pitcher Matchup ---
+
 
 @app.route("/api/pitcher-matchup")
 def api_pitcher_matchup():
@@ -689,6 +707,7 @@ def api_pitcher_matchup():
 
 # --- MLB Data (mlb-data.py) ---
 # TS tools call: /api/mlb/teams, /api/mlb/roster, etc. (these already match)
+
 
 @app.route("/api/mlb/teams")
 def api_mlb_teams():
@@ -772,6 +791,7 @@ def api_mlb_schedule():
 
 # --- History (history.py) ---
 # TS tools call: /api/league-history, /api/record-book, /api/past-standings, etc.
+
 
 @app.route("/api/league-history")
 def api_league_history():
@@ -861,6 +881,7 @@ def api_past_matchup():
 
 
 # --- Intel (intel.py) ---
+
 
 @app.route("/api/intel/player")
 def api_intel_player():
