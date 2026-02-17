@@ -3,6 +3,15 @@ name: Build and Push Docker Image
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '*.md'
+      - '.gitignore'
+      - '.env.example'
+      - '.mcp.json.example'
+      - 'docker-compose.example.yml'
+      - 'LICENSE'
+      - '.github/**'
+      - 'research_yahoo_write_workaround/**'
   workflow_dispatch:
 
 env:
