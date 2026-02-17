@@ -104,7 +104,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.injuries.map((p, i) => (
+                {(data.injuries || []).map((p, i) => (
                   <TableRow key={i}>
                     <TableCell className="font-medium">
                       <PlayerName name={p.name} app={app} navigate={navigate} context="roster" />
@@ -245,7 +245,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.prospects.map((p, i) => (
+                {(data.prospects || []).map((p, i) => (
                   <TableRow key={i}>
                     <TableCell className="font-medium">
                       <PlayerName name={p.player} app={app} navigate={navigate} context="waivers" />

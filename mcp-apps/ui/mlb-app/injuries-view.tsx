@@ -30,7 +30,7 @@ export function InjuriesView({ data }: { data: { injuries: MlbInjury[] } }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.injuries.map((inj, i) => (
+          {(data.injuries || []).map((inj, i) => (
             <TableRow key={i}>
               <TableCell className="font-medium">{inj.player}</TableCell>
               <TableCell>

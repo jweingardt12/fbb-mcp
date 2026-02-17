@@ -102,10 +102,10 @@ export function WaiverAnalyzeView({ data, app, navigate }: { data: WaiverData; a
         </TabsList>
       </Tabs>
 
-      {data.weak_categories.length > 0 && (
+      {(data.weak_categories || []).length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-muted-foreground">Weak categories:</span>
-          {data.weak_categories.map((c, i) => {
+          {(data.weak_categories || []).map((c, i) => {
             const name = typeof c === "string" ? c : c.name;
             const detail = typeof c === "string" ? "" : " (" + c.rank + "/" + c.total + ")";
             return <Badge key={i} variant="destructive" className="text-xs">{name}{detail}</Badge>;

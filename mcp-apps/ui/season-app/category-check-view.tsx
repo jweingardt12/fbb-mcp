@@ -77,24 +77,24 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
 
       {/* Strongest / Weakest summary cards */}
       <div className="grid grid-cols-2 gap-3">
-        {data.strongest.length > 0 && (
+        {(data.strongest || []).length > 0 && (
           <Card className="border-green-500/30 border-t-2 border-t-green-500">
             <CardContent className="p-3">
               <p className="text-xs text-muted-foreground mb-1.5">Strongest</p>
               <div className="flex flex-wrap gap-1">
-                {data.strongest.map((s) => (
+                {(data.strongest || []).map((s) => (
                   <Badge key={s} className="bg-green-600 text-white text-[10px]">{s}</Badge>
                 ))}
               </div>
             </CardContent>
           </Card>
         )}
-        {data.weakest.length > 0 && (
+        {(data.weakest || []).length > 0 && (
           <Card className="border-red-500/30 border-t-2 border-t-red-500">
             <CardContent className="p-3">
               <p className="text-xs text-muted-foreground mb-1.5">Weakest</p>
               <div className="flex flex-wrap gap-1">
-                {data.weakest.map((s) => (
+                {(data.weakest || []).map((s) => (
                   <Badge key={s} variant="destructive" className="text-[10px]">{s}</Badge>
                 ))}
               </div>

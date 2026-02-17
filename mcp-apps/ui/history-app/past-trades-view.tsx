@@ -54,7 +54,7 @@ export function PastTradesView({ data, app, navigate }: { data: PastTradesData; 
                 <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-4 items-start">
                   <div>
                     <p className="text-sm font-medium mb-1">{t.team1} sends:</p>
-                    {t.players1.map((p) => (
+                    {(t.players1 || []).map((p) => (
                       <Badge key={p} variant="outline" className="text-xs mr-1 mb-1">{p}</Badge>
                     ))}
                   </div>
@@ -63,7 +63,7 @@ export function PastTradesView({ data, app, navigate }: { data: PastTradesData; 
                   </div>
                   <div>
                     <p className="text-sm font-medium mb-1">{t.team2} sends:</p>
-                    {t.players2.map((p) => (
+                    {(t.players2 || []).map((p) => (
                       <Badge key={p} variant="outline" className="text-xs mr-1 mb-1">{p}</Badge>
                     ))}
                   </div>

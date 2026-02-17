@@ -36,7 +36,7 @@ export function ScheduleView({ data }: { data: MlbScheduleData }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.games.map((g, i) => (
+            {(data.games || []).map((g, i) => (
               <TableRow key={i}>
                 <TableCell className="font-medium">
                   <span className="flex items-center" style={{ gap: "5px" }}>

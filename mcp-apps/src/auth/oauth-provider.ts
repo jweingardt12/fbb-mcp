@@ -4,6 +4,7 @@ import { OAuthServerProvider, AuthorizationParams } from "@modelcontextprotocol/
 import { OAuthRegisteredClientsStore } from "@modelcontextprotocol/sdk/server/auth/clients.js";
 import { OAuthClientInformationFull, OAuthTokens, OAuthTokenRevocationRequest } from "@modelcontextprotocol/sdk/shared/auth.js";
 import { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
 
 interface PendingAuth {
   clientId: string;
@@ -113,13 +114,23 @@ export class YahooFantasyOAuthProvider implements OAuthServerProvider {
   }
 
   async verifyAccessToken(token: string): Promise<AuthInfo> {
+    // Master token bypass (using the password directly)
+    if (token === this.password) {
+      return {
+        token,
+        clientId: "master",
+        scopes: ["fbb-mcp"],
+        expiresAt: nowSeconds() + 31536000, // 1 year
+      };
+    }
+
     const stored = this.tokens.get(token);
     if (!stored) {
-      throw new Error("Invalid token");
+      throw new InvalidTokenError("Invalid token");
     }
     if (stored.expiresAt < nowSeconds()) {
       this.tokens.delete(token);
-      throw new Error("Token expired");
+      throw new InvalidTokenError("Token expired");
     }
     return {
       token,

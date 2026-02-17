@@ -41,14 +41,30 @@ async function main() {
     const app = express();
     app.set("trust proxy", 1);
 
-    // Preview app — static files (before auth, public assets only)
+    // Preview app — gated by ENABLE_PREVIEW env var (defaults to false)
+    const enablePreview = process.env.ENABLE_PREVIEW === "true";
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const previewDir = path.join(__dirname, "preview");
 
-    app.use("/preview", express.static(previewDir));
-    app.get("/preview", (_req, res) => {
-      res.sendFile(path.join(previewDir, "preview.html"));
-    });
+    if (enablePreview) {
+      app.use("/preview", express.static(previewDir));
+      app.get("/preview", (_req, res) => {
+        res.sendFile(path.join(previewDir, "preview.html"));
+      });
+
+      // API proxy — before auth since Flask binds to 127.0.0.1 (container-internal only)
+      app.use("/api", express.json(), (req, res) => {
+        const url = "http://localhost:8766" + req.originalUrl;
+        const proxyReq = http.request(url, { method: req.method, headers: { "Content-Type": "application/json" } }, (proxyRes) => {
+          res.status(proxyRes.statusCode || 500);
+          proxyRes.pipe(res);
+        });
+        proxyReq.on("error", () => res.status(502).json({ error: "Python API unavailable" }));
+        if (req.method === "POST" && req.body) proxyReq.write(JSON.stringify(req.body));
+        proxyReq.end();
+      });
+      console.log("Preview app enabled at /preview");
+    }
 
     app.use(express.json());
 
@@ -97,18 +113,6 @@ async function main() {
     app.get("/mcp", auth, handleMcp);
     app.delete("/mcp", async (_req, res) => {
       res.status(405).send("Method not allowed");
-    });
-
-    // API proxy — behind auth so it's not publicly accessible
-    app.use("/api", auth, (req, res) => {
-      const url = "http://localhost:8766" + req.originalUrl;
-      const proxyReq = http.request(url, { method: req.method, headers: { "Content-Type": "application/json" } }, (proxyRes) => {
-        res.status(proxyRes.statusCode || 500);
-        proxyRes.pipe(res);
-      });
-      proxyReq.on("error", () => res.status(502).json({ error: "Python API unavailable" }));
-      if (req.method === "POST" && req.body) proxyReq.write(JSON.stringify(req.body));
-      proxyReq.end();
     });
 
     const port = parseInt(process.env.PORT || "4951");

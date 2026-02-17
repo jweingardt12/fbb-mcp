@@ -38,10 +38,10 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
   const { callTool, loading } = useCallTool(app);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const hasIssues = data.active_off_day.length > 0 || data.bench_playing.length > 0;
+  const hasIssues = (data.active_off_day || []).length > 0 || (data.bench_playing || []).length > 0;
 
   const handleCopySwaps = () => {
-    const lines = data.swaps.map((s) => s.bench_player + " \u2192 " + s.position + " (replacing " + s.start_player + ")");
+    const lines = (data.swaps || []).map((s) => s.bench_player + " \u2192 " + s.position + " (replacing " + s.start_player + ")");
     const text = "Lineup Swaps:\n" + lines.join("\n");
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
@@ -70,7 +70,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
       </div>
 
       {/* Post-Apply Success State */}
-      {data.applied && data.swaps.length > 0 && (
+      {data.applied && (data.swaps || []).length > 0 && (
         <Card className="border-green-500/50">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -78,7 +78,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
               <span className="font-semibold text-green-700 dark:text-green-400">Lineup Updated</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              {data.swaps.length + " swap" + (data.swaps.length === 1 ? "" : "s") + " applied successfully."}
+              {(data.swaps || []).length + " swap" + ((data.swaps || []).length === 1 ? "" : "s") + " applied successfully."}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Your lineup is now optimized for today. Check back tomorrow for new recommendations.
@@ -87,7 +87,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
         </Card>
       )}
 
-      {data.active_off_day.length > 0 && (
+      {(data.active_off_day || []).length > 0 && (
         <Card className="border-destructive/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-base text-destructive flex items-center gap-1.5">
@@ -105,7 +105,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.active_off_day.map((p) => (
+                {(data.active_off_day || []).map((p) => (
                   <TableRow key={p.name}>
                     <TableCell className="font-mono text-xs">{p.position || "?"}</TableCell>
                     <TableCell className="font-medium">
@@ -129,7 +129,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
         </Card>
       )}
 
-      {data.bench_playing.length > 0 && (
+      {(data.bench_playing || []).length > 0 && (
         <Card className="border-primary/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-base text-primary">Bench Players - Have Game Today</CardTitle>
@@ -144,7 +144,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.bench_playing.map((p) => (
+                {(data.bench_playing || []).map((p) => (
                   <TableRow key={p.name}>
                     <TableCell className="font-mono text-xs">BN</TableCell>
                     <TableCell className="font-medium">
@@ -168,7 +168,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
         </Card>
       )}
 
-      {data.swaps.length > 0 && (
+      {(data.swaps || []).length > 0 && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -179,7 +179,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {data.swaps.map((s, i) => (
+            {(data.swaps || []).map((s, i) => (
               <div key={i} className="flex items-center gap-2 py-1">
                 <Badge variant="destructive" className="text-[10px]">Bench</Badge>
                 <span className="text-sm"><PlayerName name={s.bench_player} context="roster" /></span>
@@ -194,7 +194,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
       )}
 
       {/* Before/After Visualization */}
-      {data.swaps.length > 0 && !data.applied && (
+      {(data.swaps || []).length > 0 && !data.applied && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Before / After</CardTitle>
@@ -205,13 +205,13 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-2">Before</p>
                 <div className="space-y-1.5">
-                  {data.swaps.map((s, i) => (
+                  {(data.swaps || []).map((s, i) => (
                     <div key={"before-" + i} className="flex items-center gap-1.5">
                       <Badge variant="outline" className="text-[10px] min-w-[36px] justify-center">{s.position}</Badge>
                       <span className="text-sm">{s.start_player}</span>
                     </div>
                   ))}
-                  {data.swaps.map((s, i) => (
+                  {(data.swaps || []).map((s, i) => (
                     <div key={"before-bn-" + i} className="flex items-center gap-1.5">
                       <Badge variant="secondary" className="text-[10px] min-w-[36px] justify-center">BN</Badge>
                       <span className="text-sm text-muted-foreground">{s.bench_player}</span>
@@ -227,13 +227,13 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-2">After</p>
                 <div className="space-y-1.5">
-                  {data.swaps.map((s, i) => (
+                  {(data.swaps || []).map((s, i) => (
                     <div key={"after-" + i} className="flex items-center gap-1.5">
                       <Badge variant="default" className="text-[10px] min-w-[36px] justify-center">{s.position}</Badge>
                       <span className="text-sm font-medium">{s.bench_player}</span>
                     </div>
                   ))}
-                  {data.swaps.map((s, i) => (
+                  {(data.swaps || []).map((s, i) => (
                     <div key={"after-bn-" + i} className="flex items-center gap-1.5">
                       <Badge variant="secondary" className="text-[10px] min-w-[36px] justify-center">BN</Badge>
                       <span className="text-sm text-muted-foreground">{s.start_player}</span>
@@ -246,7 +246,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
         </Card>
       )}
 
-      {!data.applied && data.swaps.length > 0 && (
+      {!data.applied && (data.swaps || []).length > 0 && (
         <Button variant="default" onClick={() => setConfirmOpen(true)} disabled={loading}>
           {loading ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
           <span className="ml-1.5">Apply Swaps</span>
@@ -258,11 +258,11 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
         <DialogHeader>
           <DialogTitle>Confirm Lineup Changes</DialogTitle>
           <DialogDescription>
-            {"The following " + data.swaps.length + " swap" + (data.swaps.length === 1 ? "" : "s") + " will be applied:"}
+            {"The following " + (data.swaps || []).length + " swap" + ((data.swaps || []).length === 1 ? "" : "s") + " will be applied:"}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2 my-2">
-          {data.swaps.map((s, i) => (
+          {(data.swaps || []).map((s, i) => (
             <div key={"confirm-" + i} className="text-sm flex items-center gap-1.5">
               <span className="font-medium">{s.bench_player}</span>
               <ArrowRight size={12} className="text-muted-foreground" />

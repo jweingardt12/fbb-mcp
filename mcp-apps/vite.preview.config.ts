@@ -19,6 +19,13 @@ function redirectRoot(): Plugin {
 export default defineConfig({
   plugins: [redirectRoot(), react(), tailwindcss()],
   server: {
+    host: true,
     open: "/preview.html",
+    proxy: {
+      "/api": {
+        target: "http://localhost:8766",
+        changeOrigin: true,
+      },
+    },
   },
 });

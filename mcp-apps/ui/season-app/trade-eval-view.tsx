@@ -159,7 +159,7 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
               {(impact.losing || []).length > 0 && (
                 <div>
                   <span className="text-xs text-muted-foreground">Losing: </span>
-                  {impact.losing.map((pos) => (
+                  {(impact.losing || []).map((pos) => (
                     <Badge key={pos} variant="outline" className="text-[10px] mr-1 border-red-500 text-red-500">{pos}</Badge>
                   ))}
                 </div>
@@ -167,7 +167,7 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
               {(impact.gaining || []).length > 0 && (
                 <div>
                   <span className="text-xs text-muted-foreground">Gaining: </span>
-                  {impact.gaining.map((pos) => (
+                  {(impact.gaining || []).map((pos) => (
                     <Badge key={pos} variant="outline" className="text-[10px] mr-1 border-green-500 text-green-600">{pos}</Badge>
                   ))}
                 </div>
