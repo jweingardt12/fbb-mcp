@@ -1,5 +1,6 @@
 import * as React from "react";
 import { MessageSquare, ExternalLink, Search, FileText } from "@/shared/icons";
+import { mlbHeadshotUrl } from "./mlb-images";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -15,6 +16,7 @@ interface PlayerNameProps {
   app?: any;
   navigate?: (data: any) => void;
   context?: string;
+  showHeadshot?: boolean;
 }
 
 function getAskPrompt(name: string, context?: string): string {
@@ -36,8 +38,15 @@ function getAskPrompt(name: string, context?: string): string {
   return "Tell me about " + name + " — Statcast, trends, and fantasy outlook";
 }
 
-export function PlayerName({ name, playerId, mlbId, app, navigate, context }: PlayerNameProps) {
+export function PlayerName({ name, playerId, mlbId, app, navigate, context, showHeadshot }: PlayerNameProps) {
+  var headshot = mlbId && showHeadshot !== false
+    ? <img src={mlbHeadshotUrl(mlbId)} alt="" className="w-5 h-5 rounded-full bg-muted object-cover flex-shrink-0" style={{ boxShadow: "0 0 0 1px color-mix(in oklab, var(--color-border) 60%, transparent)" }} />
+    : null;
+
   if (!app) {
+    if (headshot) {
+      return <span className="inline-flex items-center gap-1.5">{headshot}{name}</span>;
+    }
     return <span>{name}</span>;
   }
 
@@ -46,8 +55,9 @@ export function PlayerName({ name, playerId, mlbId, app, navigate, context }: Pl
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <span className="border-b border-dashed border-muted-foreground/50 cursor-pointer hover:text-foreground/80">
-          {name}
+        <span className="inline-flex items-center gap-1.5 cursor-pointer hover:opacity-80">
+          {headshot}
+          <span className="border-b border-dashed border-muted-foreground/50">{name}</span>
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

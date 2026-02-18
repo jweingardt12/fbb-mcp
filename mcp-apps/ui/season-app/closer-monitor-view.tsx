@@ -81,20 +81,20 @@ export function CloserMonitorView({ data, app, navigate }: { data: CloserMonitor
                   <TableCell className="font-medium">
                     <span className="flex items-center gap-1.5">
                       {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" />
+                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} />
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
                       {(p.positions || []).map((pos) => (
-                        <Badge key={pos} variant="outline" className="text-[10px]">{pos}</Badge>
+                        <Badge key={pos} variant="outline" className="text-xs">{pos}</Badge>
                       ))}
                     </div>
                   </TableCell>
                   <TableCell className="text-right font-mono text-xs">{p.percent_owned}%</TableCell>
                   <TableCell className="hidden sm:table-cell">
                     {p.status && p.status !== "Healthy" && (
-                      <Badge variant="destructive" className="text-[10px]">{p.status}</Badge>
+                      <Badge variant="destructive" className="text-xs">{p.status}</Badge>
                     )}
                   </TableCell>
                 </TableRow>
@@ -126,13 +126,13 @@ export function CloserMonitorView({ data, app, navigate }: { data: CloserMonitor
                   <TableCell className="font-medium">
                     <span className="flex items-center gap-1.5">
                       {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="waivers" />
+                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="waivers" showHeadshot={false} />
                     </span>
                   </TableCell>
                   <TableCell className="text-right font-mono text-xs">{p.percent_owned}%</TableCell>
                   <TableCell className="hidden sm:table-cell">
                     {p.status && p.status !== "Healthy" && (
-                      <Badge variant="destructive" className="text-[10px]">{p.status}</Badge>
+                      <Badge variant="destructive" className="text-xs">{p.status}</Badge>
                     )}
                   </TableCell>
                   <TableCell>

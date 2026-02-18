@@ -80,15 +80,15 @@ function scoreLabel(wins: number, losses: number): string {
 function classificationBadge(cls: string) {
   switch (cls) {
     case "target":
-      return <Badge className="bg-sem-info text-[10px]"><Target className="h-2.5 w-2.5 mr-0.5 inline" />Target</Badge>;
+      return <Badge className="bg-sem-info text-xs"><Target className="h-2.5 w-2.5 mr-0.5 inline" />Target</Badge>;
     case "protect":
-      return <Badge className="bg-sem-warning text-[10px]"><Shield className="h-2.5 w-2.5 mr-0.5 inline" />Protect</Badge>;
+      return <Badge className="bg-sem-warning text-xs"><Shield className="h-2.5 w-2.5 mr-0.5 inline" />Protect</Badge>;
     case "concede":
-      return <Badge variant="outline" className="text-[10px] text-muted-foreground"><XCircle className="h-2.5 w-2.5 mr-0.5 inline" />Concede</Badge>;
+      return <Badge variant="outline" className="text-xs text-muted-foreground"><XCircle className="h-2.5 w-2.5 mr-0.5 inline" />Concede</Badge>;
     case "lock":
-      return <Badge className="bg-sem-success text-[10px]"><Lock className="h-2.5 w-2.5 mr-0.5 inline" />Lock</Badge>;
+      return <Badge className="bg-sem-success text-xs"><Lock className="h-2.5 w-2.5 mr-0.5 inline" />Lock</Badge>;
     default:
-      return <Badge variant="outline" className="text-[10px]">{cls}</Badge>;
+      return <Badge variant="outline" className="text-xs">{cls}</Badge>;
   }
 }
 
@@ -178,12 +178,12 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
             <div className="text-center">
               <p className="text-xs text-muted-foreground mb-1">You</p>
               <p className="text-xl font-bold font-mono">{myTotal}</p>
-              <p className="text-[10px] text-muted-foreground">{sched.my_batter_games} bat / {sched.my_pitcher_games} pitch</p>
+              <p className="text-xs text-muted-foreground">{sched.my_batter_games} bat / {sched.my_pitcher_games} pitch</p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground mb-1">Opponent</p>
               <p className="text-xl font-bold font-mono">{oppTotal}</p>
-              <p className="text-[10px] text-muted-foreground">{sched.opp_batter_games} bat / {sched.opp_pitcher_games} pitch</p>
+              <p className="text-xs text-muted-foreground">{sched.opp_batter_games} bat / {sched.opp_pitcher_games} pitch</p>
             </div>
           </div>
           {sched.advantage !== "neutral" && (
@@ -211,8 +211,8 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
             <Card key={s.key} className={s.border}>
               <CardContent className="p-2 text-center">
                 <s.Icon className={"h-3.5 w-3.5 mx-auto mb-1 " + s.icon} />
-                <p className={"text-[10px] font-semibold " + s.text}>{s.label}</p>
-                <p className="text-[10px] text-muted-foreground break-words">{strat[s.key].join(", ")}</p>
+                <p className={"text-xs font-semibold " + s.text}>{s.label}</p>
+                <p className="text-xs text-muted-foreground break-words">{strat[s.key].join(", ")}</p>
               </CardContent>
             </Card>
           );
@@ -270,7 +270,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
               {(d.opp_transactions || []).map(function (tx, idx) {
                 return (
                   <div key={idx} className="flex items-center gap-2 text-sm">
-                    <Badge variant={tx.type === "add" ? "default" : "outline"} className="text-[10px] w-12 justify-center">
+                    <Badge variant={tx.type === "add" ? "default" : "outline"} className="text-xs w-12 justify-center">
                       {tx.type === "add" ? "ADD" : "DROP"}
                     </Badge>
                     <span>{tx.player}</span>
@@ -318,7 +318,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
                               loading="lazy"
                             />
                           )}
-                          <PlayerName name={wt.name} playerId={wt.pid} mlbId={wt.mlb_id} app={app} navigate={navigate} context="waivers" />
+                          <PlayerName name={wt.name} playerId={wt.pid} mlbId={wt.mlb_id} app={app} navigate={navigate} context="waivers" showHeadshot={false} />
                         </div>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
@@ -332,7 +332,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
                       <TableCell className="hidden sm:table-cell">
                         <div className="flex flex-wrap gap-0.5">
                           {(wt.categories || []).map(function (cat) {
-                            return <Badge key={cat} variant="outline" className="text-[9px]">{cat}</Badge>;
+                            return <Badge key={cat} variant="outline" className="text-xs">{cat}</Badge>;
                           })}
                         </div>
                       </TableCell>

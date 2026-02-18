@@ -36,7 +36,7 @@ export function InjuriesView({ data }: { data: { injuries: MlbInjury[] } }) {
               <TableCell>
                 <span className="flex items-center gap-1">
                   <TeamLogo name={inj.team} />
-                  <Badge variant="secondary" className="text-[10px]">{inj.team}</Badge>
+                  <Badge variant="secondary" className="text-xs">{inj.team}</Badge>
                 </span>
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">{inj.description}</TableCell>

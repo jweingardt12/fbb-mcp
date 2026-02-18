@@ -104,7 +104,7 @@ export function RecordBookView({ data }: { data: RecordBookData }) {
                   <TableCell className="text-right font-mono">{formatFixed(c.win_pct, 1, "0.0")}%</TableCell>
                   <TableCell className="hidden sm:table-cell text-center font-mono">{c.playoffs}</TableCell>
                   <TableCell className="hidden sm:table-cell text-center">
-                    <Badge variant="secondary" className="text-[10px]">#{c.best_finish} ({c.best_year})</Badge>
+                    <Badge variant="secondary" className="text-xs">#{c.best_finish} ({c.best_year})</Badge>
                   </TableCell>
                 </TableRow>
               ))}

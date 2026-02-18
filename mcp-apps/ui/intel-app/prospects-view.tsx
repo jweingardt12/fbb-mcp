@@ -46,7 +46,7 @@ export function ProspectsView({ data, app, navigate }: { data: ProspectsData; ap
               return (
                 <TableRow key={i}>
                   <TableCell>
-                    <Badge variant="secondary" className={"text-[10px] " + typeColor(t.type)}>{t.type}</Badge>
+                    <Badge variant="secondary" className={"text-xs " + typeColor(t.type)}>{t.type}</Badge>
                   </TableCell>
                   <TableCell className="font-medium">{t.player}</TableCell>
                   <TableCell className="text-sm">

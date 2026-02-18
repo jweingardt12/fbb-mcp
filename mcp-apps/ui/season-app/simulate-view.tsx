@@ -152,7 +152,7 @@ export function SimulateView({ data, app, navigate }: { data: SimulateData; app:
                   </span>
                   <div className="flex gap-1 flex-wrap">
                     {(data.add_player.positions || "").split(",").filter(Boolean).map(function (pos) {
-                      return <Badge key={pos.trim()} variant="outline" className="text-[10px]">{pos.trim()}</Badge>;
+                      return <Badge key={pos.trim()} variant="outline" className="text-xs">{pos.trim()}</Badge>;
                     })}
                   </div>
                 </div>
@@ -181,7 +181,7 @@ export function SimulateView({ data, app, navigate }: { data: SimulateData; app:
                     </span>
                     <div className="flex gap-1 flex-wrap">
                       {(data.drop_player.positions || "").split(",").filter(Boolean).map(function (pos) {
-                        return <Badge key={pos.trim()} variant="outline" className="text-[10px]">{pos.trim()}</Badge>;
+                        return <Badge key={pos.trim()} variant="outline" className="text-xs">{pos.trim()}</Badge>;
                       })}
                     </div>
                   </div>

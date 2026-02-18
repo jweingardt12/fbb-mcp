@@ -116,9 +116,9 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
                     >
                       {selected ? <CheckSquare size={14} className="text-destructive flex-shrink-0" /> : <Square size={14} className="text-muted-foreground flex-shrink-0" />}
                       {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                      <span className={"truncate " + (selected ? "font-medium" : "")}><PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="trade" /></span>
+                      <span className={"truncate " + (selected ? "font-medium" : "")}><PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="trade" showHeadshot={false} /></span>
                       {p.intel && <IntelBadge intel={p.intel} size="sm" />}
-                      {p.position && <Badge variant="outline" className="text-[10px] ml-auto flex-shrink-0">{p.position}</Badge>}
+                      {p.position && <Badge variant="outline" className="text-xs ml-auto flex-shrink-0">{p.position}</Badge>}
                     </button>
                   );
                 })}
@@ -165,9 +165,9 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
                     >
                       {selected ? <CheckSquare size={14} className="text-primary flex-shrink-0" /> : <Square size={14} className="text-muted-foreground flex-shrink-0" />}
                       {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                      <span className={"truncate " + (selected ? "font-medium" : "")}><PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="trade" /></span>
+                      <span className={"truncate " + (selected ? "font-medium" : "")}><PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="trade" showHeadshot={false} /></span>
                       {p.intel && <IntelBadge intel={p.intel} size="sm" />}
-                      {p.position && <Badge variant="outline" className="text-[10px] ml-auto flex-shrink-0">{p.position}</Badge>}
+                      {p.position && <Badge variant="outline" className="text-xs ml-auto flex-shrink-0">{p.position}</Badge>}
                     </button>
                   );
                 })}
@@ -193,7 +193,7 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
                 <p className="text-xs text-muted-foreground mb-1">Give</p>
                 <div className="flex flex-wrap gap-1">
                   {givePlayers.map((p) => (
-                    <Badge key={p.player_id} variant="destructive" className="text-[10px]">{p.name}</Badge>
+                    <Badge key={p.player_id} variant="destructive" className="text-xs">{p.name}</Badge>
                   ))}
                   {givePlayers.length === 0 && <span className="text-xs text-muted-foreground">None selected</span>}
                 </div>
@@ -203,7 +203,7 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
                 <p className="text-xs text-muted-foreground mb-1">Get</p>
                 <div className="flex flex-wrap gap-1">
                   {getPlayers.map((p) => (
-                    <Badge key={p.player_id} variant="default" className="text-[10px]">{p.name}</Badge>
+                    <Badge key={p.player_id} variant="default" className="text-xs">{p.name}</Badge>
                   ))}
                   {getPlayers.length === 0 && <span className="text-xs text-muted-foreground">None selected</span>}
                 </div>
@@ -254,7 +254,7 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
                     <TrendingDown size={12} className="text-destructive" />
                     <span className="text-muted-foreground">Losing:</span>
                     {evaluation.position_impact.losing.map((p: string) => (
-                      <Badge key={p} variant="outline" className="text-[10px]">{p}</Badge>
+                      <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
                     ))}
                   </div>
                 )}
@@ -263,7 +263,7 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
                     <TrendingUp size={12} className="text-primary" />
                     <span className="text-muted-foreground">Gaining:</span>
                     {evaluation.position_impact.gaining.map((p: string) => (
-                      <Badge key={p} variant="outline" className="text-[10px]">{p}</Badge>
+                      <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
                     ))}
                   </div>
                 )}

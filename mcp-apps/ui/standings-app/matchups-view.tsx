@@ -64,7 +64,7 @@ export function MatchupsView({ data }: { data: MatchupsData }) {
                   <p className="text-xs text-muted-foreground text-center mt-2">{m.status}</p>
                 )}
                 {isMyMatchup && (
-                  <p className="text-[10px] text-primary text-center mt-1 font-medium">Your Matchup</p>
+                  <p className="text-xs text-primary text-center mt-1 font-medium">Your Matchup</p>
                 )}
               </CardContent>
             </Card>

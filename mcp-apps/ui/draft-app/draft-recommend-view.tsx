@@ -75,15 +75,15 @@ function PlayerList({ players, showTopHighlight, app, navigate }: { players: Dra
             {showDivider && (
               <div className="flex items-center gap-2 py-1">
                 <div className="flex-1 h-px bg-border" />
-                <span className="text-[10px] text-muted-foreground">{tier}</span>
+                <span className="text-xs text-muted-foreground">{tier}</span>
                 <div className="flex-1 h-px bg-border" />
               </div>
             )}
             <div className={"flex items-center gap-2 py-1 px-1.5 rounded " + (isTop ? "bg-primary/10 border border-primary/30" : "")}>
               {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-              <span className={"text-sm flex-1 truncate " + (isTop ? "font-semibold" : "font-medium")}><PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="draft" /></span>
+              <span className={"text-sm flex-1 truncate " + (isTop ? "font-semibold" : "font-medium")}><PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="draft" showHeadshot={false} /></span>
               {p.intel && <IntelBadge intel={p.intel} size="sm" />}
-              <Badge variant="outline" className="text-[10px] shrink-0">{posDisplay}</Badge>
+              <Badge variant="outline" className="text-xs shrink-0">{posDisplay}</Badge>
               <ZScoreBar z={p.z_score} />
             </div>
           </div>
@@ -124,14 +124,14 @@ export function DraftRecommendView({ data, app, navigate }: { data: DraftRecomme
         <div>
           <h3 className="text-sm font-semibold mb-2 flex items-center gap-1">
             Top Hitters
-            {hittersFirst && <Badge variant="default" className="text-[10px]">Recommended</Badge>}
+            {hittersFirst && <Badge variant="default" className="text-xs">Recommended</Badge>}
           </h3>
           <PlayerList players={hitters.slice(0, 8)} showTopHighlight={hittersFirst} app={app} navigate={navigate} />
         </div>
         <div>
           <h3 className="text-sm font-semibold mb-2 flex items-center gap-1">
             Top Pitchers
-            {!hittersFirst && <Badge variant="default" className="text-[10px]">Recommended</Badge>}
+            {!hittersFirst && <Badge variant="default" className="text-xs">Recommended</Badge>}
           </h3>
           <PlayerList players={pitchers.slice(0, 8)} showTopHighlight={!hittersFirst} app={app} navigate={navigate} />
         </div>

@@ -195,15 +195,17 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
   if (!app) {
     return (
       <div className="mcp-app-root mcp-app-content">
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-4 w-48" />
-        <div className="space-y-2 mt-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-3/4" />
+        <div className="rounded-lg border border-border p-4 space-y-3">
+          <div className="h-5 w-28 animate-shimmer" />
+          <div className="h-4 w-44 animate-shimmer" />
         </div>
-        <Skeleton className="h-48 w-full mt-2" />
+        <div className="space-y-2">
+          <div className="h-10 w-full animate-shimmer" />
+          <div className="h-10 w-full animate-shimmer" />
+          <div className="h-10 w-full animate-shimmer" />
+          <div className="h-10 w-3/4 animate-shimmer" />
+        </div>
+        <div className="h-6 w-20 animate-shimmer" />
       </div>
     );
   }
@@ -285,7 +287,9 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
           </Button>
         </div>
       )}
-      {children({ data, toolName, app, navigate })}
+      <div key={toolName} className="animate-slide-up">
+        {children({ data, toolName, app, navigate })}
+      </div>
     </div>
   );
 }

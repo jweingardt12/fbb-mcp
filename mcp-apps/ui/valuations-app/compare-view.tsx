@@ -133,7 +133,7 @@ export function CompareView({ data, app, navigate }: { data: CompareData; app?: 
                       >
                         {isSelected && <Check size={12} />}
                         <span className="font-medium">{p.name}</span>
-                        {p.position && <Badge variant="outline" className="text-[10px] ml-auto">{p.position}</Badge>}
+                        {p.position && <Badge variant="outline" className="text-xs ml-auto">{p.position}</Badge>}
                       </button>
                     );
                   })}
@@ -155,7 +155,7 @@ export function CompareView({ data, app, navigate }: { data: CompareData; app?: 
                       >
                         {isSelected && <Check size={12} />}
                         <span className="font-medium">{p.name}</span>
-                        {p.position && <Badge variant="outline" className="text-[10px] ml-auto">{p.position}</Badge>}
+                        {p.position && <Badge variant="outline" className="text-xs ml-auto">{p.position}</Badge>}
                       </button>
                     );
                   })}
@@ -213,7 +213,7 @@ export function CompareView({ data, app, navigate }: { data: CompareData; app?: 
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={chartData}>
               <PolarGrid />
-              <PolarAngleAxis dataKey="category" tick={{ fontSize: 10 }} />
+              <PolarAngleAxis dataKey="category" tick={{ fontSize: 12 }} />
               <PolarRadiusAxis tick={{ fontSize: 9 }} />
               <Radar name={data.player1.name} dataKey={data.player1.name} stroke="var(--color-primary)" fill="var(--color-primary)" fillOpacity={0.3} />
               <Radar name={data.player2.name} dataKey={data.player2.name} stroke="var(--color-destructive)" fill="var(--color-destructive)" fillOpacity={0.3} />

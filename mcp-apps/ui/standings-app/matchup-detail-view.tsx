@@ -154,7 +154,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
             <div className="flex items-center gap-1.5 mb-2">
               <SwingIcon />
               <span className="text-xs font-semibold text-sem-warning">Swing Categories</span>
-              <span className="text-[10px] text-muted-foreground ml-1">Closest margins - could flip</span>
+              <span className="text-xs text-muted-foreground ml-1">Closest margins - could flip</span>
             </div>
             <div className="flex gap-2 flex-wrap">
               {swingCategories.map((c, i) => {
@@ -166,7 +166,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
                 return (
                   <div key={i + "-" + c.name} className={"flex items-center gap-1.5 rounded-md border px-2 py-1 " + resultColor}>
                     <span className="text-xs font-medium">{c.name}</span>
-                    <span className="text-[10px] font-mono opacity-75">{c.my_value + " v " + c.opp_value}</span>
+                    <span className="text-xs font-mono opacity-75">{c.my_value + " v " + c.opp_value}</span>
                   </div>
                 );
               })}
@@ -195,7 +195,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
             <TabsContent value="batting">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-medium text-muted-foreground">Batting:</span>
-                <Badge className={"text-[10px] " + (battingWins > battingLosses ? "bg-sem-success" : battingWins < battingLosses ? "bg-sem-risk" : "bg-sem-warning")}>
+                <Badge className={"text-xs " + (battingWins > battingLosses ? "bg-sem-success" : battingWins < battingLosses ? "bg-sem-risk" : "bg-sem-warning")}>
                   {battingWins + "-" + battingLosses}
                 </Badge>
               </div>
@@ -205,7 +205,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
             <TabsContent value="pitching">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-medium text-muted-foreground">Pitching:</span>
-                <Badge className={"text-[10px] " + (pitchingWins > pitchingLosses ? "bg-sem-success" : pitchingWins < pitchingLosses ? "bg-sem-risk" : "bg-sem-warning")}>
+                <Badge className={"text-xs " + (pitchingWins > pitchingLosses ? "bg-sem-success" : pitchingWins < pitchingLosses ? "bg-sem-risk" : "bg-sem-warning")}>
                   {pitchingWins + "-" + pitchingLosses}
                 </Badge>
               </div>
@@ -221,7 +221,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs text-muted-foreground">Strongest:</span>
             {strongWins.slice(0, 3).map((c, i) => (
-              <Badge key={i + "-" + c.name} className="bg-sem-success text-[10px]">{c.name}</Badge>
+              <Badge key={i + "-" + c.name} className="bg-sem-success text-xs">{c.name}</Badge>
             ))}
           </div>
         )}
@@ -229,7 +229,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs text-muted-foreground">At risk:</span>
             {closeCategories.slice(0, 3).map((c, i) => (
-              <Badge key={i + "-" + c.name} variant="outline" className="text-[10px] border-yellow-500 text-sem-warning">{c.name}</Badge>
+              <Badge key={i + "-" + c.name} variant="outline" className="text-xs border-yellow-500 text-sem-warning">{c.name}</Badge>
             ))}
           </div>
         )}

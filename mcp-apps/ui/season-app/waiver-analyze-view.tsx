@@ -142,14 +142,14 @@ export function WaiverAnalyzeView({ data, app, navigate }: { data: WaiverData; a
                     <span className="flex items-center" style={{ gap: "4px" }}>
                       {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
                       {i === 0 && <span className="text-green-600 mr-0.5">&#9733;</span>}
-                      <PlayerName name={p.name} playerId={p.pid || p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="waivers" />
+                      <PlayerName name={p.name} playerId={p.pid || p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="waivers" showHeadshot={false} />
                       {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
                       {p.positions.split(",").map((pos) => (
-                        <Badge key={pos.trim()} variant="outline" className="text-[10px]">{pos.trim()}</Badge>
+                        <Badge key={pos.trim()} variant="outline" className="text-xs">{pos.trim()}</Badge>
                       ))}
                     </div>
                   </TableCell>
@@ -164,7 +164,7 @@ export function WaiverAnalyzeView({ data, app, navigate }: { data: WaiverData; a
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     {p.status && p.status !== "Healthy" && (
-                      <Badge variant="destructive" className="text-[10px]">{p.status}</Badge>
+                      <Badge variant="destructive" className="text-xs">{p.status}</Badge>
                     )}
                   </TableCell>
                   <TableCell>

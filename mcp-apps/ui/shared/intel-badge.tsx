@@ -95,12 +95,12 @@ export function IntelBadge({ intel, size = "sm" }: IntelBadgeProps) {
   return (
     <span className="inline-flex items-center gap-0.5">
       {tier && (
-        <span className={"inline-flex items-center rounded-md font-medium text-white " + qualityColor(tier) + " " + (isSmall ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2 py-1")}>
+        <span className={"inline-flex items-center rounded-md font-medium text-white " + qualityColor(tier) + " " + (isSmall ? "text-xs px-1.5 py-0.5" : "text-xs px-2 py-1")}>
           {tier}
         </span>
       )}
       {icon && (
-        <span className={iconColor + " " + (isSmall ? "text-[10px]" : "text-xs")}>
+        <span className={iconColor + " " + (isSmall ? "text-xs" : "text-xs")}>
           {icon}
         </span>
       )}

@@ -23,8 +23,8 @@ export function PlayerCard({ name, position, positions, status, team, mlbId, per
       <div className="flex items-center gap-2">
         {mlbId && <img src={mlbHeadshotUrl(mlbId)} alt="" className="w-8 h-8 rounded-full bg-muted object-cover" />}
         <span className="font-medium">{name}</span>
-        {posArray.map((p) => <Badge key={p} variant="secondary" className="text-[10px]">{p}</Badge>)}
-        {status && status !== "Healthy" && <Badge variant="destructive" className="text-[10px]">{status}</Badge>}
+        {posArray.map((p) => <Badge key={p} variant="secondary" className="text-xs">{p}</Badge>)}
+        {status && status !== "Healthy" && <Badge variant="destructive" className="text-xs">{status}</Badge>}
       </div>
     );
   }
@@ -38,8 +38,8 @@ export function PlayerCard({ name, position, positions, status, team, mlbId, per
           {team && <span className="text-xs text-muted-foreground">{team}</span>}
         </div>
         <div className="flex items-center gap-1 mt-0.5">
-          {posArray.map((p) => <Badge key={p} variant="outline" className="text-[10px]">{p}</Badge>)}
-          {status && status !== "Healthy" && <Badge variant="destructive" className="text-[10px]">{status}</Badge>}
+          {posArray.map((p) => <Badge key={p} variant="outline" className="text-xs">{p}</Badge>)}
+          {status && status !== "Healthy" && <Badge variant="destructive" className="text-xs">{status}</Badge>}
           {percentOwned !== undefined && <span className="text-xs text-muted-foreground ml-1">{percentOwned}% owned</span>}
           {zScore !== undefined && <ZScoreBadge z={zScore} size="sm" />}
         </div>

@@ -19,7 +19,7 @@ export function TeamsView({ data }: { data: { teams: MlbTeam[] } }) {
               <img src={teamLogoUrl(t.id)} alt={t.abbreviation} className="w-8 h-8" />
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate">{t.name}</p>
-                <Badge variant="secondary" className="text-[10px]">{t.abbreviation}</Badge>
+                <Badge variant="secondary" className="text-xs">{t.abbreviation}</Badge>
               </div>
             </CardContent>
           </Card>

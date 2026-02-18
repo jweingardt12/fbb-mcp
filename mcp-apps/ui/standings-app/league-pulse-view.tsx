@@ -101,9 +101,9 @@ export function LeaguePulseView({ data }: { data: { teams: LeaguePulseTeam[] } }
               <h3 className="text-sm font-semibold">Activity Chart</h3>
               <div className="flex items-center gap-1.5 ml-2">
                 <span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-500" />
-                <span className="text-[10px] text-muted-foreground">Moves</span>
+                <span className="text-xs text-muted-foreground">Moves</span>
                 <span className="inline-block w-2.5 h-2.5 rounded-sm bg-amber-500 ml-1" />
-                <span className="text-[10px] text-muted-foreground">Trades</span>
+                <span className="text-xs text-muted-foreground">Trades</span>
               </div>
             </div>
             <ChevronIcon open={showChart} />
@@ -112,8 +112,8 @@ export function LeaguePulseView({ data }: { data: { teams: LeaguePulseTeam[] } }
             <div className="mt-3" style={{ width: "100%", height: Math.max(250, chartData.length * 32) }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
-                  <XAxis type="number" tick={{ fontSize: 11 }} />
-                  <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} />
+                  <XAxis type="number" tick={{ fontSize: 12 }} />
+                  <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
                   <Tooltip />
                   <Bar dataKey="moves" stackId="a" fill="#3b82f6" barSize={20} />
                   <Bar dataKey="trades" stackId="a" fill="#f59e0b" barSize={20} radius={[0, 4, 4, 0]} />

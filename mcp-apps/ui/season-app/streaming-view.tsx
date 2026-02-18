@@ -65,7 +65,7 @@ export function StreamingView({ data, app, navigate }: { data: StreamingData; ap
                 <TableCell className="font-medium">
                   <span className="flex items-center" style={{ gap: "4px" }}>
                     {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                    <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="free-agents" />
+                    <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="free-agents" showHeadshot={false} />
                     {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                   </span>
                 </TableCell>

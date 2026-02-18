@@ -216,9 +216,9 @@ class ViewErrorBoundary extends React.Component<
     if (this.state.error) {
       return (
         <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-          <div className="text-destructive text-lg font-semibold mb-2">View crashed</div>
+          <div className="text-destructive text-base font-semibold mb-2">View crashed</div>
           <p className="text-muted-foreground text-sm mb-1">{this.state.error.message}</p>
-          <pre className="text-[11px] text-muted-foreground bg-muted rounded p-3 max-w-full overflow-x-auto mb-4 text-left">
+          <pre className="text-xs text-muted-foreground bg-muted rounded p-3 max-w-full overflow-x-auto mb-4 text-left">
             {this.state.error.stack}
           </pre>
           <Button size="sm" onClick={() => this.setState({ error: null })}>
@@ -240,30 +240,65 @@ function LoadingSpinner() {
   );
 }
 
+function SunIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  );
+}
+
 function DataSourceToggle({ dataSource, setDataSource, className }: {
   dataSource: "mock" | "live";
   setDataSource: (v: "mock" | "live") => void;
   className?: string;
 }) {
   return (
-    <div className={cn("inline-flex items-center rounded-lg border border-border bg-muted/70 p-0.5", className)}>
-      <Button
+    <div className={cn("inline-flex items-center rounded-lg border border-border bg-muted/60 p-0.5 gap-0.5", className)}>
+      <button
         onClick={() => setDataSource("mock")}
-        variant={dataSource === "mock" ? "secondary" : "ghost"}
-        size="sm"
-        className="h-7 rounded-md px-2.5 text-[11px] font-semibold"
+        className={cn(
+          "h-8 rounded-md px-3 text-sm font-medium transition-all cursor-pointer border-none",
+          dataSource === "mock"
+            ? "bg-background shadow-sm text-foreground"
+            : "bg-transparent text-muted-foreground hover:text-foreground"
+        )}
       >
         Mock
-      </Button>
-      <Button
+      </button>
+      <button
         onClick={() => setDataSource("live")}
-        variant={dataSource === "live" ? "secondary" : "ghost"}
-        size="sm"
-        className="h-7 rounded-md px-2.5 text-[11px] font-semibold"
+        className={cn(
+          "h-8 rounded-md px-3 text-sm font-medium transition-all cursor-pointer border-none",
+          dataSource === "live"
+            ? "bg-background shadow-sm text-foreground"
+            : "bg-transparent text-muted-foreground hover:text-foreground"
+        )}
       >
         Live
-      </Button>
+      </button>
     </div>
+  );
+}
+
+function DarkModeToggle({ darkMode, setDarkMode }: { darkMode: boolean; setDarkMode: (v: boolean) => void }) {
+  return (
+    <button
+      onClick={() => setDarkMode(!darkMode)}
+      title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+      className="h-8 w-8 flex items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer shrink-0"
+    >
+      {darkMode ? <SunIcon /> : <MoonIcon />}
+    </button>
   );
 }
 
@@ -276,6 +311,9 @@ function PreviewApp() {
   const [liveError, setLiveError] = useState<string | null>(null);
   const [liveApp] = useState(() => createLiveApp());
   const [mockData, setMockData] = useState<Record<string, any> | null>(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    try { return localStorage.getItem("preview-dark") === "1"; } catch { return false; }
+  });
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => {
     const activeGroupName = VIEW_GROUPS.find(g => g.views.some(v => v.id === "matchup-detail"));
     const collapsed = new Set<string>();
@@ -312,11 +350,18 @@ function PreviewApp() {
     }
   }, [dataSource, mockData]);
 
-  // Preview should stay in a consistent light-neutral Nova baseline.
+  // Apply dark mode class and color-scheme to <html>
   useEffect(() => {
-    document.documentElement.classList.remove("dark");
-    document.documentElement.style.colorScheme = "light";
-  }, []);
+    const html = document.documentElement;
+    if (darkMode) {
+      html.classList.add("dark");
+      html.style.colorScheme = "dark";
+    } else {
+      html.classList.remove("dark");
+      html.style.colorScheme = "light";
+    }
+    try { localStorage.setItem("preview-dark", darkMode ? "1" : "0"); } catch {}
+  }, [darkMode]);
 
   useEffect(() => {
     if (dataSource !== "live") return;
@@ -367,16 +412,19 @@ function PreviewApp() {
   };
 
   return (
-    <div className="preview-shell flex h-[100dvh] -m-3 overflow-hidden bg-background text-foreground">
+    <div className="preview-shell flex h-[100dvh] -m-3 overflow-hidden bg-background text-foreground" style={{ fontSize: "1rem" }}>
       {/* Mobile top bar */}
       <div
         className="sm:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between gap-2 border-b border-border bg-card/95 px-3 py-2 supports-backdrop-filter:backdrop-blur-md"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <Button variant="ghost" size="icon-sm" className="h-7 w-7" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? "\u2715" : "\u2630"}
-          </Button>
+          <button
+            className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer border-none bg-transparent shrink-0"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            <span className="text-base leading-none">{sidebarOpen ? "\u2715" : "\u2630"}</span>
+          </button>
           <div className="min-w-0">
             <p className="app-kicker leading-none">{activeGroup ? activeGroup.name : "Preview"}</p>
             <p className="text-sm font-semibold truncate">{view ? view.label : "Select a view"}</p>
@@ -384,6 +432,7 @@ function PreviewApp() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <DataSourceToggle dataSource={dataSource} setDataSource={setDataSource} className="hidden min-[420px]:inline-flex" />
+          <DarkModeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
         </div>
       </div>
 
@@ -398,7 +447,7 @@ function PreviewApp() {
       {/* Sidebar */}
       <nav
         className={
-          "w-72 max-w-[86vw] flex-shrink-0 border-r border-border bg-card/95 supports-backdrop-filter:backdrop-blur-sm flex flex-col z-50 "
+          "w-72 max-w-[86vw] flex-shrink-0 border-r border-border bg-card flex flex-col z-50 "
           + "sm:relative sm:block sm:h-full "
           + (sidebarOpen
             ? "fixed top-0 left-0 bottom-0"
@@ -406,20 +455,24 @@ function PreviewApp() {
         }
         style={sidebarOpen ? { paddingTop: "env(safe-area-inset-top)" } : undefined}
       >
-        {/* Sidebar header — sticky */}
-        <div className="flex-shrink-0 border-b border-border p-3 sm:p-4">
+        {/* Sidebar header */}
+        <div className="flex-shrink-0 border-b border-border px-3 py-3">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon-sm" className="sm:hidden h-7 w-7" onClick={() => setSidebarOpen(false)}>
-                {"\u2715"}
-              </Button>
-              <h1 className="text-sm font-semibold tracking-wide">Fantasy Preview</h1>
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                className="sm:hidden h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer border-none bg-transparent shrink-0"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <span className="text-base leading-none">{"\u2715"}</span>
+              </button>
+              <h1 className="text-sm font-bold tracking-wide truncate">Fantasy Preview</h1>
             </div>
-            <Badge variant="outline" className="text-[10px]">{allViews.length} views</Badge>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Badge variant="outline" className="text-xs">{allViews.length}</Badge>
+              <DarkModeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <DataSourceToggle dataSource={dataSource} setDataSource={setDataSource} className="flex-1 justify-start" />
-          </div>
+          <DataSourceToggle dataSource={dataSource} setDataSource={setDataSource} className="w-full" />
         </div>
 
         {/* Scrollable groups */}
@@ -436,8 +489,8 @@ function PreviewApp() {
                 <button
                   onClick={() => toggleGroup(group.name)}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 rounded-md text-left border-none cursor-pointer transition-colors",
-                    "text-xs font-semibold uppercase tracking-wide",
+                    "w-full flex items-center justify-between px-3 py-2.5 rounded-md text-left border-none cursor-pointer transition-colors",
+                    "text-xs font-bold uppercase tracking-widest",
                     isActiveGroup
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
@@ -445,10 +498,10 @@ function PreviewApp() {
                 >
                   <span>{group.name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] bg-muted text-muted-foreground rounded-full px-1.5 py-px font-medium">
+                    <span className="text-xs bg-muted text-muted-foreground rounded-full px-2 py-px font-semibold tabular-nums">
                       {group.views.length}
                     </span>
-                    <span className={cn("text-[10px] text-muted-foreground transition-transform duration-150", isCollapsed ? "" : "rotate-90")}>
+                    <span className={cn("text-xs transition-transform duration-150", isCollapsed ? "" : "rotate-90")}>
                       {"\u25B6"}
                     </span>
                   </div>
@@ -461,10 +514,10 @@ function PreviewApp() {
                         ref={activeView === v.id ? activeItemRef : undefined}
                         onClick={() => handleSelectView(v.id)}
                         className={cn(
-                          "block w-full text-left pl-4 pr-3 py-2 rounded-r-md text-sm transition-colors mb-px border-none cursor-pointer border-l-2",
+                          "block w-full text-left pl-4 pr-3 py-2.5 rounded-r-md text-sm transition-colors mb-px border-none cursor-pointer border-l-2",
                           activeView === v.id
                             ? "bg-primary/10 text-primary font-semibold border-l-primary"
-                            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground bg-transparent border-l-transparent"
+                            : "text-foreground/70 hover:bg-accent/60 hover:text-foreground bg-transparent border-l-transparent"
                         )}
                         style={{ borderLeftStyle: "solid" }}
                       >
@@ -484,13 +537,13 @@ function PreviewApp() {
         className="flex-1 min-w-0 overflow-y-auto overscroll-contain bg-[color:var(--color-surface-2)] h-full pt-[env(safe-area-inset-top)]"
         style={{ WebkitOverflowScrolling: "touch" } as any}
       >
-        <div className="p-4 sm:p-6 pt-14 sm:pt-6">
-          <div className="max-w-4xl mx-auto">
+        <div className="p-3 sm:p-4 pt-14 sm:pt-4">
+          <div className="w-full">
             <Card size="sm" className="mb-4">
               <CardContent className="flex items-center justify-between gap-3 py-3">
                 <div className="min-w-0">
                   <p className="app-kicker">{activeGroup ? activeGroup.name : "Preview"}</p>
-                  <h2 className="truncate text-base font-semibold">{view ? view.label : "Select a view"}</h2>
+                  <h2 className="truncate text-base font-bold">{view ? view.label : "Select a view"}</h2>
                 </div>
                 <div className="hidden sm:flex items-center gap-2">
                   <DataSourceToggle dataSource={dataSource} setDataSource={setDataSource} />
@@ -510,7 +563,7 @@ function PreviewApp() {
             ) : dataSource === "mock" && !mockData ? (
               <LoadingSpinner />
             ) : view && currentData ? (
-              <ViewErrorBoundary viewId={activeView}>
+              <ViewErrorBoundary key={activeView} viewId={activeView}>
                 <Suspense fallback={<LoadingSpinner />}>
                   <ViewRenderer view={view} data={currentData} app={dataSource === "live" ? liveApp : null} navigate={dataSource === "live" ? handleNavigate : noop} />
                 </Suspense>

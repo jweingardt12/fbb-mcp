@@ -41,7 +41,7 @@ export function ZScoreBadge({ z, size }: { z: number | null; size?: "sm" | "md" 
   if (z == null) return <span className="text-xs text-muted-foreground">N/A</span>;
   const isSmall = size === "sm";
   return (
-    <span className={"inline-flex items-center gap-1 rounded-md font-mono " + tierColor(z) + " text-white " + (isSmall ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-0.5 text-xs")}>
+    <span className={"inline-flex items-center gap-1 rounded-md font-mono " + tierColor(z) + " text-white " + (isSmall ? "px-1.5 py-0.5 text-xs" : "px-2 py-0.5 text-xs")}>
       <span className="font-medium">{getTier(z)}</span>
       <span>{formatFixed(z, 2, "0.00")}</span>
     </span>
@@ -50,7 +50,7 @@ export function ZScoreBadge({ z, size }: { z: number | null; size?: "sm" | "md" 
 
 export function ZScoreExplainer() {
   return (
-    <p className="text-[11px] text-muted-foreground">
+    <p className="text-xs text-muted-foreground">
       Z-Score: standard deviations above league average. Higher = better.
     </p>
   );

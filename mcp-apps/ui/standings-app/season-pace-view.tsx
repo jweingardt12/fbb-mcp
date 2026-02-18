@@ -31,10 +31,10 @@ interface SeasonPaceData {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === "in") return <Badge className="text-[10px] bg-sem-success">In</Badge>;
-  if (status === "bubble") return <Badge className="text-[10px] bg-sem-warning">Bubble</Badge>;
-  if (status === "out") return <Badge variant="destructive" className="text-[10px]">Out</Badge>;
-  return <Badge variant="secondary" className="text-[10px]">{status}</Badge>;
+  if (status === "in") return <Badge className="text-xs bg-sem-success">In</Badge>;
+  if (status === "bubble") return <Badge className="text-xs bg-sem-warning">Bubble</Badge>;
+  if (status === "out") return <Badge variant="destructive" className="text-xs">Out</Badge>;
+  return <Badge variant="secondary" className="text-xs">{status}</Badge>;
 }
 
 export function SeasonPaceView({ data }: { data: SeasonPaceData }) {

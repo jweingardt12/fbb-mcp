@@ -90,7 +90,7 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs text-muted-foreground">Weak:</span>
             {data.weak_categories.map((c) => (
-              <Badge key={c} variant="destructive" className="text-[10px]">{c}</Badge>
+              <Badge key={c} variant="destructive" className="text-xs">{c}</Badge>
             ))}
           </div>
         )}
@@ -98,7 +98,7 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs text-muted-foreground">Strong:</span>
             {data.strong_categories.map((c) => (
-              <Badge key={c} className="text-[10px] bg-sem-success">{c}</Badge>
+              <Badge key={c} className="text-xs bg-sem-success">{c}</Badge>
             ))}
           </div>
         )}
@@ -118,14 +118,14 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               {partner.team_name}
-              <Badge variant="outline" className="text-[10px]">
+              <Badge variant="outline" className="text-xs">
                 Score: {formatFixed(partner.score, 1, "0.0")}
               </Badge>
             </CardTitle>
             <div className="flex items-center gap-1 flex-wrap mt-1">
-              <span className="text-[10px] text-muted-foreground">Complementary:</span>
+              <span className="text-xs text-muted-foreground">Complementary:</span>
               {(partner.complementary_categories || []).map((c) => (
-                <Badge key={c} variant="secondary" className="text-[10px]">{c}</Badge>
+                <Badge key={c} variant="secondary" className="text-xs">{c}</Badge>
               ))}
             </div>
           </CardHeader>
@@ -134,7 +134,7 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
               <div key={i} className="border rounded-lg p-3 space-y-2">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Give</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Give</p>
                     {(pkg.give || []).map((p, j) => (
                       <div key={j} className="text-sm py-0.5">
                         <PlayerName name={p.name} playerId={p.player_id} app={app} navigate={navigate} context="trade" />
@@ -142,7 +142,7 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
                     ))}
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Get</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Get</p>
                     {(pkg.get || []).map((p, j) => (
                       <div key={j} className="text-sm py-0.5">
                         <PlayerName name={p.name} playerId={p.player_id} app={app} navigate={navigate} context="trade" />

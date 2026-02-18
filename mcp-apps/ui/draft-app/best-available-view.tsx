@@ -69,7 +69,7 @@ export function BestAvailableView({ data, app, navigate }: { data: BestAvailable
             <Badge
               key={pos}
               variant={posFilter === pos ? "default" : "outline"}
-              className="text-[10px] cursor-pointer"
+              className="text-xs cursor-pointer"
               onClick={function () { setPosFilter(pos); }}
             >
               {pos}
@@ -96,16 +96,16 @@ export function BestAvailableView({ data, app, navigate }: { data: BestAvailable
                 {showDivider && (
                   <div className="flex items-center gap-2 py-1.5">
                     <div className="flex-1 h-px bg-border" />
-                    <span className="text-[10px] text-muted-foreground">{tier} Tier</span>
+                    <span className="text-xs text-muted-foreground">{tier} Tier</span>
                     <div className="flex-1 h-px bg-border" />
                   </div>
                 )}
                 <div className={"flex items-center gap-2 py-1.5 px-2 rounded " + (i === 0 ? "bg-primary/10 border border-primary/30" : i % 2 === 0 ? "bg-muted/30" : "")}>
                   <span className="font-mono text-xs text-muted-foreground w-6 text-right">{p.rank}</span>
                   {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                  <span className={"text-sm flex-1 truncate " + (i === 0 ? "font-semibold" : "font-medium")}><PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="draft" /></span>
+                  <span className={"text-sm flex-1 truncate " + (i === 0 ? "font-semibold" : "font-medium")}><PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="draft" showHeadshot={false} /></span>
                   {p.intel && <IntelBadge intel={p.intel} size="sm" />}
-                  <Badge variant="outline" className="text-[10px] shrink-0">{posDisplay}</Badge>
+                  <Badge variant="outline" className="text-xs shrink-0">{posDisplay}</Badge>
                   <ZScoreBar z={p.z_score} />
                 </div>
               </div>

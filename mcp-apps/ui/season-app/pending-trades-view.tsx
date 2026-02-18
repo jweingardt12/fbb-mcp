@@ -84,7 +84,7 @@ export function PendingTradesView({ data, app, navigate }: { data: PendingTrades
                 <span className="text-muted-foreground mx-2">vs</span>
                 {trade.tradee_team_name || trade.tradee_team_key}
               </CardTitle>
-              <Badge variant="outline" className="text-[10px]">{trade.status}</Badge>
+              <Badge variant="outline" className="text-xs">{trade.status}</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -112,7 +112,7 @@ export function PendingTradesView({ data, app, navigate }: { data: PendingTrades
             )}
 
             <div className="flex items-center justify-between pt-1">
-              <span className="text-[10px] text-muted-foreground font-mono">{trade.transaction_key}</span>
+              <span className="text-xs text-muted-foreground font-mono">{trade.transaction_key}</span>
               <div className="flex gap-2">
                 <Button size="sm" variant="default" onClick={() => setConfirmAction({ type: "accept", trade })} disabled={loading}>
                   <Check size={14} className="mr-1" />

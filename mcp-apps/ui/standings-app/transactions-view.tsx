@@ -123,7 +123,7 @@ export function TransactionsView({ data }: { data: TransactionsData }) {
                           <TableCell className="w-24">
                             <div className="flex items-center gap-1.5">
                               <TypeIcon type={t.type} />
-                              <Badge variant={typeColors[t.type] || "outline"} className="text-[10px]">{t.type}</Badge>
+                              <Badge variant={typeColors[t.type] || "outline"} className="text-xs">{t.type}</Badge>
                             </div>
                           </TableCell>
                           <TableCell>

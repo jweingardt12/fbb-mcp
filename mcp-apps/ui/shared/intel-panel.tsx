@@ -28,12 +28,12 @@ function PercentileRow({ label, value, rank, invert }: { label: string; value: s
   const displayRank = invert ? (100 - rank) : rank;
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[11px] text-muted-foreground w-24 shrink-0">{label}</span>
+      <span className="text-xs text-muted-foreground w-24 shrink-0">{label}</span>
       <div className="flex-1">
         <StatBar value={displayRank} max={100} barClassName={rankBarClass(displayRank)} />
       </div>
       <span className="text-xs font-mono w-16 text-right shrink-0">{value}</span>
-      <span className={"text-[10px] font-mono w-12 text-right shrink-0 " + (rankBarClass(displayRank).replace("bg-", "text-").replace("-500", "-600").replace("-400", "-500"))}>
+      <span className={"text-xs font-mono w-12 text-right shrink-0 " + (rankBarClass(displayRank).replace("bg-", "text-").replace("-500", "-600").replace("-400", "-500"))}>
         {"(" + ordinal(Math.round(rank)) + ")"}
       </span>
     </div>
@@ -138,23 +138,23 @@ function TrendsSection({ trends }: { trends: NonNullable<PlayerIntel["trends"]> 
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Trends</h4>
         {icon && <span className={iconColor + " text-xs"}>{icon}</span>}
         {trends.hot_cold && trends.hot_cold !== "neutral" && (
-          <span className={iconColor + " text-[10px] font-medium"}>{trends.hot_cold}</span>
+          <span className={iconColor + " text-xs font-medium"}>{trends.hot_cold}</span>
         )}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-border">
-              <th className="text-left text-[11px] text-muted-foreground font-medium py-1 pr-4"></th>
-              {last14 && <th className="text-right text-[11px] text-muted-foreground font-medium py-1 px-2">14-Day</th>}
-              {last30 && <th className="text-right text-[11px] text-muted-foreground font-medium py-1 px-2">30-Day</th>}
+              <th className="text-left text-xs text-muted-foreground font-medium py-1 pr-4"></th>
+              {last14 && <th className="text-right text-xs text-muted-foreground font-medium py-1 px-2">14-Day</th>}
+              {last30 && <th className="text-right text-xs text-muted-foreground font-medium py-1 px-2">30-Day</th>}
             </tr>
           </thead>
           <tbody>
             {statKeys.map(function (key) {
               return (
                 <tr key={key} className="border-b border-border/50">
-                  <td className="text-[11px] text-muted-foreground font-medium py-0.5 pr-4">{key}</td>
+                  <td className="text-xs text-muted-foreground font-medium py-0.5 pr-4">{key}</td>
                   {last14 && <td className="text-right font-mono py-0.5 px-2">{last14[key] != null ? String(last14[key]) : "—"}</td>}
                   {last30 && <td className="text-right font-mono py-0.5 px-2">{last30[key] != null ? String(last30[key]) : "—"}</td>}
                 </tr>
@@ -164,7 +164,7 @@ function TrendsSection({ trends }: { trends: NonNullable<PlayerIntel["trends"]> 
         </table>
       </div>
       {trends.vs_last_year && (
-        <p className="text-[11px] text-muted-foreground">{"vs. Last Year: " + trends.vs_last_year}</p>
+        <p className="text-xs text-muted-foreground">{"vs. Last Year: " + trends.vs_last_year}</p>
       )}
     </div>
   );
@@ -180,7 +180,7 @@ function DisciplineSection({ discipline }: { discipline: NonNullable<PlayerIntel
       <div className="space-y-1">
         {discipline.bb_rate != null && (
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground w-24 shrink-0">BB%</span>
+            <span className="text-xs text-muted-foreground w-24 shrink-0">BB%</span>
             <div className="flex-1">
               <StatBar value={discipline.bb_rate} max={25} barClassName={discipline.bb_rate >= 12 ? "bg-green-500" : discipline.bb_rate >= 8 ? "bg-blue-500" : "bg-slate-400"} />
             </div>
@@ -189,7 +189,7 @@ function DisciplineSection({ discipline }: { discipline: NonNullable<PlayerIntel
         )}
         {discipline.k_rate != null && (
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground w-24 shrink-0">K%</span>
+            <span className="text-xs text-muted-foreground w-24 shrink-0">K%</span>
             <div className="flex-1">
               <StatBar value={discipline.k_rate} max={40} barClassName={discipline.k_rate <= 15 ? "bg-green-500" : discipline.k_rate <= 22 ? "bg-blue-500" : discipline.k_rate <= 28 ? "bg-orange-500" : "bg-red-500"} />
             </div>
@@ -198,7 +198,7 @@ function DisciplineSection({ discipline }: { discipline: NonNullable<PlayerIntel
         )}
         {discipline.o_swing_pct != null && (
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground w-24 shrink-0">O-Swing%</span>
+            <span className="text-xs text-muted-foreground w-24 shrink-0">O-Swing%</span>
             <div className="flex-1">
               <StatBar value={discipline.o_swing_pct} max={50} barClassName={discipline.o_swing_pct <= 25 ? "bg-green-500" : discipline.o_swing_pct <= 32 ? "bg-blue-500" : "bg-orange-500"} />
             </div>
@@ -207,7 +207,7 @@ function DisciplineSection({ discipline }: { discipline: NonNullable<PlayerIntel
         )}
         {discipline.z_contact_pct != null && (
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground w-24 shrink-0">Z-Contact</span>
+            <span className="text-xs text-muted-foreground w-24 shrink-0">Z-Contact</span>
             <div className="flex-1">
               <StatBar value={discipline.z_contact_pct} max={100} barClassName={discipline.z_contact_pct >= 85 ? "bg-green-500" : discipline.z_contact_pct >= 78 ? "bg-blue-500" : "bg-orange-500"} />
             </div>
@@ -216,7 +216,7 @@ function DisciplineSection({ discipline }: { discipline: NonNullable<PlayerIntel
         )}
         {discipline.swstr_pct != null && (
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground w-24 shrink-0">SwStr%</span>
+            <span className="text-xs text-muted-foreground w-24 shrink-0">SwStr%</span>
             <div className="flex-1">
               <StatBar value={discipline.swstr_pct} max={20} barClassName={discipline.swstr_pct <= 8 ? "bg-green-500" : discipline.swstr_pct <= 12 ? "bg-blue-500" : "bg-red-500"} />
             </div>
@@ -295,9 +295,9 @@ export function IntelPanel({ intel, defaultExpanded = false }: IntelPanelProps) 
         className={"w-full flex items-center gap-2 py-1 px-2 rounded text-left hover:bg-muted/50 transition-colors " + (expanded ? "bg-muted/30" : "")}
       >
         <ChevronRight className={"h-3 w-3 transition-transform " + (expanded ? "rotate-90" : "")} />
-        <span className="text-[11px] text-muted-foreground font-medium">Intel</span>
+        <span className="text-xs text-muted-foreground font-medium">Intel</span>
         {tier && (
-          <span className={"inline-flex items-center rounded-md text-[10px] font-medium text-white px-1.5 py-0.5 " + qualityColor(tier)}>
+          <span className={"inline-flex items-center rounded-md text-xs font-medium text-white px-1.5 py-0.5 " + qualityColor(tier)}>
             {tier}
           </span>
         )}

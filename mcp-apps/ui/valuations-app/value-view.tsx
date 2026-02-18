@@ -63,8 +63,8 @@ export function ValueView({ data, app, navigate }: { data: ValueData; app?: any;
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" height={60} />
-              <YAxis tick={{ fontSize: 10 }} />
+              <XAxis dataKey="name" tick={{ fontSize: 12 }} angle={-35} textAnchor="end" height={60} />
+              <YAxis tick={{ fontSize: 12 }} />
               <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "6px", fontSize: "12px" }} />
               <Bar dataKey="z_score" radius={[3, 3, 0, 0]}>
                 {chartData.map(function (entry, i) {

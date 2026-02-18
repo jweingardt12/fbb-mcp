@@ -120,14 +120,14 @@ export function FreeAgentsView({ data, app, navigate }: { data: FreeAgentsData; 
                       <span className="flex items-center" style={{ gap: "4px" }}>
                         {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
                         {logoUrl && <img src={logoUrl} alt={p.team || ""} width={16} height={16} style={{ display: "inline", flexShrink: 0 }} />}
-                        <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="free-agents" />
+                        <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="free-agents" showHeadshot={false} />
                         {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                       </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
                         {posDisplay.split(",").map((pos) => (
-                          <Badge key={pos.trim()} variant="outline" className="text-[10px]">{pos.trim()}</Badge>
+                          <Badge key={pos.trim()} variant="outline" className="text-xs">{pos.trim()}</Badge>
                         ))}
                       </div>
                     </TableCell>
@@ -139,7 +139,7 @@ export function FreeAgentsView({ data, app, navigate }: { data: FreeAgentsData; 
                     </TableCell>
                     <TableCell>
                       {p.status && p.status !== "Healthy" && (
-                        <Badge variant="destructive" className="text-[10px]">{p.status}</Badge>
+                        <Badge variant="destructive" className="text-xs">{p.status}</Badge>
                       )}
                     </TableCell>
                     <TableCell>

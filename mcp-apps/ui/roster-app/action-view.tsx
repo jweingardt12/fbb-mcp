@@ -25,18 +25,18 @@ export function ActionView({ data, app, navigate }: { data: ActionData; app: any
   };
 
   return (
-    <Card className="max-w-md mx-auto mt-4 animate-fade-in">
-      <CardHeader>
+    <Card className="w-full mt-2 animate-slide-up overflow-hidden">
+      <CardHeader className={data.success ? "bg-sem-success-subtle" : "bg-destructive/5"}>
         <div className="flex items-center gap-2">
           <CardTitle>{title}</CardTitle>
           {data.success
-            ? <CheckCircle size={20} className="text-green-500" />
-            : <XCircle size={20} className="text-destructive" />
+            ? <CheckCircle size={20} className="text-sem-success animate-success-pop" />
+            : <XCircle size={20} className="text-destructive animate-error-shake" />
           }
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm">{data.message}</p>
+        <p className="text-base">{data.message}</p>
         {data.player_id && <p className="text-xs text-muted-foreground mt-2">{"Player ID: " + data.player_id}</p>}
         {data.add_id && <p className="text-xs text-muted-foreground mt-1">{"Added ID: " + data.add_id}</p>}
         {data.drop_id && <p className="text-xs text-muted-foreground mt-1">{"Dropped ID: " + data.drop_id}</p>}

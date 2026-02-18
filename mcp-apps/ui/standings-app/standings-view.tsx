@@ -78,12 +78,12 @@ function PointsDistributionChart({ standings, playoffLine }: { standings: Standi
     <div style={{ width: "100%", height: chartHeight }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
-          <XAxis type="number" tick={{ fontSize: 11 }} />
+          <XAxis type="number" tick={{ fontSize: 12 }} />
           <YAxis
             type="category"
             dataKey="name"
             width={130}
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 12 }}
           />
           {cutoffPoints > 0 && (
             <ReferenceLine
@@ -91,7 +91,7 @@ function PointsDistributionChart({ standings, playoffLine }: { standings: Standi
               stroke="var(--sem-neutral)"
               strokeDasharray="4 4"
               strokeWidth={1.5}
-              label={{ value: "Playoff line", position: "top", fontSize: 10, fill: "var(--sem-neutral)" }}
+              label={{ value: "Playoff line", position: "top", fontSize: 11, fill: "var(--sem-neutral)" }}
             />
           )}
           <Bar dataKey="points" radius={[0, 4, 4, 0]} barSize={20}>
@@ -172,9 +172,9 @@ export function StandingsView({ data }: { data: { standings: StandingsEntry[]; p
                 <h3 className="text-sm font-semibold">Points Distribution</h3>
                 <div className="flex items-center gap-1.5 ml-2">
                   <span className="inline-block w-2.5 h-2.5 rounded-sm bg-green-500 opacity-70" />
-                  <span className="text-[10px] text-muted-foreground">Playoff</span>
+                  <span className="text-xs text-muted-foreground">Playoff</span>
                   <span className="inline-block w-2.5 h-2.5 rounded-sm bg-red-500 opacity-70 ml-1" />
-                  <span className="text-[10px] text-muted-foreground">Out</span>
+                  <span className="text-xs text-muted-foreground">Out</span>
                 </div>
               </div>
               <ChevronIcon open={showDistribution} />

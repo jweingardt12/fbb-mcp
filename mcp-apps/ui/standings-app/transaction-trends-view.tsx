@@ -92,7 +92,7 @@ function TrendTable({ players, direction }: { players: TrendPlayer[]; direction:
               <TableCell className="hidden sm:table-cell">
                 <div className="flex gap-1 flex-wrap">
                   {(p.position || "").split(",").filter(Boolean).map(function (pos) {
-                    return <Badge key={pos.trim()} variant="outline" className="text-[10px]">{pos.trim()}</Badge>;
+                    return <Badge key={pos.trim()} variant="outline" className="text-xs">{pos.trim()}</Badge>;
                   })}
                 </div>
               </TableCell>

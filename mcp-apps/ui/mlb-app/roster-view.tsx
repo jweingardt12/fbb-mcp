@@ -31,7 +31,7 @@ export function RosterView({ data, app, navigate }: { data: MlbRosterData; app?:
               <TableCell className="font-mono">{p.jersey_number}</TableCell>
               <TableCell className="font-medium"><PlayerName name={p.name} app={app} navigate={navigate} context="default" /></TableCell>
               <TableCell>
-                <Badge variant="outline" className="text-[10px]">{p.position}</Badge>
+                <Badge variant="outline" className="text-xs">{p.position}</Badge>
               </TableCell>
             </TableRow>
           ))}

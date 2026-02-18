@@ -138,9 +138,9 @@ export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; ap
                     {c.result === "tie" && <span className="text-xs text-sem-warning font-medium">TIE</span>}
                   </TableCell>
                   <TableCell className="text-center hidden sm:table-cell">
-                    {c.margin === "close" && <Badge variant="outline" className="text-[10px] border-yellow-500 text-sem-warning">Close</Badge>}
-                    {c.margin === "comfortable" && <Badge variant="outline" className="text-[10px]">Comf.</Badge>}
-                    {c.margin === "dominant" && <Badge variant="outline" className="text-[10px] border-red-500 text-sem-risk">Dom.</Badge>}
+                    {c.margin === "close" && <Badge variant="outline" className="text-xs border-yellow-500 text-sem-warning">Close</Badge>}
+                    {c.margin === "comfortable" && <Badge variant="outline" className="text-xs">Comf.</Badge>}
+                    {c.margin === "dominant" && <Badge variant="outline" className="text-xs border-red-500 text-sem-risk">Dom.</Badge>}
                   </TableCell>
                 </TableRow>
               ))}
@@ -160,7 +160,7 @@ export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; ap
               </div>
               <div className="flex flex-wrap gap-1">
                 {(d.opp_strengths || []).map((s) => (
-                  <Badge key={s} variant="destructive" className="text-[10px]">{s}</Badge>
+                  <Badge key={s} variant="destructive" className="text-xs">{s}</Badge>
                 ))}
               </div>
             </CardContent>
@@ -175,7 +175,7 @@ export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; ap
               </div>
               <div className="flex flex-wrap gap-1">
                 {(d.opp_weaknesses || []).map((s) => (
-                  <Badge key={s} className="bg-sem-success text-[10px]">{s}</Badge>
+                  <Badge key={s} className="bg-sem-success text-xs">{s}</Badge>
                 ))}
               </div>
             </CardContent>

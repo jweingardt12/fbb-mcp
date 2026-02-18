@@ -28,25 +28,17 @@ export function WhoOwnsView({ data, app, navigate }: { data: WhoOwnsData; app: a
   };
 
   return (
-    <Card className="max-w-md mx-auto mt-4 animate-fade-in">
+    <Card className="w-full mt-2 animate-slide-up">
       <CardHeader>
         <CardTitle>Player Ownership</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Player:</span>
-          <span className="text-sm font-mono">{data.player_key}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Status:</span>
+        <div className="flex items-center gap-3 flex-wrap">
           {ownershipBadge(data.ownership_type)}
-        </div>
-        {data.ownership_type === "team" && data.owner && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Owner:</span>
+          {data.ownership_type === "team" && data.owner && (
             <span className="text-sm font-medium">{data.owner}</span>
-          </div>
-        )}
+          )}
+        </div>
         <div className="pt-2 flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleSearch}>
             <Search size={14} className="mr-1" />

@@ -83,7 +83,7 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
               <p className="text-xs text-muted-foreground mb-1.5">Strongest</p>
               <div className="flex flex-wrap gap-1">
                 {(data.strongest || []).map((s) => (
-                  <Badge key={s} className="bg-sem-success text-[10px]">{s}</Badge>
+                  <Badge key={s} className="bg-sem-success text-xs">{s}</Badge>
                 ))}
               </div>
             </CardContent>
@@ -95,7 +95,7 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
               <p className="text-xs text-muted-foreground mb-1.5">Weakest</p>
               <div className="flex flex-wrap gap-1">
                 {(data.weakest || []).map((s) => (
-                  <Badge key={s} variant="destructive" className="text-[10px]">{s}</Badge>
+                  <Badge key={s} variant="destructive" className="text-xs">{s}</Badge>
                 ))}
               </div>
             </CardContent>
@@ -124,7 +124,7 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={chartData}>
                   <PolarGrid />
-                  <PolarAngleAxis dataKey="category" tick={{ fontSize: 10 }} />
+                  <PolarAngleAxis dataKey="category" tick={{ fontSize: 12 }} />
                   <PolarRadiusAxis tick={{ fontSize: 9 }} domain={[0, "dataMax"]} />
                   <Radar dataKey="rank" stroke="var(--color-primary)" fill="var(--color-primary)" fillOpacity={0.3} />
                 </RadarChart>
@@ -136,8 +136,8 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData} layout="vertical" margin={{ left: 40, right: 10, top: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.5} vertical={false} />
-                  <XAxis type="number" domain={[0, "dataMax"]} tick={{ fontSize: 10 }} />
-                  <YAxis type="category" dataKey="category" tick={{ fontSize: 10 }} width={40} />
+                  <XAxis type="number" domain={[0, "dataMax"]} tick={{ fontSize: 12 }} />
+                  <YAxis type="category" dataKey="category" tick={{ fontSize: 12 }} width={40} />
                   <ReferenceLine x={medianValue} stroke="#94a3b8" strokeDasharray="3 3" label={{ value: "Median", fontSize: 9, fill: "#94a3b8" }} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {barData.map((entry) => (
@@ -180,8 +180,8 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
                 </div>
               </TableCell>
               <TableCell className="hidden sm:table-cell">
-                {c.strength === "strong" && <Badge variant="default" className="text-[10px] bg-green-600">Strong</Badge>}
-                {c.strength === "weak" && <Badge variant="destructive" className="text-[10px]">Weak</Badge>}
+                {c.strength === "strong" && <Badge variant="default" className="text-xs bg-green-600">Strong</Badge>}
+                {c.strength === "weak" && <Badge variant="destructive" className="text-xs">Weak</Badge>}
               </TableCell>
             </TableRow>
           ))}

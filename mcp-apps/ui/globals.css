@@ -78,12 +78,12 @@
   --safe-area-right: 0px;
   --safe-area-bottom: 0px;
   --safe-area-left: 0px;
-  --app-space-1: clamp(0.5rem, 0.45rem + 0.3vw, 0.75rem);
-  --app-space-2: clamp(0.75rem, 0.7rem + 0.35vw, 1rem);
-  --app-space-3: clamp(1rem, 0.92rem + 0.55vw, 1.4rem);
-  --app-space-4: clamp(1.25rem, 1.1rem + 1vw, 2rem);
-  --app-text-sm: clamp(0.77rem, 0.75rem + 0.08vw, 0.84rem);
-  --app-text-base: clamp(0.9rem, 0.85rem + 0.2vw, 1rem);
+  --app-space-1: clamp(0.875rem, 0.8rem + 0.4vw, 1.25rem);
+  --app-space-2: clamp(1rem, 0.9rem + 0.5vw, 1.5rem);
+  --app-space-3: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
+  --app-space-4: clamp(1.5rem, 1.25rem + 1vw, 2.25rem);
+  --app-text-sm: clamp(0.8125rem, 0.8rem + 0.05vw, 0.875rem);
+  --app-text-base: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
   --app-text-lg: clamp(1.04rem, 0.95rem + 0.5vw, 1.2rem);
   --app-shadow-soft: 0 1px 2px rgba(2, 8, 23, 0.08), 0 3px 12px rgba(2, 8, 23, 0.04);
   --background: oklch(1 0 0);
@@ -130,7 +130,7 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   margin: 0;
-  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -144,21 +144,22 @@ button, a, [role="button"] {
 }
 
 #root {
-  min-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+  min-height: calc(100dvh - max(8px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
 }
 
 .mcp-app-root {
   position: relative;
   overflow: hidden;
   border-radius: 14px;
+  animation: slide-up 240ms ease-out both;
   background: linear-gradient(180deg, color-mix(in oklab, var(--color-surface-1) 98%, var(--color-accent-info) 2%), var(--color-surface-1));
   box-shadow: var(--app-shadow-soft);
   border: 1px solid color-mix(in oklab, var(--color-border) 82%, transparent);
   padding:
-    calc(var(--app-space-2) + min(var(--safe-area-top), 12px))
-    calc(var(--app-space-2) + min(var(--safe-area-right), 12px))
-    calc(var(--app-space-2) + min(var(--safe-area-bottom), 12px))
-    calc(var(--app-space-2) + min(var(--safe-area-left), 12px));
+    calc(var(--app-space-1) + min(var(--safe-area-top), 8px))
+    calc(var(--app-space-1) + min(var(--safe-area-right), 8px))
+    calc(var(--app-space-1) + min(var(--safe-area-bottom), 8px))
+    calc(var(--app-space-1) + min(var(--safe-area-left), 8px));
 }
 
 /* In preview mode, force components into the Nova card system instead of command-center chrome. */
@@ -167,7 +168,7 @@ button, a, [role="button"] {
   background: var(--card);
   border: 1px solid var(--border);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
-  padding: var(--app-space-2);
+  padding: var(--app-space-1);
 }
 
 .preview-shell .mcp-app-content {
@@ -231,8 +232,8 @@ button, a, [role="button"] {
 
 .app-kicker {
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
   color: var(--color-muted-foreground);
   font-weight: 600;
 }
@@ -308,6 +309,51 @@ button, a, [role="button"] {
 
 .animate-fade-in {
   animation: fade-in 200ms ease-out;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up { animation: slide-up 240ms ease-out both; }
+
+@keyframes success-pop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.2); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+.animate-success-pop { animation: success-pop 350ms cubic-bezier(0.34,1.56,0.64,1) both; }
+
+@keyframes error-shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-4px); }
+  40%      { transform: translateX(4px); }
+  60%      { transform: translateX(-3px); }
+  80%      { transform: translateX(3px); }
+}
+.animate-error-shake { animation: error-shake 400ms ease-in-out both; }
+
+.animate-stagger > * { animation: fade-in 200ms ease-out both; }
+.animate-stagger > *:nth-child(1) { animation-delay:   0ms; }
+.animate-stagger > *:nth-child(2) { animation-delay:  50ms; }
+.animate-stagger > *:nth-child(3) { animation-delay: 100ms; }
+.animate-stagger > *:nth-child(4) { animation-delay: 150ms; }
+.animate-stagger > *:nth-child(5) { animation-delay: 200ms; }
+.animate-stagger > *:nth-child(n+6) { animation-delay: 240ms; }
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg,
+    var(--color-muted) 25%,
+    oklch(from var(--color-muted) calc(l + 0.08) c h) 50%,
+    var(--color-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
 }
 
 .loading-overlay {

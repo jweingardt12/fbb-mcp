@@ -111,7 +111,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
                     <TableCell className="font-medium">
                       <span className="flex items-center" style={{ gap: "4px" }}>
                         {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" />
+                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} />
                         {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                       </span>
                     </TableCell>
@@ -150,7 +150,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
                     <TableCell className="font-medium">
                       <span className="flex items-center" style={{ gap: "4px" }}>
                         {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" />
+                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} />
                         {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                       </span>
                     </TableCell>
@@ -181,12 +181,12 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
           <CardContent>
             {(data.swaps || []).map((s, i) => (
               <div key={i} className="flex items-center gap-2 py-1">
-                <Badge variant="destructive" className="text-[10px]">Bench</Badge>
-                <span className="text-sm"><PlayerName name={s.bench_player} context="roster" /></span>
+                <Badge variant="destructive" className="text-xs">Bench</Badge>
+                <span className="text-sm"><PlayerName name={s.bench_player} context="roster" showHeadshot={false} /></span>
                 <ArrowRightLeft size={14} className="text-muted-foreground" />
-                <Badge variant="default" className="text-[10px]">Start</Badge>
-                <span className="text-sm"><PlayerName name={s.start_player} context="roster" /></span>
-                <Badge variant="outline" className="text-[10px]">{s.position}</Badge>
+                <Badge variant="default" className="text-xs">Start</Badge>
+                <span className="text-sm"><PlayerName name={s.start_player} context="roster" showHeadshot={false} /></span>
+                <Badge variant="outline" className="text-xs">{s.position}</Badge>
               </div>
             ))}
           </CardContent>
@@ -207,13 +207,13 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
                 <div className="space-y-1.5">
                   {(data.swaps || []).map((s, i) => (
                     <div key={"before-" + i} className="flex items-center gap-1.5">
-                      <Badge variant="outline" className="text-[10px] min-w-[36px] justify-center">{s.position}</Badge>
+                      <Badge variant="outline" className="text-xs min-w-[36px] justify-center">{s.position}</Badge>
                       <span className="text-sm">{s.start_player}</span>
                     </div>
                   ))}
                   {(data.swaps || []).map((s, i) => (
                     <div key={"before-bn-" + i} className="flex items-center gap-1.5">
-                      <Badge variant="secondary" className="text-[10px] min-w-[36px] justify-center">BN</Badge>
+                      <Badge variant="secondary" className="text-xs min-w-[36px] justify-center">BN</Badge>
                       <span className="text-sm text-muted-foreground">{s.bench_player}</span>
                     </div>
                   ))}
@@ -229,13 +229,13 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
                 <div className="space-y-1.5">
                   {(data.swaps || []).map((s, i) => (
                     <div key={"after-" + i} className="flex items-center gap-1.5">
-                      <Badge variant="default" className="text-[10px] min-w-[36px] justify-center">{s.position}</Badge>
+                      <Badge variant="default" className="text-xs min-w-[36px] justify-center">{s.position}</Badge>
                       <span className="text-sm font-medium">{s.bench_player}</span>
                     </div>
                   ))}
                   {(data.swaps || []).map((s, i) => (
                     <div key={"after-bn-" + i} className="flex items-center gap-1.5">
-                      <Badge variant="secondary" className="text-[10px] min-w-[36px] justify-center">BN</Badge>
+                      <Badge variant="secondary" className="text-xs min-w-[36px] justify-center">BN</Badge>
                       <span className="text-sm text-muted-foreground">{s.start_player}</span>
                     </div>
                   ))}
@@ -266,11 +266,11 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
             <div key={"confirm-" + i} className="text-sm flex items-center gap-1.5">
               <span className="font-medium">{s.bench_player}</span>
               <ArrowRight size={12} className="text-muted-foreground" />
-              <Badge variant="outline" className="text-[10px]">{s.position}</Badge>
+              <Badge variant="outline" className="text-xs">{s.position}</Badge>
               <span className="text-muted-foreground mx-1">/</span>
               <span className="font-medium">{s.start_player}</span>
               <ArrowRight size={12} className="text-muted-foreground" />
-              <Badge variant="secondary" className="text-[10px]">BN</Badge>
+              <Badge variant="secondary" className="text-xs">BN</Badge>
             </div>
           ))}
         </div>

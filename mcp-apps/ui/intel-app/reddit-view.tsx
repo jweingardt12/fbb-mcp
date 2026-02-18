@@ -66,7 +66,7 @@ export function RedditView({ data, app, navigate }: { data: RedditData; app: any
             <div key={i} className="rounded-lg border p-3 space-y-1.5 hover:bg-muted/30 transition-colors">
               <div className="flex items-start gap-2">
                 {post.flair && (
-                  <Badge variant="secondary" className={"text-[10px] shrink-0 " + flairColor(post.flair)}>{post.flair}</Badge>
+                  <Badge variant="secondary" className={"text-xs shrink-0 " + flairColor(post.flair)}>{post.flair}</Badge>
                 )}
                 <p className="text-sm font-medium leading-tight">{post.title}</p>
               </div>

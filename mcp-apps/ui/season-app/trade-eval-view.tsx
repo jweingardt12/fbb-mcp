@@ -63,11 +63,11 @@ function PlayerRow({ player, app, navigate }: { player: Player; app?: any; navig
   return (
     <div className="flex items-center gap-2 py-1.5 border-b last:border-0">
       {player.mlb_id && <img src={mlbHeadshotUrl(player.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-      <span className="font-medium text-sm flex-1"><PlayerName name={player.name} playerId={player.player_id} mlbId={player.mlb_id} app={app} navigate={navigate} context="trade" /></span>
+      <span className="font-medium text-sm flex-1"><PlayerName name={player.name} playerId={player.player_id} mlbId={player.mlb_id} app={app} navigate={navigate} context="trade" showHeadshot={false} /></span>
       {player.intel && <IntelBadge intel={player.intel} size="sm" />}
       <div className="flex gap-1">
         {positions.map((pos) => (
-          <Badge key={pos} variant="outline" className="text-[10px]">{pos}</Badge>
+          <Badge key={pos} variant="outline" className="text-xs">{pos}</Badge>
         ))}
       </div>
       {player.value != null && (
@@ -110,7 +110,7 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
               <p className={"text-2xl font-bold font-mono " + (netValue >= 0 ? "text-green-600" : "text-destructive")}>
                 {netValue >= 0 ? "+" : ""}{fmtOne(netValue)}
               </p>
-              <p className="text-[11px] text-muted-foreground">Based on z-score projections</p>
+              <p className="text-xs text-muted-foreground">Based on z-score projections</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="text-center">
@@ -178,7 +178,7 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
                 <div>
                   <span className="text-xs text-muted-foreground">Losing: </span>
                   {(impact.losing || []).map((pos) => (
-                    <Badge key={pos} variant="outline" className="text-[10px] mr-1 border-red-500 text-sem-risk">{pos}</Badge>
+                    <Badge key={pos} variant="outline" className="text-xs mr-1 border-red-500 text-sem-risk">{pos}</Badge>
                   ))}
                 </div>
               )}
@@ -186,7 +186,7 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
                 <div>
                   <span className="text-xs text-muted-foreground">Gaining: </span>
                   {(impact.gaining || []).map((pos) => (
-                    <Badge key={pos} variant="outline" className="text-[10px] mr-1 border-green-500 text-green-600">{pos}</Badge>
+                    <Badge key={pos} variant="outline" className="text-xs mr-1 border-green-500 text-green-600">{pos}</Badge>
                   ))}
                 </div>
               )}

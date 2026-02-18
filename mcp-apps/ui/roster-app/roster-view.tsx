@@ -67,20 +67,20 @@ export function RosterView({ data, app, navigate }: { data: { players: Player[] 
                     <span className="flex items-center" style={{ gap: "4px" }}>
                       {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
                       {logoUrl && <img src={logoUrl} alt={p.team || ""} width={16} height={16} style={{ display: "inline", flexShrink: 0 }} />}
-                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" />
+                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} />
                       {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                     </span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex gap-1 flex-wrap">
                       {(p.eligible_positions || []).map((pos) => (
-                        <Badge key={pos} variant="secondary" className="text-[10px]">{pos}</Badge>
+                        <Badge key={pos} variant="secondary" className="text-xs">{pos}</Badge>
                       ))}
                     </div>
                   </TableCell>
                   <TableCell>
                     {p.status && p.status !== "Healthy" && (
-                      <Badge variant="destructive" className="text-[10px]">{p.status}</Badge>
+                      <Badge variant="destructive" className="text-xs">{p.status}</Badge>
                     )}
                   </TableCell>
                   <TableCell>

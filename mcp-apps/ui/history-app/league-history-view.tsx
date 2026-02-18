@@ -200,13 +200,13 @@ export function LeagueHistoryView({ data }: { data: { seasons: SeasonResult[] } 
                 <BarChart data={sortedChartData} margin={{ top: 5, right: 5, bottom: 5, left: -10 }}>
                   <XAxis
                     dataKey="year"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 12 }}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis
                     domain={[0, 100]}
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 12 }}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={function (v: number) { return v + "%"; }}
@@ -242,7 +242,7 @@ export function LeagueHistoryView({ data }: { data: { seasons: SeasonResult[] } 
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex flex-wrap gap-3 mt-2 text-[10px] text-muted-foreground">
+            <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <div className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
                 Champion

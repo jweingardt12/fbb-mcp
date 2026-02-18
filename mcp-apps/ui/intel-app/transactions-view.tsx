@@ -73,7 +73,7 @@ export function TransactionsView({ data, app, navigate }: { data: TransactionsDa
                 return (
                   <TableRow key={i}>
                     <TableCell>
-                      <Badge variant="secondary" className={"text-[10px] " + typeColor(t.type)}>{t.type}</Badge>
+                      <Badge variant="secondary" className={"text-xs " + typeColor(t.type)}>{t.type}</Badge>
                     </TableCell>
                     <TableCell className="font-medium">{t.player}</TableCell>
                     <TableCell className="text-sm">

@@ -72,7 +72,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">What's New</h2>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground">{data.check_time || data.last_check}</span>
+          <span className="text-xs text-muted-foreground">{data.check_time || data.last_check}</span>
           <RefreshButton app={app} toolName="yahoo_whats_new" navigate={navigate} />
         </div>
       </div>
@@ -90,7 +90,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
             <CardTitle className="text-sm flex items-center gap-2">
               <AlertTriangle size={14} className="text-destructive" />
               Injuries
-              <Badge variant="destructive" className="text-[10px]">{data.injuries.length}</Badge>
+              <Badge variant="destructive" className="text-xs">{data.injuries.length}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -110,10 +110,10 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
                       <PlayerName name={p.name} app={app} navigate={navigate} context="roster" />
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-[10px]">{p.position}</Badge>
+                      <Badge variant="outline" className="text-xs">{p.position}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="destructive" className="text-[10px]">{p.status}</Badge>
+                      <Badge variant="destructive" className="text-xs">{p.status}</Badge>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">{p.section}</TableCell>
                   </TableRow>
@@ -131,7 +131,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
             <CardTitle className="text-sm flex items-center gap-2">
               <ArrowRightLeft size={14} />
               Pending Trades
-              <Badge variant="secondary" className="text-[10px]">{data.pending_trades.length}</Badge>
+              <Badge variant="secondary" className="text-xs">{data.pending_trades.length}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -152,7 +152,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
             <CardTitle className="text-sm flex items-center gap-2">
               <Activity size={14} />
               League Activity
-              <Badge variant="secondary" className="text-[10px]">{data.league_activity.length}</Badge>
+              <Badge variant="secondary" className="text-xs">{data.league_activity.length}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -168,7 +168,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
                 {data.league_activity.slice(0, 10).map((a, i) => (
                   <TableRow key={i}>
                     <TableCell>
-                      <Badge variant={a.type === "add" ? "default" : "secondary"} className="text-[10px]">{a.type}</Badge>
+                      <Badge variant={a.type === "add" ? "default" : "secondary"} className="text-xs">{a.type}</Badge>
                     </TableCell>
                     <TableCell className="font-medium">
                       <PlayerName name={a.player} app={app} navigate={navigate} context="waivers" />
@@ -189,7 +189,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
             <CardTitle className="text-sm flex items-center gap-2">
               <TrendingUp size={14} />
               Trending Pickups
-              <Badge variant="secondary" className="text-[10px]">{data.trending.length}</Badge>
+              <Badge variant="secondary" className="text-xs">{data.trending.length}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -232,7 +232,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
             <CardTitle className="text-sm flex items-center gap-2">
               <Star size={14} />
               Prospect Call-Ups
-              <Badge variant="secondary" className="text-[10px]">{data.prospects.length}</Badge>
+              <Badge variant="secondary" className="text-xs">{data.prospects.length}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -251,7 +251,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
                       <PlayerName name={p.player} app={app} navigate={navigate} context="waivers" />
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-[10px]">{p.type}</Badge>
+                      <Badge variant="outline" className="text-xs">{p.type}</Badge>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">

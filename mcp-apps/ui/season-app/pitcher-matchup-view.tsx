@@ -74,7 +74,7 @@ export function PitcherMatchupView({ data }: { data: PitcherMatchupData }) {
               <TableCell className="font-medium">
                 <span className="flex items-center gap-1.5">
                   {p.name}
-                  {p.two_start && <Badge className="text-[10px] bg-purple-600 text-white">2S</Badge>}
+                  {p.two_start && <Badge className="text-xs bg-purple-600 text-white">2S</Badge>}
                 </span>
               </TableCell>
               <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">

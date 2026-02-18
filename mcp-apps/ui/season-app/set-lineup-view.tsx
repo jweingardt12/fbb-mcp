@@ -27,31 +27,33 @@ export function SetLineupView({ data, app, navigate }: { data: SetLineupData; ap
   };
 
   return (
-    <Card className="max-w-md mx-auto mt-4 animate-fade-in">
-      <CardHeader>
+    <Card className="w-full mt-2 animate-slide-up overflow-hidden">
+      <CardHeader className={data.success ? "bg-sem-success-subtle" : "bg-destructive/5"}>
         <div className="flex items-center gap-2">
           <CardTitle>Set Lineup</CardTitle>
           {data.success
-            ? <CheckCircle size={20} className="text-green-500" />
-            : <XCircle size={20} className="text-destructive" />
+            ? <CheckCircle size={20} className="text-sem-success animate-success-pop" />
+            : <XCircle size={20} className="text-destructive animate-error-shake" />
           }
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {(data.moves || []).map((m, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm">
-            {m.success
-              ? <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
-              : <XCircle size={14} className="text-destructive flex-shrink-0" />
-            }
-            <span>
+        <div className="animate-stagger space-y-2">
+          {(data.moves || []).map((m, i) => (
+            <div key={i} className="flex items-center gap-2 text-sm">
               {m.success
-                ? "Moved " + m.player_id + " to " + m.position
-                : "Error: " + (m.error || "Failed to move " + m.player_id)
+                ? <CheckCircle size={14} className="text-sem-success flex-shrink-0" />
+                : <XCircle size={14} className="text-destructive flex-shrink-0" />
               }
-            </span>
-          </div>
-        ))}
+              <span>
+                {m.success
+                  ? "Moved " + m.player_id + " to " + m.position
+                  : "Error: " + (m.error || "Failed to move " + m.player_id)
+                }
+              </span>
+            </div>
+          ))}
+        </div>
         {data.message && <p className="text-xs text-muted-foreground">{data.message}</p>}
         <div className="flex items-center gap-2 pt-2">
           <Button variant="outline" size="sm" onClick={handleViewRoster}>

@@ -75,7 +75,7 @@ export function WeekPlannerView({ data }: { data: WeekPlannerData }) {
                       {p.name}
                     </td>
                     <td className="py-1.5 pr-2">
-                      <Badge variant="outline" className="text-[10px]">{p.position}</Badge>
+                      <Badge variant="outline" className="text-xs">{p.position}</Badge>
                     </td>
                     <td className="py-1.5 pr-2 text-xs text-muted-foreground">
                       <span className="flex items-center" style={{ gap: "4px" }}>

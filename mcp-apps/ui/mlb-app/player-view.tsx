@@ -19,13 +19,13 @@ interface MlbPlayerData {
 
 export function PlayerView({ data, app, navigate }: { data: MlbPlayerData; app?: any; navigate?: (data: any) => void }) {
   return (
-    <Card className="w-full max-w-lg mx-auto">
+    <Card className="w-full animate-slide-up">
       <CardHeader>
         <div className="flex items-center gap-3 sm:gap-4">
           <img src={mlbHeadshotUrl(data.mlb_id)} alt={data.name} className="w-16 h-16 rounded-full bg-muted object-cover" />
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <CardTitle><PlayerName name={data.name} mlbId={data.mlb_id} app={app} navigate={navigate} context="default" /></CardTitle>
+              <CardTitle><PlayerName name={data.name} mlbId={data.mlb_id} app={app} navigate={navigate} context="default" showHeadshot={false} /></CardTitle>
               {data.intel && <IntelBadge intel={data.intel} size="sm" />}
             </div>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -39,7 +39,7 @@ export function PlayerView({ data, app, navigate }: { data: MlbPlayerData; app?:
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-2 sm:gap-4 text-center">
+        <div className="animate-stagger grid grid-cols-1 min-[380px]:grid-cols-3 gap-2 sm:gap-4 text-center">
           <div>
             <p className="text-xl sm:text-2xl font-bold">{data.age}</p>
             <p className="text-xs text-muted-foreground">Age</p>
@@ -53,7 +53,6 @@ export function PlayerView({ data, app, navigate }: { data: MlbPlayerData; app?:
             <p className="text-xs text-muted-foreground">Throws</p>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-4">MLB ID: {data.mlb_id}</p>
         {data.intel && <IntelPanel intel={data.intel} />}
       </CardContent>
     </Card>

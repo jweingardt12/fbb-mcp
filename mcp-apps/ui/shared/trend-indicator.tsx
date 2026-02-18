@@ -8,7 +8,7 @@ export function TrendIndicator({ trend }: TrendIndicatorProps) {
   if (!trend) return null;
   if (trend.direction === "added") {
     return (
-      <span className="inline-flex items-center gap-0.5 text-green-600 text-[10px] font-mono">
+      <span className="inline-flex items-center gap-0.5 text-green-600 text-xs font-mono">
         <TrendingUp className="h-3 w-3" />
         {trend.delta}
       </span>
@@ -16,7 +16,7 @@ export function TrendIndicator({ trend }: TrendIndicatorProps) {
   }
   if (trend.direction === "dropped") {
     return (
-      <span className="inline-flex items-center gap-0.5 text-red-500 text-[10px] font-mono">
+      <span className="inline-flex items-center gap-0.5 text-red-500 text-xs font-mono">
         <TrendingDown className="h-3 w-3" />
         {trend.delta}
       </span>

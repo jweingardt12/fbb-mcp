@@ -28,19 +28,19 @@ function PlayerRow({ player, showFind, onFind, readyToActivate, loading, app, na
   return (
     <div className="flex items-center gap-2 py-1.5 border-b last:border-0">
       {player.mlb_id && <img src={mlbHeadshotUrl(player.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-      <Badge variant="outline" className="text-[10px] w-8 justify-center">{player.position}</Badge>
-      <span className="font-medium text-sm flex-1"><PlayerName name={player.name} mlbId={player.mlb_id} app={app} navigate={navigate} context="roster" /></span>
+      <Badge variant="outline" className="text-xs w-8 justify-center">{player.position}</Badge>
+      <span className="font-medium text-sm flex-1"><PlayerName name={player.name} mlbId={player.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} /></span>
       {player.intel && <IntelBadge intel={player.intel} size="sm" />}
-      <Badge variant="destructive" className="text-[10px]">{player.status}</Badge>
+      <Badge variant="destructive" className="text-xs">{player.status}</Badge>
       {player.description && <span className="text-xs text-muted-foreground hidden sm:inline">{player.description}</span>}
       {readyToActivate && (
-        <Badge className="text-[10px] bg-sem-success gap-1">
+        <Badge className="text-xs bg-sem-success gap-1">
           <CheckCircle className="h-3 w-3" />
           Ready to Activate
         </Badge>
       )}
       {showFind && onFind && (
-        <Button variant="outline" size="sm" onClick={onFind} disabled={loading} className="h-6 text-[10px] px-2 gap-1">
+        <Button variant="outline" size="sm" onClick={onFind} disabled={loading} className="h-6 text-xs px-2 gap-1">
           <Search className="h-3 w-3" />
           Find FA
         </Button>

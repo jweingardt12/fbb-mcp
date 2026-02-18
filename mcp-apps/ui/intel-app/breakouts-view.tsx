@@ -85,7 +85,7 @@ export function BreakoutsView({ data, app, navigate }: { data: BreakoutsData; ap
           </TableBody>
         </Table>
       </div>
-      <p className="text-[11px] text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         {isBreakouts
           ? "Higher diff = more unlucky. These players are performing below their expected stats and should improve."
           : "Higher diff = more lucky. These players are performing above their expected stats and may regress."}

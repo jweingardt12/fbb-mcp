@@ -73,8 +73,8 @@ export function RankingsView({ data, app, navigate }: { data: RankingsData; app:
           <div className="mb-4 h-36 sm:h-48">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" height={60} />
-                <YAxis tick={{ fontSize: 10 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} angle={-35} textAnchor="end" height={60} />
+                <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: "6px", fontSize: "12px" }} />
                 <Bar dataKey="z_score" fill="var(--color-primary)" radius={[3, 3, 0, 0]} />
               </BarChart>
@@ -104,7 +104,7 @@ export function RankingsView({ data, app, navigate }: { data: RankingsData; app:
                       <TableCell colSpan={5} className="py-0.5 px-0">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-px bg-border" />
-                          <span className="text-[10px] text-muted-foreground">{tier} Tier</span>
+                          <span className="text-xs text-muted-foreground">{tier} Tier</span>
                           <div className="flex-1 h-px bg-border" />
                         </div>
                       </TableCell>
@@ -115,7 +115,7 @@ export function RankingsView({ data, app, navigate }: { data: RankingsData; app:
                     <TableCell className="font-medium">
                       <span className="flex items-center" style={{ gap: "4px" }}>
                         {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="default" />
+                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="default" showHeadshot={false} />
                         {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                       </span>
                     </TableCell>
@@ -126,7 +126,7 @@ export function RankingsView({ data, app, navigate }: { data: RankingsData; app:
                       </span>
                     </TableCell>
                     <TableCell>
-                      {p.position && <Badge variant="outline" className="text-[10px]">{p.position}</Badge>}
+                      {p.position && <Badge variant="outline" className="text-xs">{p.position}</Badge>}
                     </TableCell>
                     <TableCell className="text-right">
                       <ZScoreBar z={p.z_score} />
