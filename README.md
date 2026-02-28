@@ -33,13 +33,13 @@ Claude calls the MCP tools to pull live data, run analysis, and take action on y
 
 1. **Yahoo Fantasy API** — Your roster, standings, matchups, free agents, transactions, and league settings come from Yahoo's OAuth API in real time. Every tool call fetches current data, not cached snapshots.
 
-2. **Analytics engine** — Z-score valuations tuned to your league's stat categories, category gap analysis to find your weaknesses, H2H matchup strategy (target/protect/concede/lock), trade evaluation with positional scarcity, and a trade finder that scans every team for complementary deals.
+2. **Analytics engine** — Z-score valuations tuned to your league's stat categories, powered by Steamer projections auto-fetched from FanGraphs (with in-season blending of projections + live stats weighted by games played). Category gap analysis to find your weaknesses, H2H matchup strategy (target/protect/concede/lock), trade evaluation with positional scarcity, and a trade finder that scans every team for complementary deals.
 
-3. **Player intelligence** — Every player surface is enriched with Statcast data (xwOBA, exit velocity, barrel rate), recent trend splits (7/14/30 day), plate discipline metrics (FanGraphs), Reddit sentiment from r/fantasybaseball, and MLB transaction alerts.
+3. **Player intelligence** — Every player surface is enriched with Statcast data (xwOBA, exit velocity, barrel rate, percentile rankings, pitch arsenal), recent trend splits (7/14/30 day), plate discipline metrics (FanGraphs), Reddit sentiment from r/fantasybaseball, and MLB transaction alerts. Before the season starts, Savant data automatically falls back to the prior year so intel surfaces stay populated during spring training.
 
 4. **Browser automation** — Write operations (add, drop, trade, lineup changes) use Playwright to automate the Yahoo Fantasy website directly, since Yahoo's API no longer grants write scope to new developer apps. Read operations still use the fast OAuth API.
 
-5. **Inline UI apps** — Tool results aren't just text. Eight Preact + Tailwind HTML apps render interactive tables, charts, and dashboards directly inside Claude's response using MCP Apps (`@modelcontextprotocol/ext-apps`).
+5. **Inline UI apps** — Tool results aren't just text. Eight Preact + Tailwind HTML apps with 62 views render interactive tables, charts, and dashboards directly inside Claude's response using MCP Apps (`@modelcontextprotocol/ext-apps`).
 
 ### Data Flow
 
@@ -140,7 +140,7 @@ This opens a browser — log into Yahoo manually. The session saves to `config/y
 
 ### 6. Enable preview dashboard (optional)
 
-To browse all 60+ UI views in your browser, set `ENABLE_PREVIEW=true` in `.env` and rebuild:
+To browse all 62 UI views in your browser, set `ENABLE_PREVIEW=true` in `.env` and rebuild:
 
 ```bash
 docker compose up -d --build
@@ -272,7 +272,7 @@ Claude.ai → GET /mcp → 401 Unauthorized
 </details>
 
 <details>
-<summary><strong>In-Season Management</strong> (19 tools)</summary>
+<summary><strong>In-Season Management</strong> (20 tools)</summary>
 
 | Tool | Description |
 |------|-------------|
@@ -407,7 +407,7 @@ The `./yf` helper script provides direct CLI access to all functionality:
 │  │                   │  │                     │  │
 │  │  yahoo_fantasy_api│  │  MCP SDK + ext-apps │  │
 │  │  pybaseball       │  │  71 tool defs       │  │
-│  │  MLB-StatsAPI     │  │  8 inline HTML UIs  │  │
+│  │  MLB-StatsAPI     │  │  8 apps / 62 views  │  │
 │  │  Playwright       │  │                     │  │
 │  └──────────────────┘  └─────────────────────┘  │
 └─────────────────────────────────────────────────┘
@@ -418,6 +418,7 @@ The `./yf` helper script provides direct CLI access to all functionality:
 
 - **Read operations**: Yahoo Fantasy OAuth API (fast, reliable)
 - **Write operations**: Playwright browser automation against Yahoo Fantasy website
+- **Valuations**: Steamer projections auto-fetched from FanGraphs, blended with live stats in-season (weighted by games played), z-scored against league categories
 - **MCP Apps**: Inline HTML UIs (Preact + Tailwind) rendered directly in Claude via `@modelcontextprotocol/ext-apps`
 
 ## Environment Variables
@@ -459,7 +460,9 @@ fbb-mcp/
 │   ├── league-history.json         # Optional: historical league keys
 │   └── draft-cheatsheet.json       # Optional: draft strategy
 ├── data/
-│   └── player-rankings-YYYY.json   # Optional: curated rankings
+│   ├── player-rankings-YYYY.json   # Optional: curated rankings
+│   ├── projections_hitters.csv     # Auto-fetched Steamer projections (gitignored)
+│   └── projections_pitchers.csv    # Auto-fetched Steamer projections (gitignored)
 ├── scripts/
 │   ├── api-server.py               # Flask API server
 │   ├── yahoo-fantasy.py            # League management
@@ -474,9 +477,10 @@ fbb-mcp/
 └── mcp-apps/                       # TypeScript MCP server + UI apps
     ├── server.ts                   # MCP server setup + tool registration
     ├── main.ts                     # Entry point (stdio + HTTP)
+    ├── assets/logo-128.png         # Server icon (pixel-art baseball)
     ├── src/tools/                  # 8 tool files, 71 MCP tools
     ├── src/api/                    # Python API client
-    └── ui/                         # 8 inline HTML apps (Preact + Tailwind)
+    └── ui/                         # 8 inline HTML apps, 62 views (Preact + Tailwind)
 ```
 
 </details>
