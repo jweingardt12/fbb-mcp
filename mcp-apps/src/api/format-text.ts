@@ -1,0 +1,52 @@
+/** Compact text formatting helpers for workflow tools.
+ *  Designed for token-efficient agent consumption. */
+
+import { str } from "./types.js";
+import type { ActionItem, RosterIssue, WaiverPair } from "./types.js";
+
+/** Format a workflow header tag with summary stats */
+export function header(tag: string, summary: string): string {
+  return "[" + tag + "] " + summary;
+}
+
+/** Format priority-ranked action items */
+export function actionList(items: ActionItem[]): string {
+  if (!items || items.length === 0) return "ACTIONS: none";
+  const lines = ["ACTIONS:"];
+  for (const [i, item] of items.entries()) {
+    const label = item.priority === 1 ? "CRITICAL" : item.priority === 2 ? "IMPORTANT" : "OPTIONAL";
+    lines.push("  " + (i + 1) + ". " + label + ": " + item.message);
+  }
+  return lines.join("\n");
+}
+
+/** Format roster issues by severity */
+export function issueList(issues: RosterIssue[]): string {
+  if (!issues || issues.length === 0) return "No issues found.";
+  const lines: string[] = [];
+  for (const issue of issues) {
+    const tag = issue.severity === "critical" ? "!!!" : issue.severity === "warning" ? " ! " : "   ";
+    lines.push(tag + " " + issue.message + " -> " + issue.fix);
+  }
+  return lines.join("\n");
+}
+
+/** Format waiver add/drop pairs */
+export function waiverPairList(pairs: WaiverPair[]): string {
+  if (!pairs || pairs.length === 0) return "No waiver recommendations.";
+  const lines: string[] = [];
+  for (const [i, pair] of pairs.entries()) {
+    const label = pair.pos_type === "B" ? "BAT" : "PIT";
+    lines.push("  " + (i + 1) + ". [" + label + "] ADD " + pair.add.name
+      + " (id:" + pair.add.player_id + " " + str(pair.add.percent_owned) + "% owned"
+      + " score=" + str(pair.add.score) + ")"
+      + " | improves: " + pair.weak_categories.join(", "));
+  }
+  return lines.join("\n");
+}
+
+/** Compact pipe-delimited section */
+export function compactSection(name: string, items: string[]): string {
+  if (!items || items.length === 0) return "";
+  return name + ": " + items.join(" | ");
+}

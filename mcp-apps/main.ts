@@ -68,6 +68,11 @@ async function main() {
 
     app.use(express.json());
 
+    // Health check (unauthenticated)
+    app.get("/health", (_req, res) => {
+      res.json({ ok: true, writes_enabled: process.env.ENABLE_WRITE_OPS === "true" });
+    });
+
     app.use(mcpAuthRouter({
       provider,
       issuerUrl: new URL(SERVER_URL),

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Daily lineup + morning briefing",
+    "schedule": { "kind": "cron", "expr": "0 9 * * *", "tz": "America/New_York" },
+    "sessionTarget": "isolated",
+    "payload": {
+      "kind": "agentTurn",
+      "message": "Daily routine. Call yahoo_morning_briefing, then yahoo_auto_lineup. Execute any priority-1 action items (injured starters, pending trades). Report actions taken in 2-3 sentences."
+    }
+  },
+  {
+    "name": "Monday matchup plan",
+    "schedule": { "kind": "cron", "expr": "0 8 * * 1", "tz": "America/New_York" },
+    "sessionTarget": "isolated",
+    "payload": {
+      "kind": "agentTurn",
+      "message": "New matchup week. Call yahoo_league_landscape for standings context, then yahoo_matchup_strategy for this week's opponent. Report: your opponent, category targets/concedes, top 2 recommended actions. Keep under 200 words."
+    }
+  },
+  {
+    "name": "Midweek waiver check",
+    "schedule": { "kind": "cron", "expr": "0 10 * * 3", "tz": "America/New_York" },
+    "sessionTarget": "isolated",
+    "payload": {
+      "kind": "agentTurn",
+      "message": "Midweek waiver wire check. Call yahoo_waiver_recommendations. If any recommendation has a strong category improvement, execute the top add/drop. Report what you found and any actions taken."
+    }
+  },
+  {
+    "name": "Weekend roster health audit",
+    "schedule": { "kind": "cron", "expr": "0 9 * * 6", "tz": "America/New_York" },
+    "sessionTarget": "isolated",
+    "payload": {
+      "kind": "agentTurn",
+      "message": "Weekend roster audit. Call yahoo_roster_health_check. Report any critical or warning issues found. If there are healthy players stuck on IL, flag them for activation."
+    }
+  }
+]

@@ -1008,6 +1008,343 @@ def api_intel_batch():
         return jsonify({"error": str(e)}), 500
 
 
+# --- Workflow endpoints (aggregate multiple calls for token efficiency) ---
+
+
+def _safe_call(fn, args=None):
+    """Call a cmd_* function with as_json=True, returning error dict on failure"""
+    try:
+        return fn(args or [], as_json=True)
+    except Exception as e:
+        return {"_error": str(e)}
+
+
+def _synthesize_morning_actions(injury, lineup, whats_new, waiver_b, waiver_p):
+    """Build priority-ranked action items from morning briefing data"""
+    actions = []
+
+    # Critical: injured players in active slots
+    for p in (injury or {}).get("injured_active", []):
+        actions.append({
+            "priority": 1,
+            "type": "injury",
+            "message": str(p.get("name", "?")) + " (" + str(p.get("status", ""))
+                + ") injured in active slot - move to IL or bench",
+            "player_id": str(p.get("player_id", "")),
+        })
+
+    # Lineup: off-day starters or bench with games
+    off_day = (lineup or {}).get("active_off_day", [])
+    bench_playing = (lineup or {}).get("bench_playing", [])
+    if off_day or bench_playing:
+        msg = str(len(off_day)) + " starter(s) off today"
+        if bench_playing:
+            msg += ", " + str(len(bench_playing)) + " bench player(s) have games"
+        actions.append({
+            "priority": 2,
+            "type": "lineup",
+            "message": msg + " - run yahoo_auto_lineup",
+        })
+
+    # Pending trades need attention
+    for t in (whats_new or {}).get("pending_trades", []):
+        actions.append({
+            "priority": 2,
+            "type": "trade",
+            "message": "Pending trade from " + str(t.get("trader_team_name", "?"))
+                + " - review and respond",
+            "transaction_key": str(t.get("transaction_key", "")),
+        })
+
+    # Waiver opportunities: top picks
+    for label, waiver in [("batter", waiver_b), ("pitcher", waiver_p)]:
+        recs = (waiver or {}).get("recommendations", [])
+        if recs:
+            top = recs[0]
+            actions.append({
+                "priority": 3,
+                "type": "waiver",
+                "message": "Top " + label + " pickup: " + str(top.get("name", "?"))
+                    + " (id:" + str(top.get("pid", "?")) + ") score="
+                    + str(top.get("score", "?")),
+                "player_id": str(top.get("pid", "")),
+            })
+
+    # Healthy players stuck on IL
+    for p in (injury or {}).get("healthy_il", []):
+        actions.append({
+            "priority": 3,
+            "type": "il_activation",
+            "message": str(p.get("name", "?"))
+                + " on IL with no injury status - may be activatable",
+            "player_id": str(p.get("player_id", "")),
+        })
+
+    actions.sort(key=lambda a: a.get("priority", 99))
+    return actions
+
+
+@app.route("/api/workflow/morning-briefing")
+def workflow_morning_briefing():
+    try:
+        injury = _safe_call(season_manager.cmd_injury_report)
+        lineup = _safe_call(season_manager.cmd_lineup_optimize)
+        matchup = _safe_call(yahoo_fantasy.cmd_matchup_detail)
+        strategy = _safe_call(season_manager.cmd_matchup_strategy)
+        whats_new = _safe_call(season_manager.cmd_whats_new)
+        waiver_b = _safe_call(season_manager.cmd_waiver_analyze, ["B", "5"])
+        waiver_p = _safe_call(season_manager.cmd_waiver_analyze, ["P", "5"])
+
+        action_items = _synthesize_morning_actions(
+            injury, lineup, whats_new, waiver_b, waiver_p
+        )
+
+        return jsonify({
+            "action_items": action_items,
+            "injury": injury,
+            "lineup": lineup,
+            "matchup": matchup,
+            "strategy": strategy,
+            "whats_new": whats_new,
+            "waiver_batters": waiver_b,
+            "waiver_pitchers": waiver_p,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/workflow/league-landscape")
+def workflow_league_landscape():
+    try:
+        standings = _safe_call(yahoo_fantasy.cmd_standings)
+        pace = _safe_call(season_manager.cmd_season_pace)
+        power = _safe_call(season_manager.cmd_power_rankings)
+        pulse = _safe_call(yahoo_fantasy.cmd_league_pulse)
+        transactions = _safe_call(yahoo_fantasy.cmd_transactions, ["", "15"])
+        trade_finder = _safe_call(season_manager.cmd_trade_finder)
+        scoreboard = _safe_call(yahoo_fantasy.cmd_scoreboard)
+
+        return jsonify({
+            "standings": standings,
+            "pace": pace,
+            "power_rankings": power,
+            "league_pulse": pulse,
+            "transactions": transactions,
+            "trade_finder": trade_finder,
+            "scoreboard": scoreboard,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def _synthesize_roster_issues(injury, lineup, roster, busts):
+    """Build severity-ranked roster issues"""
+    issues = []
+
+    # Critical: injured in active slots
+    for p in (injury or {}).get("injured_active", []):
+        issues.append({
+            "severity": "critical",
+            "type": "injury",
+            "message": str(p.get("name", "?")) + " (" + str(p.get("status", ""))
+                + ") injured in active slot",
+            "fix": "Move to IL or bench",
+            "player_id": str(p.get("player_id", "")),
+        })
+
+    # Warning: healthy players on IL
+    for p in (injury or {}).get("healthy_il", []):
+        issues.append({
+            "severity": "warning",
+            "type": "il_waste",
+            "message": str(p.get("name", "?")) + " on IL with no injury status",
+            "fix": "Activate to free IL slot",
+            "player_id": str(p.get("player_id", "")),
+        })
+
+    # Warning: off-day starters
+    for p in (lineup or {}).get("active_off_day", []):
+        issues.append({
+            "severity": "warning",
+            "type": "off_day",
+            "message": str(p.get("name", "?")) + " starting but has no game today",
+            "fix": "Bench and start an active player",
+        })
+
+    # Info: bust candidates on roster
+    roster_names = set()
+    for p in (roster or {}).get("players", []):
+        roster_names.add(str(p.get("name", "")).lower())
+    for b in (busts or {}).get("candidates", []):
+        if str(b.get("name", "")).lower() in roster_names:
+            issues.append({
+                "severity": "info",
+                "type": "bust_risk",
+                "message": str(b.get("name", "?"))
+                    + " is a bust candidate (underperforming Statcast metrics)",
+                "fix": "Consider replacing if better options available",
+            })
+
+    return issues
+
+
+@app.route("/api/workflow/roster-health")
+def workflow_roster_health():
+    try:
+        injury = _safe_call(season_manager.cmd_injury_report)
+        lineup = _safe_call(season_manager.cmd_lineup_optimize)
+        roster = _safe_call(yahoo_fantasy.cmd_roster)
+        busts = _safe_call(intel.cmd_busts, ["B", "20"])
+
+        issues = _synthesize_roster_issues(injury, lineup, roster, busts)
+
+        return jsonify({
+            "issues": issues,
+            "injury": injury,
+            "lineup": lineup,
+            "roster": roster,
+            "busts": busts,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def _synthesize_waiver_pairs(cat_check, waiver_b, waiver_p, roster):
+    """Pair waiver recommendations with droppable players"""
+    pairs = []
+
+    # Identify lowest-value roster players as drop candidates
+    drop_candidates = []
+    for p in (roster or {}).get("players", []):
+        if p.get("status") in ("IL", "IL+", "IL10", "IL60"):
+            continue  # Don't suggest dropping IL players
+        drop_candidates.append({
+            "name": str(p.get("name", "?")),
+            "position": str(p.get("position", "?")),
+            "player_id": str(p.get("player_id", "")),
+        })
+
+    for label, waiver in [("B", waiver_b), ("P", waiver_p)]:
+        for rec in (waiver or {}).get("recommendations", [])[:5]:
+            pair = {
+                "add": {
+                    "name": str(rec.get("name", "?")),
+                    "player_id": str(rec.get("pid", "")),
+                    "positions": str(rec.get("positions", "")),
+                    "score": rec.get("score", 0),
+                    "percent_owned": rec.get("pct", 0),
+                },
+                "pos_type": label,
+                "weak_categories": [
+                    c.get("name", "") for c in
+                    (waiver or {}).get("weak_categories", [])
+                ],
+            }
+            pairs.append(pair)
+
+    return pairs
+
+
+@app.route("/api/workflow/waiver-recommendations")
+def workflow_waiver_recommendations():
+    try:
+        count = request.args.get("count", "5")
+        cat_check = _safe_call(season_manager.cmd_category_check)
+        waiver_b = _safe_call(season_manager.cmd_waiver_analyze, ["B", count])
+        waiver_p = _safe_call(season_manager.cmd_waiver_analyze, ["P", count])
+        roster = _safe_call(yahoo_fantasy.cmd_roster)
+
+        pairs = _synthesize_waiver_pairs(cat_check, waiver_b, waiver_p, roster)
+
+        return jsonify({
+            "pairs": pairs,
+            "category_check": cat_check,
+            "waiver_batters": waiver_b,
+            "waiver_pitchers": waiver_p,
+            "roster": roster,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/workflow/trade-analysis", methods=["POST"])
+def workflow_trade_analysis():
+    try:
+        data = request.get_json(silent=True) or {}
+        give_names = data.get("give_names", [])
+        get_names = data.get("get_names", [])
+        if not give_names or not get_names:
+            return jsonify({"error": "Missing give_names and/or get_names arrays"}), 400
+
+        # Resolve player names to IDs via value lookup
+        give_players = []
+        get_players = []
+        give_ids = []
+        get_ids = []
+
+        for name in give_names:
+            try:
+                val = valuations.cmd_value([name], as_json=True)
+                players = val.get("players", [])
+                if players:
+                    p = players[0]
+                    give_players.append(p)
+                    # Try to find player_id from roster
+                    roster = _safe_call(yahoo_fantasy.cmd_roster)
+                    for rp in (roster or {}).get("players", []):
+                        if str(rp.get("name", "")).lower() == str(p.get("name", "")).lower():
+                            give_ids.append(str(rp.get("player_id", "")))
+                            break
+            except Exception:
+                give_players.append({"name": name, "_error": "not found"})
+
+        for name in get_names:
+            try:
+                val = valuations.cmd_value([name], as_json=True)
+                players = val.get("players", [])
+                if players:
+                    p = players[0]
+                    get_players.append(p)
+                    # Try search for player ID
+                    search = _safe_call(yahoo_fantasy.cmd_search, [name])
+                    for rp in (search or {}).get("results", []):
+                        if str(rp.get("name", "")).lower() == str(p.get("name", "")).lower():
+                            get_ids.append(str(rp.get("player_id", "")))
+                            break
+            except Exception:
+                get_players.append({"name": name, "_error": "not found"})
+
+        # Run trade eval if we have IDs
+        trade_eval = None
+        if give_ids and get_ids:
+            try:
+                trade_eval = season_manager.cmd_trade_eval(
+                    [",".join(give_ids), ",".join(get_ids)], as_json=True
+                )
+            except Exception as e:
+                trade_eval = {"_error": str(e)}
+
+        # Get intel for each player
+        all_names = give_names + get_names
+        intel_data = {}
+        for name in all_names:
+            try:
+                intel_data[name] = intel.cmd_player_report([name], as_json=True)
+            except Exception:
+                intel_data[name] = {"_error": "unavailable"}
+
+        return jsonify({
+            "give_players": give_players,
+            "get_players": get_players,
+            "give_ids": give_ids,
+            "get_ids": get_ids,
+            "trade_eval": trade_eval,
+            "intel": intel_data,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("API_PORT", "8766"))
     app.run(host="0.0.0.0", port=port)

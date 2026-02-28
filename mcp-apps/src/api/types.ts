@@ -1018,3 +1018,79 @@ export interface PitcherMatchupResponse {
   end_date: string;
   pitchers: PitcherMatchupEntry[];
 }
+
+// --- Workflow (aggregated) response types ---
+
+export interface ActionItem {
+  priority: number;
+  type: string;
+  message: string;
+  player_id?: string;
+  transaction_key?: string;
+}
+
+export interface MorningBriefingResponse {
+  action_items: ActionItem[];
+  injury: InjuryReportResponse;
+  lineup: LineupOptimizeResponse;
+  matchup: MatchupDetailResponse;
+  strategy: MatchupStrategyResponse;
+  whats_new: WhatsNewResponse;
+  waiver_batters: WaiverAnalyzeResponse;
+  waiver_pitchers: WaiverAnalyzeResponse;
+}
+
+export interface LeagueLandscapeResponse {
+  standings: StandingsResponse;
+  pace: SeasonPaceResponse;
+  power_rankings: PowerRankingsResponse;
+  league_pulse: LeaguePulseResponse;
+  transactions: TransactionsResponse;
+  trade_finder: TradeFinderResponse;
+  scoreboard: ScoreboardResponse;
+}
+
+export interface RosterIssue {
+  severity: "critical" | "warning" | "info";
+  type: string;
+  message: string;
+  fix: string;
+  player_id?: string;
+}
+
+export interface RosterHealthResponse {
+  issues: RosterIssue[];
+  injury: InjuryReportResponse;
+  lineup: LineupOptimizeResponse;
+  roster: RosterResponse;
+  busts: BustsResponse;
+}
+
+export interface WaiverPair {
+  add: {
+    name: string;
+    player_id: string;
+    positions: string;
+    score: number;
+    percent_owned: number;
+  };
+  pos_type: string;
+  weak_categories: string[];
+}
+
+export interface WaiverRecommendationsResponse {
+  pairs: WaiverPair[];
+  category_check: CategoryCheckResponse;
+  waiver_batters: WaiverAnalyzeResponse;
+  waiver_pitchers: WaiverAnalyzeResponse;
+  roster: RosterResponse;
+}
+
+export interface TradeAnalysisResponse {
+  give_players: ValuePlayer[];
+  get_players: ValuePlayer[];
+  give_ids: string[];
+  get_ids: string[];
+  trade_eval: TradeEvalResponse | null;
+  intel: Record<string, PlayerIntel>;
+}
