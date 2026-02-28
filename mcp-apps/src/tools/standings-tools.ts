@@ -58,6 +58,7 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_standings",
     {
       description: "Show league standings with win-loss records",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async () => {
@@ -81,7 +82,8 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_matchups",
     {
       description: "Show weekly H2H matchup pairings. Leave week empty for current week.",
-      inputSchema: { week: z.string().default("") },
+      inputSchema: { week: z.string().describe("Week number, empty for current week").default("") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async ({ week }) => {
@@ -108,6 +110,7 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_scoreboard",
     {
       description: "Show live scoring overview for the current week",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async () => {
@@ -130,6 +133,7 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_my_matchup",
     {
       description: "Show your detailed H2H matchup with per-category comparison for the current week",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async () => {
@@ -155,6 +159,7 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_info",
     {
       description: "Show league settings and team info",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async () => {
@@ -185,7 +190,8 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_transactions",
     {
       description: "Show recent league transactions. trans_type: add, drop, trade, or empty for all",
-      inputSchema: { trans_type: z.string().default(""), count: z.number().default(25) },
+      inputSchema: { trans_type: z.string().describe("Transaction type: add, drop, trade, or empty for all").default(""), count: z.number().describe("Number of transactions to return").default(25) },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async ({ trans_type, count }) => {
@@ -212,6 +218,7 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_stat_categories",
     {
       description: "Show league scoring categories",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async () => {
@@ -234,6 +241,7 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_transaction_trends",
     {
       description: "Most added and most dropped players across all Yahoo Fantasy leagues",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async () => {
@@ -262,6 +270,7 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_league_pulse",
     {
       description: "Show league activity - moves and trades per team, sorted by most active",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async () => {
@@ -290,6 +299,7 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_power_rankings",
     {
       description: "Rank all league teams by estimated roster strength (based on aggregate player ownership %)",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async () => {
@@ -319,6 +329,7 @@ export function registerStandingsTools(server: McpServer, distDir: string) {
     "yahoo_season_pace",
     {
       description: "Project season pace, playoff probability, and magic number for all teams",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: STANDINGS_URI } },
     },
     async () => {

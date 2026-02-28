@@ -54,6 +54,7 @@ export function registerMlbTools(server: McpServer, distDir: string) {
     "mlb_teams",
     {
       description: "List all MLB teams with abbreviations",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: MLB_URI } },
     },
     async () => {
@@ -76,7 +77,8 @@ export function registerMlbTools(server: McpServer, distDir: string) {
     "mlb_roster",
     {
       description: "Get an MLB team's roster. team: abbreviation (NYY, LAD) or team ID",
-      inputSchema: { team: z.string() },
+      inputSchema: { team: z.string().describe("Team abbreviation (NYY, LAD) or MLB team ID") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: MLB_URI } },
     },
     async ({ team }) => {
@@ -99,7 +101,8 @@ export function registerMlbTools(server: McpServer, distDir: string) {
     "mlb_player",
     {
       description: "Get MLB player info by MLB Stats API player ID",
-      inputSchema: { player_id: z.string() },
+      inputSchema: { player_id: z.string().describe("MLB Stats API player ID") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: MLB_URI } },
     },
     async ({ player_id }) => {
@@ -125,7 +128,8 @@ export function registerMlbTools(server: McpServer, distDir: string) {
     "mlb_stats",
     {
       description: "Get player season stats by MLB Stats API player ID",
-      inputSchema: { player_id: z.string(), season: z.string().default("2025") },
+      inputSchema: { player_id: z.string().describe("MLB Stats API player ID"), season: z.string().describe("Season year (e.g. 2025)").default("2025") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: MLB_URI } },
     },
     async ({ player_id, season }) => {
@@ -149,6 +153,7 @@ export function registerMlbTools(server: McpServer, distDir: string) {
     "mlb_injuries",
     {
       description: "Show current MLB injuries across all teams",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: MLB_URI } },
     },
     async () => {
@@ -173,6 +178,7 @@ export function registerMlbTools(server: McpServer, distDir: string) {
     "mlb_standings",
     {
       description: "Show MLB division standings",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: MLB_URI } },
     },
     async () => {
@@ -199,7 +205,8 @@ export function registerMlbTools(server: McpServer, distDir: string) {
     "mlb_schedule",
     {
       description: "Show MLB game schedule. Leave date empty for today, or pass YYYY-MM-DD",
-      inputSchema: { date: z.string().default("") },
+      inputSchema: { date: z.string().describe("Date in YYYY-MM-DD format, empty for today").default("") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: MLB_URI } },
     },
     async ({ date }) => {

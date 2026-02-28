@@ -45,7 +45,8 @@ export function registerValuationsTools(server: McpServer, distDir: string) {
     "yahoo_rankings",
     {
       description: "Show top players ranked by z-score value. pos_type: B for batters, P for pitchers",
-      inputSchema: { pos_type: z.string().default("B"), count: z.number().default(25) },
+      inputSchema: { pos_type: z.string().describe("B for batters, P for pitchers").default("B"), count: z.number().describe("Number of players to return").default(25) },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: VALUATIONS_URI } },
     },
     async ({ pos_type, count }) => {
@@ -71,7 +72,8 @@ export function registerValuationsTools(server: McpServer, distDir: string) {
     "yahoo_compare",
     {
       description: "Compare two players side by side with z-score breakdowns",
-      inputSchema: { player1: z.string(), player2: z.string() },
+      inputSchema: { player1: z.string().describe("First player name"), player2: z.string().describe("Second player name") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: VALUATIONS_URI } },
     },
     async ({ player1, player2 }) => {
@@ -110,7 +112,8 @@ export function registerValuationsTools(server: McpServer, distDir: string) {
     "yahoo_value",
     {
       description: "Show a player's full z-score breakdown across all categories",
-      inputSchema: { player_name: z.string() },
+      inputSchema: { player_name: z.string().describe("Player name to look up") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: VALUATIONS_URI } },
     },
     async ({ player_name }) => {

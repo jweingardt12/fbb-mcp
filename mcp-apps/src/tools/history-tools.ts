@@ -54,6 +54,7 @@ export function registerHistoryTools(server: McpServer, distDir: string) {
     "yahoo_league_history",
     {
       description: "All-time season results: champions, your finishes, and W-L-T records",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: HISTORY_URI } },
     },
     async () => {
@@ -80,6 +81,7 @@ export function registerHistoryTools(server: McpServer, distDir: string) {
     "yahoo_record_book",
     {
       description: "All-time records: career W-L, best seasons, most active managers, playoff appearances, #1 draft picks",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: HISTORY_URI } },
     },
     async () => {
@@ -112,7 +114,8 @@ export function registerHistoryTools(server: McpServer, distDir: string) {
     "yahoo_past_standings",
     {
       description: "Full standings for a past season with W-L-T records and managers",
-      inputSchema: { year: z.number() },
+      inputSchema: { year: z.number().describe("Season year (e.g. 2024)") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: HISTORY_URI } },
     },
     async ({ year }) => {
@@ -136,7 +139,8 @@ export function registerHistoryTools(server: McpServer, distDir: string) {
     "yahoo_past_draft",
     {
       description: "Draft picks for a past season with player names resolved",
-      inputSchema: { year: z.number(), count: z.number().default(25) },
+      inputSchema: { year: z.number().describe("Season year (e.g. 2024)"), count: z.number().describe("Number of picks to return").default(25) },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: HISTORY_URI } },
     },
     async ({ year, count }) => {
@@ -160,7 +164,8 @@ export function registerHistoryTools(server: McpServer, distDir: string) {
     "yahoo_past_teams",
     {
       description: "Team names, managers, move counts, and trade counts for a past season",
-      inputSchema: { year: z.number() },
+      inputSchema: { year: z.number().describe("Season year (e.g. 2024)") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: HISTORY_URI } },
     },
     async ({ year }) => {
@@ -184,7 +189,8 @@ export function registerHistoryTools(server: McpServer, distDir: string) {
     "yahoo_past_trades",
     {
       description: "Trade history for a past season showing players exchanged between teams",
-      inputSchema: { year: z.number(), count: z.number().default(10) },
+      inputSchema: { year: z.number().describe("Season year (e.g. 2024)"), count: z.number().describe("Number of trades to return").default(10) },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: HISTORY_URI } },
     },
     async ({ year, count }) => {
@@ -216,7 +222,8 @@ export function registerHistoryTools(server: McpServer, distDir: string) {
     "yahoo_past_matchup",
     {
       description: "Matchup results for a specific week in a past season with category win counts",
-      inputSchema: { year: z.number(), week: z.number() },
+      inputSchema: { year: z.number().describe("Season year (e.g. 2024)"), week: z.number().describe("Week number") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: HISTORY_URI } },
     },
     async ({ year, week }) => {

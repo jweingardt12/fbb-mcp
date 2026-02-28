@@ -46,6 +46,7 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_roster",
     {
       description: "Show current fantasy baseball roster with positions and eligibility",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async () => {
@@ -76,7 +77,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_free_agents",
     {
       description: "List top free agents. pos_type: B for batters, P for pitchers",
-      inputSchema: { pos_type: z.string().default("B"), count: z.number().default(20) },
+      inputSchema: { pos_type: z.string().describe("B for batters, P for pitchers").default("B"), count: z.number().describe("Number of free agents to return").default(20) },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ pos_type, count }) => {
@@ -107,7 +109,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_search",
     {
       description: "Search for a player by name among free agents",
-      inputSchema: { player_name: z.string() },
+      inputSchema: { player_name: z.string().describe("Player name to search for") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ player_name }) => {
@@ -134,7 +137,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_add",
     {
       description: "Add a free agent to your roster by player ID",
-      inputSchema: { player_id: z.string() },
+      inputSchema: { player_id: z.string().describe("Yahoo player ID to add") },
+      annotations: { readOnlyHint: false, destructiveHint: false },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ player_id }) => {
@@ -154,7 +158,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_drop",
     {
       description: "Drop a player from your roster by player ID",
-      inputSchema: { player_id: z.string() },
+      inputSchema: { player_id: z.string().describe("Yahoo player ID to drop") },
+      annotations: { readOnlyHint: false, destructiveHint: true },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ player_id }) => {
@@ -174,7 +179,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_swap",
     {
       description: "Atomic add+drop swap: add one player and drop another",
-      inputSchema: { add_id: z.string(), drop_id: z.string() },
+      inputSchema: { add_id: z.string().describe("Yahoo player ID to add"), drop_id: z.string().describe("Yahoo player ID to drop") },
+      annotations: { readOnlyHint: false, destructiveHint: true },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ add_id, drop_id }) => {
@@ -194,7 +200,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_waiver_claim",
     {
       description: "Submit a waiver claim with optional FAAB bid. Use for players on waivers (not free agents).",
-      inputSchema: { player_id: z.string(), faab: z.number().optional() },
+      inputSchema: { player_id: z.string().describe("Yahoo player ID to claim"), faab: z.number().describe("FAAB bid amount in dollars").optional() },
+      annotations: { readOnlyHint: false, destructiveHint: false },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ player_id, faab }) => {
@@ -216,7 +223,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_waiver_claim_swap",
     {
       description: "Submit a waiver claim + drop with optional FAAB bid",
-      inputSchema: { add_id: z.string(), drop_id: z.string(), faab: z.number().optional() },
+      inputSchema: { add_id: z.string().describe("Yahoo player ID to claim"), drop_id: z.string().describe("Yahoo player ID to drop"), faab: z.number().describe("FAAB bid amount in dollars").optional() },
+      annotations: { readOnlyHint: false, destructiveHint: true },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ add_id, drop_id, faab }) => {
@@ -238,6 +246,7 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_browser_status",
     {
       description: "Check if the browser session for write operations (add, drop, trade, etc.) is valid. If not valid, user needs to run './yf browser-login'.",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async () => {
@@ -260,7 +269,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_change_team_name",
     {
       description: "Change your fantasy team name",
-      inputSchema: { new_name: z.string() },
+      inputSchema: { new_name: z.string().describe("New team name") },
+      annotations: { readOnlyHint: false, destructiveHint: false },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ new_name }) => {
@@ -280,7 +290,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_change_team_logo",
     {
       description: "Change your fantasy team logo. Provide an absolute file path to an image (PNG/JPG) inside the container.",
-      inputSchema: { image_path: z.string() },
+      inputSchema: { image_path: z.string().describe("Absolute path to image file (PNG/JPG) inside the container") },
+      annotations: { readOnlyHint: false, destructiveHint: false },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ image_path }) => {
@@ -302,7 +313,8 @@ export function registerRosterTools(server: McpServer, distDir: string, writesEn
     "yahoo_who_owns",
     {
       description: "Check who owns a specific player by player ID",
-      inputSchema: { player_id: z.string() },
+      inputSchema: { player_id: z.string().describe("Yahoo player ID to look up") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: ROSTER_URI } },
     },
     async ({ player_id }) => {

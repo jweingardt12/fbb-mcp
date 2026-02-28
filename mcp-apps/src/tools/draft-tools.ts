@@ -52,6 +52,7 @@ export function registerDraftTools(server: McpServer, distDir: string) {
     "yahoo_draft_status",
     {
       description: "Show current draft status: picks made, your round, roster composition",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: DRAFT_URI } },
     },
     async () => {
@@ -76,6 +77,7 @@ export function registerDraftTools(server: McpServer, distDir: string) {
     "yahoo_draft_recommend",
     {
       description: "Get draft pick recommendation with top available hitters and pitchers by z-score",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: DRAFT_URI } },
     },
     async () => {
@@ -110,6 +112,7 @@ export function registerDraftTools(server: McpServer, distDir: string) {
     "yahoo_draft_cheatsheet",
     {
       description: "Show draft strategy cheat sheet with round-by-round targets",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: DRAFT_URI } },
     },
     async () => {
@@ -150,7 +153,8 @@ export function registerDraftTools(server: McpServer, distDir: string) {
     "yahoo_best_available",
     {
       description: "Show best available players ranked by z-score. pos_type: B for batters, P for pitchers",
-      inputSchema: { pos_type: z.string().default("B"), count: z.number().default(25) },
+      inputSchema: { pos_type: z.string().describe("B for batters, P for pitchers").default("B"), count: z.number().describe("Number of players to return").default(25) },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: DRAFT_URI } },
     },
     async ({ pos_type, count }) => {

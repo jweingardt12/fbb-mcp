@@ -54,7 +54,8 @@ export function registerIntelTools(server: McpServer, distDir: string) {
     "fantasy_player_report",
     {
       description: "Deep-dive Statcast + trends + plate discipline + Reddit buzz for a single player",
-      inputSchema: { player_name: z.string() },
+      inputSchema: { player_name: z.string().describe("Player name to look up") },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: INTEL_URI } },
     },
     async ({ player_name }) => {
@@ -107,7 +108,8 @@ export function registerIntelTools(server: McpServer, distDir: string) {
     "fantasy_breakout_candidates",
     {
       description: "Find breakout candidates: players whose expected stats (xwOBA) exceed actual performance, suggesting positive regression",
-      inputSchema: { pos_type: z.string().default("B"), count: z.number().default(15) },
+      inputSchema: { pos_type: z.string().describe("B for batters, P for pitchers").default("B"), count: z.number().describe("Number of candidates to return").default(15) },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: INTEL_URI } },
     },
     async ({ pos_type, count }) => {
@@ -134,7 +136,8 @@ export function registerIntelTools(server: McpServer, distDir: string) {
     "fantasy_bust_candidates",
     {
       description: "Find bust candidates: players whose actual performance (wOBA) exceeds expected stats (xwOBA), suggesting negative regression",
-      inputSchema: { pos_type: z.string().default("B"), count: z.number().default(15) },
+      inputSchema: { pos_type: z.string().describe("B for batters, P for pitchers").default("B"), count: z.number().describe("Number of candidates to return").default(15) },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: INTEL_URI } },
     },
     async ({ pos_type, count }) => {
@@ -161,6 +164,7 @@ export function registerIntelTools(server: McpServer, distDir: string) {
     "fantasy_reddit_buzz",
     {
       description: "What r/fantasybaseball is talking about right now - hot posts, trending topics",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: INTEL_URI } },
     },
     async () => {
@@ -185,6 +189,7 @@ export function registerIntelTools(server: McpServer, distDir: string) {
     "fantasy_trending_players",
     {
       description: "Players with rising buzz on Reddit - high engagement posts about specific players",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: INTEL_URI } },
     },
     async () => {
@@ -209,6 +214,7 @@ export function registerIntelTools(server: McpServer, distDir: string) {
     "fantasy_prospect_watch",
     {
       description: "Recent MLB prospect call-ups and roster moves that could impact fantasy",
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: INTEL_URI } },
     },
     async () => {
@@ -233,7 +239,8 @@ export function registerIntelTools(server: McpServer, distDir: string) {
     "fantasy_transactions",
     {
       description: "Recent fantasy-relevant MLB transactions (IL, call-up, DFA, trade). Use days param to control lookback window.",
-      inputSchema: { days: z.number().default(7) },
+      inputSchema: { days: z.number().describe("Number of days to look back").default(7) },
+      annotations: { readOnlyHint: true },
       _meta: { ui: { resourceUri: INTEL_URI } },
     },
     async ({ days }) => {
