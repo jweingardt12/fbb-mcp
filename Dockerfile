@@ -11,8 +11,10 @@ COPY mcp-apps/src/ src/
 COPY mcp-apps/ui/ ui/
 COPY mcp-apps/server.ts mcp-apps/main.ts mcp-apps/preview.html ./
 COPY mcp-apps/vite.preview.build.config.ts ./
+COPY mcp-apps/assets/ assets/
 
 RUN npm run build
+RUN cp -r assets dist/assets
 
 # Stage 2: Python runtime + Node.js for production
 FROM python:3.11-slim

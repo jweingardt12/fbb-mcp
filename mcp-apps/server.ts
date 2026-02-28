@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as path from "path";
+import * as fs from "fs";
 import { fileURLToPath } from "url";
 import { registerRosterTools } from "./src/tools/roster-tools.js";
 import { registerStandingsTools } from "./src/tools/standings-tools.js";
@@ -15,10 +16,19 @@ const DIST_DIR = __dirname;
 
 const WRITES_ENABLED = process.env.ENABLE_WRITE_OPS === "true";
 
+// Base64-encoded 128x128 PNG logo (pixel-art baseball)
+const LOGO_DATA_URI = "data:image/png;base64,"
+  + fs.readFileSync(path.join(__dirname, "assets", "logo-128.png")).toString("base64");
+
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "Yahoo Fantasy Baseball",
     version: "1.0.0",
+    icons: [{
+      url: LOGO_DATA_URI,
+      mediaType: "image/png",
+      sizes: ["128x128"],
+    }],
   });
 
   registerRosterTools(server, DIST_DIR, WRITES_ENABLED);
