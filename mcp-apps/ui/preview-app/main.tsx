@@ -215,7 +215,7 @@ class ViewErrorBoundary extends React.Component<
   render() {
     if (this.state.error) {
       return (
-        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
           <div className="text-destructive text-base font-semibold mb-2">View crashed</div>
           <p className="text-muted-foreground text-sm mb-1">{this.state.error.message}</p>
           <pre className="text-xs text-muted-foreground bg-muted rounded p-3 max-w-full overflow-x-auto mb-4 text-left">
@@ -233,7 +233,7 @@ class ViewErrorBoundary extends React.Component<
 
 function LoadingSpinner() {
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
+    <div className="flex flex-col items-center justify-center py-8 text-center">
       <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mb-3" />
       <p className="text-muted-foreground text-sm">Loading view...</p>
     </div>
@@ -555,7 +555,7 @@ function PreviewApp() {
               <LoadingSpinner />
             ) : dataSource === "live" && liveError ? (
               <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <CardContent className="flex flex-col items-center justify-center py-8 px-4 text-center">
                   <p className="text-destructive text-sm font-medium">Failed to load live data</p>
                   <p className="text-muted-foreground text-xs mt-1">{liveError}</p>
                 </CardContent>
@@ -570,7 +570,7 @@ function PreviewApp() {
               </ViewErrorBoundary>
             ) : (
               <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <CardContent className="flex flex-col items-center justify-center py-8 px-4 text-center">
                   <p className="text-muted-foreground text-sm">
                     {dataSource === "live" ? "No API mapping for this view." : "No mock data for this view yet."}
                   </p>

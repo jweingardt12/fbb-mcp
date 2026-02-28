@@ -25,7 +25,7 @@ export function PlayerReportView({ data, app, navigate }: { data: PlayerReportDa
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold flex items-center gap-2">
         <PlayerName name={data.name} app={app} navigate={navigate} context="default" />
         <IntelBadge intel={data} size="md" />

@@ -57,7 +57,7 @@ function SwingIcon() {
 function CategoryList({ categories, keyPrefix }: { categories: MatchupCategory[]; keyPrefix?: string }) {
   const prefix = keyPrefix || "";
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {categories.map((cat, i) => (
         <ComparisonBar
           key={prefix + i + "-" + cat.name}
@@ -109,7 +109,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
   const pitchingLosses = pitchingCategories.filter((c) => c.result === "loss").length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Week {data.week} Matchup</h2>
@@ -120,7 +120,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
 
       {/* Score Ring + Teams */}
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <div className="flex items-center justify-between">
             <div className="flex-1 text-center">
               <p className="font-semibold text-sm truncate">{data.my_team}</p>
@@ -177,7 +177,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
 
       {/* Category Comparison Bars with Tabs */}
       <Card>
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="p-4 space-y-2">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
               <h3 className="text-sm font-semibold text-muted-foreground">Category Breakdown</h3>
@@ -193,7 +193,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
             </TabsContent>
 
             <TabsContent value="batting">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-medium text-muted-foreground">Batting:</span>
                 <Badge className={"text-xs " + (battingWins > battingLosses ? "bg-sem-success" : battingWins < battingLosses ? "bg-sem-risk" : "bg-sem-warning")}>
                   {battingWins + "-" + battingLosses}
@@ -203,7 +203,7 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
             </TabsContent>
 
             <TabsContent value="pitching">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-medium text-muted-foreground">Pitching:</span>
                 <Badge className={"text-xs " + (pitchingWins > pitchingLosses ? "bg-sem-success" : pitchingWins < pitchingLosses ? "bg-sem-risk" : "bg-sem-warning")}>
                   {pitchingWins + "-" + pitchingLosses}

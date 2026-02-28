@@ -16,7 +16,7 @@ interface MlbRosterData {
 export function RosterView({ data, app, navigate }: { data: MlbRosterData; app?: any; navigate?: (data: any) => void }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-3">{data.team_name} Roster</h2>
+      <h2 className="text-lg font-semibold mb-2">{data.team_name} Roster</h2>
       <Table>
         <TableHeader>
           <TableRow>

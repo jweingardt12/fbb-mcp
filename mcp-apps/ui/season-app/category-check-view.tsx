@@ -72,7 +72,7 @@ export function CategoryCheckView({ data }: { data: CategoryCheckData }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Category Check - Week {data.week}</h2>
 
       {/* Strongest / Weakest summary cards */}

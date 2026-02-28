@@ -90,7 +90,7 @@ export function WaiverAnalyzeView({ data, app, navigate }: { data: WaiverData; a
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold flex items-center gap-2">
         <TrendingUp size={18} />
         Waiver Wire Analysis - {label}

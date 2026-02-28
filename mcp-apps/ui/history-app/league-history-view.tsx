@@ -105,7 +105,7 @@ export function LeagueHistoryView({ data }: { data: { seasons: SeasonResult[] } 
   }).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">League History</h2>
 
       {/* Summary Stats */}

@@ -101,12 +101,12 @@ export function DraftStatusView({ data }: { data: DraftStatusData }) {
   var totalSlots = ALL_SLOTS.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Draft Status</h2>
 
       {/* Current Round - Hero */}
       <Card className="bg-primary/5 border-primary/30">
-        <CardContent className="p-6 text-center">
+        <CardContent className="p-4 text-center">
           <p className="app-kicker mb-1">Current Round</p>
           <p className="text-4xl sm:text-5xl font-bold font-mono text-primary">{data.current_round}</p>
           <p className="text-xs text-muted-foreground mt-1">{data.total_picks} total picks made</p>
@@ -142,7 +142,7 @@ export function DraftStatusView({ data }: { data: DraftStatusData }) {
           <CardTitle className="text-base">Roster Composition</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             {rosterData.length > 0 && (
               <div className="w-24 h-24 flex-shrink-0 mx-auto sm:mx-0">
                 <ResponsiveContainer width="100%" height="100%">
@@ -168,7 +168,7 @@ export function DraftStatusView({ data }: { data: DraftStatusData }) {
                 </ResponsiveContainer>
               </div>
             )}
-            <div className="flex-1 space-y-3">
+            <div className="flex-1 space-y-2">
               <div className="app-stat-grid-3">
                 <div className="text-center">
                   <p className="text-xl sm:text-2xl font-bold font-mono">{myPicks}</p>
@@ -217,7 +217,7 @@ export function DraftStatusView({ data }: { data: DraftStatusData }) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Batting Slots */}
             <div>
               <p className="text-xs text-muted-foreground mb-1.5 font-medium">Batting</p>

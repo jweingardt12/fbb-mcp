@@ -114,9 +114,9 @@ export function StandingsView({ data }: { data: { standings: StandingsEntry[]; p
   const hasPoints = data.standings.some((s) => s.points_for);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div>
-        <h2 className="text-lg font-semibold mb-3">League Standings</h2>
+        <h2 className="text-lg font-semibold mb-2">League Standings</h2>
         <Table>
           <TableHeader>
             <TableRow>
@@ -163,7 +163,7 @@ export function StandingsView({ data }: { data: { standings: StandingsEntry[]; p
       {/* Points Distribution Chart (collapsible) */}
       {hasPoints && (
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <button
               onClick={() => setShowDistribution(!showDistribution)}
               className="flex items-center justify-between w-full text-left"

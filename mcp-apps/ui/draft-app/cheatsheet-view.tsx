@@ -21,7 +21,7 @@ export function CheatsheetView({ data, app, navigate }: { data: CheatsheetData; 
   const isTargetArray = Array.isArray(targetMap);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Draft Cheat Sheet</h2>
 
       {/* Round-by-round strategy */}

@@ -78,14 +78,15 @@
   --safe-area-right: 0px;
   --safe-area-bottom: 0px;
   --safe-area-left: 0px;
-  --app-space-1: clamp(0.875rem, 0.8rem + 0.4vw, 1.25rem);
-  --app-space-2: clamp(1rem, 0.9rem + 0.5vw, 1.5rem);
-  --app-space-3: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
-  --app-space-4: clamp(1.5rem, 1.25rem + 1vw, 2.25rem);
-  --app-text-sm: clamp(0.8125rem, 0.8rem + 0.05vw, 0.875rem);
-  --app-text-base: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
-  --app-text-lg: clamp(1.04rem, 0.95rem + 0.5vw, 1.2rem);
-  --app-shadow-soft: 0 1px 2px rgba(2, 8, 23, 0.08), 0 3px 12px rgba(2, 8, 23, 0.04);
+  --app-space-1: clamp(0.5rem, 0.45rem + 0.3vw, 0.875rem);
+  --app-space-2: clamp(0.625rem, 0.55rem + 0.4vw, 1rem);
+  --app-space-3: clamp(0.75rem, 0.65rem + 0.5vw, 1.25rem);
+  --app-space-4: clamp(1rem, 0.85rem + 0.6vw, 1.5rem);
+  --app-text-xs: var(--font-text-xs-size, clamp(0.6875rem, 0.68rem + 0.04vw, 0.75rem));
+  --app-text-sm: var(--font-text-sm-size, clamp(0.8125rem, 0.8rem + 0.05vw, 0.875rem));
+  --app-text-base: var(--font-text-md-size, clamp(0.875rem, 0.85rem + 0.15vw, 1rem));
+  --app-text-lg: var(--font-heading-sm-size, clamp(1rem, 0.95rem + 0.3vw, 1.125rem));
+  --app-shadow-soft: var(--shadow-sm, 0 1px 2px rgba(2, 8, 23, 0.08), 0 3px 12px rgba(2, 8, 23, 0.04));
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -109,7 +110,7 @@
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.625rem;
+  --radius: var(--border-radius-md, 0.625rem);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -130,7 +131,7 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   margin: 0;
-  padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  padding: max(4px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left));
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -144,7 +145,7 @@ button, a, [role="button"] {
 }
 
 #root {
-  min-height: calc(100dvh - max(8px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
+  min-height: calc(100dvh - max(4px, env(safe-area-inset-top)) - max(4px, env(safe-area-inset-bottom)));
 }
 
 .mcp-app-root {
@@ -156,10 +157,10 @@ button, a, [role="button"] {
   box-shadow: var(--app-shadow-soft);
   border: 1px solid color-mix(in oklab, var(--color-border) 82%, transparent);
   padding:
-    calc(var(--app-space-1) + min(var(--safe-area-top), 8px))
-    calc(var(--app-space-1) + min(var(--safe-area-right), 8px))
-    calc(var(--app-space-1) + min(var(--safe-area-bottom), 8px))
-    calc(var(--app-space-1) + min(var(--safe-area-left), 8px));
+    calc(var(--app-space-1) + min(var(--safe-area-top), 4px))
+    calc(var(--app-space-1) + min(var(--safe-area-right), 4px))
+    calc(var(--app-space-1) + min(var(--safe-area-bottom), 4px))
+    calc(var(--app-space-1) + min(var(--safe-area-left), 4px));
 }
 
 /* In preview mode, force components into the Nova card system instead of command-center chrome. */
@@ -368,14 +369,28 @@ button, a, [role="button"] {
   border-radius: var(--radius);
 }
 
+/* Width-bucket responsive gap rules */
+.mcp-app-compact .mcp-app-content { gap: var(--app-space-1); }
+.mcp-app-narrow .mcp-app-content { gap: var(--app-space-1); }
+.mcp-app-wide .mcp-app-content,
+.mcp-app-xwide .mcp-app-content { gap: var(--app-space-3); }
+
+/* Touch-aware sizing: ensure 44px tap targets */
+[data-touch="true"] button,
+[data-touch="true"] [role="button"],
+[data-touch="true"] a[href] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 @media (max-width: 360px) {
   body {
-    padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    padding: max(2px, env(safe-area-inset-top)) max(2px, env(safe-area-inset-right)) max(2px, env(safe-area-inset-bottom)) max(2px, env(safe-area-inset-left));
   }
 
   .mcp-app-root {
-    padding: 10px;
-    border-radius: 12px;
+    padding: 6px;
+    border-radius: 10px;
   }
 }
 

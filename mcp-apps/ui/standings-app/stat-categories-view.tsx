@@ -33,7 +33,7 @@ export function StatCategoriesView({ data }: { data: { categories: StatCategory[
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Stat Categories</h2>
       {renderGroup("Batting", batting)}
       {renderGroup("Pitching", pitching)}

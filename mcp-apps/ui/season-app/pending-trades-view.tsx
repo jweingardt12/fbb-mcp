@@ -48,7 +48,7 @@ export function PendingTradesView({ data, app, navigate }: { data: PendingTrades
 
   if (trades.length === 0) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Pending Trades</h2>
           <RefreshButton app={app} toolName="yahoo_pending_trades" navigate={navigate} />
@@ -59,7 +59,7 @@ export function PendingTradesView({ data, app, navigate }: { data: PendingTrades
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <ArrowRightLeft size={18} />
@@ -87,8 +87,8 @@ export function PendingTradesView({ data, app, navigate }: { data: PendingTrades
               <Badge variant="outline" className="text-xs">{trade.status}</Badge>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <CardContent className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">{trade.trader_team_name || "Trader"} sends:</p>
                 {(trade.trader_players || []).map((p, i) => (

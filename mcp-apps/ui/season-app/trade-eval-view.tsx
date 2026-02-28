@@ -98,12 +98,12 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Trade Evaluation</h2>
 
       {/* Grade + Net Value Hero */}
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Net Z-Value</p>
@@ -129,7 +129,7 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
 
       {/* Value Comparison Bar */}
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <ComparisonBar
             label="Total Value"
             leftValue={fmtOne(giveValue)}
@@ -142,7 +142,7 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
       </Card>
 
       {/* Player Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Card className="border-destructive/30 border-t-2 border-t-destructive">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -171,9 +171,9 @@ export function TradeEvalView({ data, app, navigate }: { data: TradeEvalData; ap
       {/* Position Impact */}
       {impact && ((impact.losing || []).length > 0 || (impact.gaining || []).length > 0) && (
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <p className="text-sm font-medium mb-2">Position Impact</p>
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               {(impact.losing || []).length > 0 && (
                 <div>
                   <span className="text-xs text-muted-foreground">Losing: </span>

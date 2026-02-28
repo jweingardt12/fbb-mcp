@@ -44,7 +44,7 @@ export function RedditView({ data, app, navigate }: { data: RedditData; app: any
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{title}</h2>
         <div className="flex gap-2">

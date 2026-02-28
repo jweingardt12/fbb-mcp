@@ -69,7 +69,7 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Search size={18} />
@@ -129,10 +129,10 @@ export function TradeFinderView({ data, app, navigate }: { data: TradeFinderData
               ))}
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             {(partner.packages || []).map((pkg, i) => (
               <div key={i} className="border rounded-lg p-3 space-y-2">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Give</p>
                     {(pkg.give || []).map((p, j) => (

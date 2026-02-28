@@ -42,7 +42,7 @@ export function SeasonPaceView({ data }: { data: SeasonPaceData }) {
   var progressPct = data.end_week > 0 ? Math.round((data.current_week / data.end_week) * 100) : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div>
         <h2 className="text-lg font-semibold flex items-center gap-2">
           Season Pace

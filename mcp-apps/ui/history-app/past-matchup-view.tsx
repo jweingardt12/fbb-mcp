@@ -44,7 +44,7 @@ export function PastMatchupView({ data, app, navigate }: { data: PastMatchupData
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <Button variant="outline" size="sm" disabled={data.week <= 1 || loading} onClick={() => changeWeek(data.week - 1)}>
           <ChevronLeft className="h-4 w-4" />
         </Button>

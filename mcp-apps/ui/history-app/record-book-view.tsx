@@ -37,7 +37,7 @@ export function RecordBookView({ data }: { data: RecordBookData }) {
   const [tab, setTab] = useState("champions");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Record Book</h2>
 
       <Tabs value={tab} onValueChange={setTab}>

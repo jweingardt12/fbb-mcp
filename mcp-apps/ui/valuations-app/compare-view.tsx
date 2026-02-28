@@ -95,7 +95,7 @@ export function CompareView({ data, app, navigate }: { data: CompareData; app?: 
   }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center gap-2">
         <h2 className="text-lg font-semibold">Player Comparison</h2>
         <ArrowRightLeft size={18} className="text-muted-foreground" />
@@ -116,7 +116,7 @@ export function CompareView({ data, app, navigate }: { data: CompareData; app?: 
             <CardTitle className="text-base">Select Two Players</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Player 1 selection */}
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-2">Player 1</p>
@@ -183,7 +183,7 @@ export function CompareView({ data, app, navigate }: { data: CompareData; app?: 
 
       <ZScoreExplainer />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2 flex-wrap">

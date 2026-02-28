@@ -37,7 +37,7 @@ export function SetLineupView({ data, app, navigate }: { data: SetLineupData; ap
           }
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2">
         <div className="animate-stagger space-y-2">
           {(data.moves || []).map((m, i) => (
             <div key={i} className="flex items-center gap-2 text-sm">

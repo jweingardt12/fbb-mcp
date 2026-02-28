@@ -79,14 +79,14 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
   const getPlayers = searchResults.filter((p) => getIds.has(p.player_id));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center gap-2">
         <ArrowRightLeft className="h-5 w-5" />
         <h2 className="text-lg font-semibold">Trade Builder</h2>
         {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Your roster - Give side */}
         <Card>
           <CardHeader className="pb-2">
@@ -138,7 +138,7 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
             <CardTitle className="text-base text-primary">You Get</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-2 mb-2">
               <input
                 type="text"
                 placeholder="Search players..."
@@ -187,8 +187,8 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
       {/* Trade Summary */}
       {(givePlayers.length > 0 || getPlayers.length > 0) && (
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between gap-4">
+          <CardContent className="p-3">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground mb-1">Give</p>
                 <div className="flex flex-wrap gap-1">
@@ -231,7 +231,7 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-center mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3 text-center mb-2">
               <div>
                 <p className="text-lg font-bold font-mono text-destructive">{formatFixed(evaluation.give_value, 1, "0.0")}</p>
                 <p className="text-xs text-muted-foreground">Give Value</p>
@@ -248,7 +248,7 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
               </div>
             </div>
             {evaluation.position_impact && (
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 text-xs">
                 {evaluation.position_impact.losing && evaluation.position_impact.losing.length > 0 && (
                   <div className="flex items-center gap-1">
                     <TrendingDown size={12} className="text-destructive" />

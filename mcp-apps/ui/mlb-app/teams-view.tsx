@@ -11,7 +11,7 @@ interface MlbTeam {
 export function TeamsView({ data }: { data: { teams: MlbTeam[] } }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-3">MLB Teams</h2>
+      <h2 className="text-lg font-semibold mb-2">MLB Teams</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {(data.teams || []).map((t) => (
           <Card key={t.id}>

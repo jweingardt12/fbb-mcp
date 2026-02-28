@@ -129,7 +129,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
   var gameDiff = Math.abs(myTotal - oppTotal);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -159,7 +159,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
       {/* Summary Card */}
       {d.summary && (
         <Card className={"border-" + resultColor(score.wins, score.losses) + "-500/30 bg-" + resultColor(score.wins, score.losses) + "-500/5"}>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <p className="text-sm leading-relaxed">{d.summary}</p>
           </CardContent>
         </Card>
@@ -174,7 +174,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="text-center">
               <p className="text-xs text-muted-foreground mb-1">You</p>
               <p className="text-xl font-bold font-mono">{myTotal}</p>

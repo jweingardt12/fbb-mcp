@@ -71,16 +71,16 @@ export function FreeAgentsView({ data, app, navigate }: { data: FreeAgentsData; 
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-3">{title}</h2>
+      <h2 className="text-lg font-semibold mb-2">{title}</h2>
       {data.type !== "search" && (
-        <Tabs defaultValue={data.pos_type || "B"} onValueChange={handleTabChange} className="mb-3">
+        <Tabs defaultValue={data.pos_type || "B"} onValueChange={handleTabChange} className="mb-2">
           <TabsList>
             <TabsTrigger value="B">Batters</TabsTrigger>
             <TabsTrigger value="P">Pitchers</TabsTrigger>
           </TabsList>
         </Tabs>
       )}
-      <form onSubmit={handleSearch} className="flex gap-2 mb-3">
+      <form onSubmit={handleSearch} className="flex gap-2 mb-2">
         <Input
           placeholder="Search players..."
           value={searchQuery}

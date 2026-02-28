@@ -18,7 +18,7 @@
     "@fontsource-variable/geist": "^5.2.8",
     "@hugeicons/core-free-icons": "^3.1.1",
     "@hugeicons/react": "^1.1.5",
-    "@modelcontextprotocol/ext-apps": "^1.0.1",
+    "@modelcontextprotocol/ext-apps": "^1.1.2",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "express": "^5.1.0",
     "radix-ui": "^1.4.3",

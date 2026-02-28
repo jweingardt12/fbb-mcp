@@ -46,7 +46,7 @@ export function RankingsView({ data, app, navigate }: { data: RankingsData; app:
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-2">
         <BarChart3 size={18} />
         <h2 className="text-lg font-semibold">{label} Rankings</h2>
         <Badge variant="secondary">{data.source}</Badge>

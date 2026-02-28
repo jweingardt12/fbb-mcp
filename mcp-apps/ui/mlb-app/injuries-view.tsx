@@ -12,7 +12,7 @@ export function InjuriesView({ data }: { data: { injuries: MlbInjury[] } }) {
   if ((data.injuries || []).length === 0) {
     return (
       <div>
-        <h2 className="text-lg font-semibold mb-3">MLB Injuries</h2>
+        <h2 className="text-lg font-semibold mb-2">MLB Injuries</h2>
         <p className="text-muted-foreground">No injuries reported (may be offseason).</p>
       </div>
     );
@@ -20,7 +20,7 @@ export function InjuriesView({ data }: { data: { injuries: MlbInjury[] } }) {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-3">MLB Injuries</h2>
+      <h2 className="text-lg font-semibold mb-2">MLB Injuries</h2>
       <Table>
         <TableHeader>
           <TableRow>

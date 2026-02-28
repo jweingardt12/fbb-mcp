@@ -38,7 +38,7 @@ export function StreamingView({ data, app, navigate }: { data: StreamingData; ap
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Streaming Pitchers - Week {data.week}</h2>
 
       <div className="relative">

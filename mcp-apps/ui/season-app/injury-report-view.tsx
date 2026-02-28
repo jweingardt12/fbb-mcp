@@ -65,7 +65,7 @@ export function InjuryReportView({ data, app, navigate }: { data: InjuryReportDa
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Injury Report</h2>
 
       {loading && (
@@ -135,7 +135,7 @@ export function InjuryReportView({ data, app, navigate }: { data: InjuryReportDa
 
       {!hasAnyIssues && (
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <p className="text-sm text-muted-foreground">No injury issues found. Roster is healthy!</p>
           </CardContent>
         </Card>

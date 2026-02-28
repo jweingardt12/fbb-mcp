@@ -35,7 +35,7 @@ export function BreakoutsView({ data, app, navigate }: { data: BreakoutsData; ap
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div>
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Icon size={18} />

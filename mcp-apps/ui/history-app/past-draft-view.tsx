@@ -28,7 +28,7 @@ export function PastDraftView({ data, app, navigate }: { data: PastDraftData; ap
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <Button variant="outline" size="sm" disabled={data.year <= 2011 || loading} onClick={() => changeYear(data.year - 1)}>
           <ChevronLeft className="h-4 w-4" />
         </Button>

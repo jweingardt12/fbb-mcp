@@ -40,7 +40,7 @@ export function ValueView({ data, app, navigate }: { data: ValueData; app?: any;
   if (data.pos) details.push(data.pos);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2 flex-wrap">

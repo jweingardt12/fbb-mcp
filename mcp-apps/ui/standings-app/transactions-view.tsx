@@ -78,13 +78,13 @@ export function TransactionsView({ data }: { data: TransactionsData }) {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-3">
+      <h2 className="text-lg font-semibold mb-2">
         {"Recent Transactions" + (data.trans_type ? " (" + data.trans_type + ")" : "")}
       </h2>
 
       {/* Transaction count badges */}
       {typeKeys.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-2 mb-2">
           {typeKeys.map(function (type) {
             return (
               <Badge key={type} variant={typeColors[type] || "outline"} className="text-xs">

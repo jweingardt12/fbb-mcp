@@ -117,7 +117,7 @@ export function SimulateView({ data, app, navigate }: { data: SimulateData; app:
   var regressed = (data.simulated_ranks || []).filter(function (s) { return s.change < 0; }).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Header */}
       <h2 className="text-lg font-semibold flex items-center gap-2">
         <FlaskConical size={18} />
@@ -191,7 +191,7 @@ export function SimulateView({ data, app, navigate }: { data: SimulateData; app:
           </Card>
         ) : (
           <Card className="border-dashed">
-            <CardContent className="flex items-center justify-center h-full p-4">
+            <CardContent className="flex items-center justify-center h-full p-3">
               <Button variant="outline" size="sm" onClick={handleLoadRoster} disabled={loading}>
                 Simulate Drop
               </Button>
@@ -297,7 +297,7 @@ export function SimulateView({ data, app, navigate }: { data: SimulateData; app:
           </CardHeader>
           <CardContent className="pt-0">
             {rosterLoading ? (
-              <div className="flex items-center justify-center p-4">
+              <div className="flex items-center justify-center p-3">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
             ) : (

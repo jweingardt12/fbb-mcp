@@ -68,7 +68,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">What's New</h2>
         <div className="flex items-center gap-2">
@@ -270,7 +270,7 @@ export function WhatsNewView({ data, app, navigate }: { data: WhatsNewData; app:
       {/* Empty state if nothing new */}
       {!(data.injuries?.length || data.pending_trades?.length || data.league_activity?.length
         || data.trending?.length || data.prospects?.length) && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex flex-col items-center justify-center py-8 text-center">
           <p className="text-sm text-muted-foreground">Nothing new to report</p>
           <p className="text-xs text-muted-foreground mt-1">Check back later for updates</p>
         </div>

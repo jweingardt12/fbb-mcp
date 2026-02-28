@@ -63,7 +63,7 @@ export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; ap
   const score = d.score || { wins: 0, losses: 0, ties: 0 };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -92,7 +92,7 @@ export function ScoutView({ data, app, navigate }: { data: ScoutOpponentData; ap
 
       {/* Score Card */}
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <div className="flex items-center justify-around">
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Wins</p>

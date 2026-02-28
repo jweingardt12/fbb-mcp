@@ -21,7 +21,7 @@ export function PlayerView({ data, app, navigate }: { data: MlbPlayerData; app?:
   return (
     <Card className="w-full animate-slide-up">
       <CardHeader>
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-3">
           <img src={mlbHeadshotUrl(data.mlb_id)} alt={data.name} className="w-16 h-16 rounded-full bg-muted object-cover" />
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -39,7 +39,7 @@ export function PlayerView({ data, app, navigate }: { data: MlbPlayerData; app?:
         </div>
       </CardHeader>
       <CardContent>
-        <div className="animate-stagger grid grid-cols-1 min-[380px]:grid-cols-3 gap-2 sm:gap-4 text-center">
+        <div className="animate-stagger grid grid-cols-1 min-[380px]:grid-cols-3 gap-2 sm:gap-3 text-center">
           <div>
             <p className="text-xl sm:text-2xl font-bold">{data.age}</p>
             <p className="text-xs text-muted-foreground">Age</p>

@@ -27,7 +27,7 @@ export function PastTradesView({ data, app, navigate }: { data: PastTradesData; 
   };
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-2 animate-fade-in">
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" disabled={data.year <= 2011 || loading} onClick={() => changeYear(data.year - 1)}>
           <ChevronLeft className="h-4 w-4" />
@@ -50,8 +50,8 @@ export function PastTradesView({ data, app, navigate }: { data: PastTradesData; 
         ) : (
           (data.trades || []).map((t, i) => (
             <Card key={i} className="mb-4 last:mb-0">
-              <CardContent className="p-4">
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-4 items-start">
+              <CardContent className="p-3">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 items-start">
                   <div>
                     <p className="text-sm font-medium mb-1">{t.team1} sends:</p>
                     {(t.players1 || []).map((p) => (

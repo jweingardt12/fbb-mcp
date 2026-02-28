@@ -21,8 +21,8 @@ function TabsList({
   behavior = "scroll",
 }: { children: React.ReactNode; className?: string; behavior?: TabsListBehavior }) {
   const base = behavior === "wrap"
-    ? "inline-flex min-h-10 flex-wrap items-center rounded-xl bg-muted/80 p-1 text-muted-foreground gap-1"
-    : "flex min-h-10 w-full items-center rounded-xl bg-muted/80 p-1 text-muted-foreground gap-1 overflow-x-auto overflow-y-hidden no-scrollbar mcp-app-scroll-x";
+    ? "inline-flex min-h-11 flex-wrap items-center rounded-xl bg-muted/80 p-1.5 text-muted-foreground gap-1"
+    : "flex min-h-11 w-full items-center rounded-xl bg-muted/80 p-1.5 text-muted-foreground gap-1 overflow-x-auto overflow-y-hidden no-scrollbar mcp-app-scroll-x";
   return (
     <div className={cn(base, "touch-pan-x", className)}>
       {children}
@@ -36,7 +36,7 @@ function TabsTrigger({ value, children, className }: { value: string; children: 
     <button
       type="button"
       className={cn(
-        "inline-flex min-h-9 items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all shrink-0",
+        "inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-medium transition-all shrink-0",
         ctx.value === value ? "bg-background text-foreground shadow-sm" : "hover:text-foreground/80",
         className
       )}

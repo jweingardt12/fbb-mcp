@@ -11,7 +11,7 @@ export function StatsView({ data }: { data: MlbStatsData }) {
   const entries = Object.entries(data.stats || {});
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center gap-2">
         <h2 className="text-lg font-semibold">Player Stats</h2>
         <Badge variant="secondary">{data.season}</Badge>

@@ -28,7 +28,7 @@ export function InfoView({ data }: { data: LeagueInfo }) {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">

@@ -44,7 +44,7 @@ export function CloserMonitorView({ data, app, navigate }: { data: CloserMonitor
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold flex items-center gap-2">
         <ShieldCheck size={18} />
         Closer Monitor
@@ -101,7 +101,7 @@ export function CloserMonitorView({ data, app, navigate }: { data: CloserMonitor
               ))}
               {myClosers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
                     No closers/RPs on your roster
                   </TableCell>
                 </TableRow>
@@ -144,7 +144,7 @@ export function CloserMonitorView({ data, app, navigate }: { data: CloserMonitor
               ))}
               {available.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
                     No available closers found
                   </TableCell>
                 </TableRow>
@@ -172,7 +172,7 @@ export function CloserMonitorView({ data, app, navigate }: { data: CloserMonitor
               ))}
               {leaders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={3} className="text-center text-muted-foreground py-6">
                     No saves leaders data available
                   </TableCell>
                 </TableRow>

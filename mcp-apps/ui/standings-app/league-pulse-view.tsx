@@ -53,7 +53,7 @@ export function LeaguePulseView({ data }: { data: { teams: LeaguePulseTeam[] } }
   }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">League Pulse</h2>
 
       <div className="flex gap-2 flex-wrap">
@@ -95,7 +95,7 @@ export function LeaguePulseView({ data }: { data: { teams: LeaguePulseTeam[] } }
       </Table>
 
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <button onClick={() => setShowChart(!showChart)} className="flex items-center justify-between w-full text-left">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold">Activity Chart</h3>

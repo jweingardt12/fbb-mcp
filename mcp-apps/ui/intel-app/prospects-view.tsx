@@ -25,7 +25,7 @@ function typeColor(type: string): string {
 
 export function ProspectsView({ data, app, navigate }: { data: ProspectsData; app: any; navigate: (data: any) => void }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Prospect Watch</h2>
       <p className="text-xs text-muted-foreground">Recent call-ups and roster moves that could impact fantasy</p>
 

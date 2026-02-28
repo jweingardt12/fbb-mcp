@@ -58,7 +58,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center gap-2">
         <h2 className="text-lg font-semibold">Lineup Optimizer</h2>
         {data.applied && (
@@ -72,7 +72,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
       {/* Post-Apply Success State */}
       {data.applied && (data.swaps || []).length > 0 && (
         <Card className="border-green-500/50">
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle size={18} className="text-green-500" />
               <span className="font-semibold text-green-700 dark:text-green-400">Lineup Updated</span>
@@ -220,7 +220,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
                 </div>
               </div>
               {/* Arrow */}
-              <div className="flex items-center justify-center pt-6">
+              <div className="flex items-center justify-center pt-4">
                 <ArrowRight size={20} className="text-muted-foreground" />
               </div>
               {/* After column */}
@@ -285,7 +285,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
 
       {!hasIssues && (
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <p className="text-sm text-muted-foreground">All active players have games today. Lineup looks good!</p>
           </CardContent>
         </Card>

@@ -32,7 +32,7 @@ export function MatchupsView({ data }: { data: MatchupsData }) {
   const isScoreboard = data.type === "scoreboard";
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-3">
+      <h2 className="text-lg font-semibold mb-2">
         {isScoreboard ? "Scoreboard" : "Matchups"} - Week {data.week}
       </h2>
       <div className="grid gap-3">
@@ -42,7 +42,7 @@ export function MatchupsView({ data }: { data: MatchupsData }) {
           const isMyMatchup = name1 === MY_TEAM || name2 === MY_TEAM;
           return (
             <Card key={i} className={isMyMatchup ? "border-primary border-2 bg-primary/5" : ""}>
-              <CardContent className="p-4">
+              <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className={"font-medium flex items-center" + (name1 === MY_TEAM ? " text-primary" : "")} style={{ gap: "6px" }}>

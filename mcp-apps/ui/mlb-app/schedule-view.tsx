@@ -18,7 +18,7 @@ interface MlbScheduleData {
 export function ScheduleView({ data }: { data: MlbScheduleData }) {
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-2">
         <h2 className="text-lg font-semibold">Schedule</h2>
         <Badge variant="secondary">{data.date}</Badge>
       </div>

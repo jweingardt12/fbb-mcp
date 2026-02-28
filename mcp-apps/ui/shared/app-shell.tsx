@@ -214,7 +214,7 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
     if (cancelled) {
       return (
         <div className="mcp-app-root">
-          <div className="flex flex-col items-center justify-center p-8 text-center">
+          <div className="flex flex-col items-center justify-center p-6 text-center">
             <p className="text-sm text-muted-foreground">Tool call was cancelled.</p>
             <p className="text-xs text-muted-foreground mt-1">Ask Claude to try again.</p>
           </div>
@@ -225,7 +225,7 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
     if (errorMsg) {
       return (
         <div className="mcp-app-root">
-          <div className="flex flex-col items-center justify-center p-8 text-center">
+          <div className="flex flex-col items-center justify-center p-6 text-center">
             <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 max-w-md">
               <h3 className="text-sm font-medium text-destructive">Something went wrong</h3>
               <p className="text-xs text-muted-foreground mt-1">{errorMsg}</p>
@@ -239,7 +239,7 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
     var label = toolName ? toolLabel(toolName) : null;
     return (
       <div className="mcp-app-root">
-        <div className="flex flex-col items-center justify-center p-8 text-center">
+        <div className="flex flex-col items-center justify-center p-6 text-center">
           <div className="flex items-center gap-2 text-muted-foreground">
             <div className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
             <span className="text-sm">{label ? "Loading " + label + "..." : "Waiting for data..."}</span>

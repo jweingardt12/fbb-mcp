@@ -32,7 +32,7 @@ export function WhoOwnsView({ data, app, navigate }: { data: WhoOwnsData; app: a
       <CardHeader>
         <CardTitle>Player Ownership</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2">
         <div className="flex items-center gap-3 flex-wrap">
           {ownershipBadge(data.ownership_type)}
           {data.ownership_type === "team" && data.owner && (

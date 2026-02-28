@@ -41,7 +41,7 @@ export function WeekPlannerView({ data }: { data: WeekPlannerData }) {
   var maxTotal = Math.max(1, ...Object.values(totals));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div>
         <h2 className="text-lg font-semibold">
           Week {data.week} Planner

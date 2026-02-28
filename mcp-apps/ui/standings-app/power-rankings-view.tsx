@@ -38,7 +38,7 @@ export function PowerRankingsView({ data }: { data: { rankings: PowerRankingTeam
   var rankings = data.rankings || [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Power Rankings</h2>
 
       <Table>

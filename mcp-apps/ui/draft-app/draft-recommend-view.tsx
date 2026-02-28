@@ -100,7 +100,7 @@ export function DraftRecommendView({ data, app, navigate }: { data: DraftRecomme
   const hittersFirst = strategy.toLowerCase().includes("hitter");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -120,7 +120,7 @@ export function DraftRecommendView({ data, app, navigate }: { data: DraftRecomme
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <h3 className="text-sm font-semibold mb-2 flex items-center gap-1">
             Top Hitters

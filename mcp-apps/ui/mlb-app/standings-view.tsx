@@ -17,7 +17,7 @@ interface MlbDivision {
 
 export function StandingsView({ data }: { data: { divisions: MlbDivision[] } }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">MLB Standings</h2>
       {(data.divisions || []).map((div) => (
         <Card key={div.division}>

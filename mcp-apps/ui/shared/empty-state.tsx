@@ -12,12 +12,12 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center py-12 text-center", className)}>
-      {Icon && <div className="rounded-full bg-muted p-3 mb-3"><Icon className="h-10 w-10 text-muted-foreground/50" /></div>}
+    <div className={cn("flex flex-col items-center justify-center py-6 text-center", className)}>
+      {Icon && <div className="rounded-full bg-muted p-2.5 mb-2.5"><Icon className="h-8 w-8 text-muted-foreground/55" /></div>}
       <h3 className="text-sm font-medium text-foreground">{title}</h3>
-      {description && <p className="text-xs text-muted-foreground mt-1 max-w-xs">{description}</p>}
+      {description && <p className="text-sm text-muted-foreground mt-1 max-w-xs">{description}</p>}
       {action && (
-        <Button variant="outline" size="sm" onClick={action.onClick} className="mt-3">
+        <Button variant="outline" size="sm" onClick={action.onClick} className="mt-2.5">
           {action.label}
         </Button>
       )}

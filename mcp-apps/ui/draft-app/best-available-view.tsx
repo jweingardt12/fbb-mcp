@@ -49,13 +49,13 @@ export function BestAvailableView({ data, app, navigate }: { data: BestAvailable
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-2">
         <h2 className="text-lg font-semibold">Best Available {label}</h2>
         <span className="text-xs text-muted-foreground">Top {data.count || filteredPlayers.length}</span>
       </div>
 
       {app && (
-        <Tabs defaultValue={data.pos_type || "B"} onValueChange={handleTypeChange} className="mb-3">
+        <Tabs defaultValue={data.pos_type || "B"} onValueChange={handleTypeChange} className="mb-2">
           <TabsList>
             <TabsTrigger value="B">Hitters</TabsTrigger>
             <TabsTrigger value="P">Pitchers</TabsTrigger>
@@ -63,7 +63,7 @@ export function BestAvailableView({ data, app, navigate }: { data: BestAvailable
         </Tabs>
       )}
 
-      <div className="flex gap-1 flex-wrap mb-3">
+      <div className="flex gap-1 flex-wrap mb-2">
         {POSITION_FILTERS.map(function (pos) {
           return (
             <Badge

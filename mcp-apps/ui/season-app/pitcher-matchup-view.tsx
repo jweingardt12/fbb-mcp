@@ -47,7 +47,7 @@ export function PitcherMatchupView({ data }: { data: PitcherMatchupData }) {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div>
         <h2 className="text-lg font-semibold">Pitcher Matchups</h2>
         <p className="text-xs text-muted-foreground">
@@ -107,7 +107,7 @@ export function PitcherMatchupView({ data }: { data: PitcherMatchupData }) {
           ))}
           {pitchers.length === 0 && (
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+              <TableCell colSpan={8} className="text-center text-muted-foreground py-6">
                 No pitcher matchup data available
               </TableCell>
             </TableRow>

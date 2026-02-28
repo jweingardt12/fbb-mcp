@@ -115,7 +115,7 @@ export function TransactionTrendsView({ data }: { data: TransactionTrendsData })
   var dropped = data.most_dropped || [];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-2">
       <h2 className="text-lg font-semibold">Transaction Trends</h2>
 
       <div className="flex gap-2 mb-1">
