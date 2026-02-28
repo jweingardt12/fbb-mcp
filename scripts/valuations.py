@@ -5,6 +5,9 @@ import sys
 import json
 import os
 import csv
+import io
+import urllib.request
+from datetime import date
 
 import pandas as pd
 import numpy as np
@@ -12,6 +15,125 @@ from mlb_id_cache import get_mlb_id
 from intel import batch_intel
 
 DATA_DIR = os.environ.get("DATA_DIR", "/app/data")
+
+# FanGraphs projections API
+FANGRAPHS_PROJ_URL = "https://www.fangraphs.com/api/projections"
+PROJ_MAX_AGE = 86400  # 24 hours
+
+
+def _proj_csv_path(stats_type):
+    """Get path for projection CSV (bat or pit)"""
+    filename = "projections_hitters.csv" if stats_type == "bat" else "projections_pitchers.csv"
+    return os.path.join(DATA_DIR, filename)
+
+
+def _proj_csv_is_fresh(path):
+    """Check if a projection CSV exists and is less than 24h old"""
+    if not os.path.exists(path):
+        return False
+    try:
+        import time as _time
+        age = _time.time() - os.path.getmtime(path)
+        return age < PROJ_MAX_AGE
+    except Exception:
+        return True
+
+
+def fetch_fangraphs_projections(stats_type, proj_type="steamer"):
+    """Fetch projections from FanGraphs JSON API.
+    stats_type: 'bat' or 'pit'
+    proj_type: 'steamer', 'zips', or 'depthcharts'
+    Returns a pandas DataFrame or None on failure.
+    """
+    url = (
+        FANGRAPHS_PROJ_URL
+        + "?type=" + proj_type
+        + "&stats=" + stats_type
+        + "&pos=all&team=0&players=0"
+    )
+    try:
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "YahooFantasyBot/1.0",
+            "Accept": "application/json",
+        })
+        with urllib.request.urlopen(req, timeout=30) as response:
+            raw = json.loads(response.read().decode())
+        if not raw or not isinstance(raw, list):
+            print("Warning: FanGraphs projections returned empty for " + stats_type)
+            return None
+
+        # Map FanGraphs JSON field names to CSV-compatible column names
+        rows = []
+        for entry in raw:
+            row = {}
+            row["Name"] = entry.get("PlayerName", entry.get("playerName", ""))
+            row["Team"] = entry.get("Team", entry.get("team", ""))
+            if stats_type == "bat":
+                row["PA"] = entry.get("PA", 0)
+                row["AB"] = entry.get("AB", 0)
+                row["H"] = entry.get("H", 0)
+                row["HR"] = entry.get("HR", 0)
+                row["R"] = entry.get("R", 0)
+                row["RBI"] = entry.get("RBI", 0)
+                row["SB"] = entry.get("SB", 0)
+                row["CS"] = entry.get("CS", 0)
+                row["BB"] = entry.get("BB", 0)
+                row["SO"] = entry.get("SO", entry.get("K", 0))
+                row["AVG"] = entry.get("AVG", 0)
+                row["OBP"] = entry.get("OBP", 0)
+                row["SLG"] = entry.get("SLG", 0)
+                row["2B"] = entry.get("2B", 0)
+                row["3B"] = entry.get("3B", 0)
+            else:
+                row["IP"] = entry.get("IP", 0)
+                row["W"] = entry.get("W", 0)
+                row["L"] = entry.get("L", 0)
+                row["ERA"] = entry.get("ERA", 0)
+                row["WHIP"] = entry.get("WHIP", 0)
+                row["K"] = entry.get("SO", entry.get("K", 0))
+                row["BB"] = entry.get("BB", 0)
+                row["SV"] = entry.get("SV", 0)
+                row["HLD"] = entry.get("HLD", 0)
+                row["GS"] = entry.get("GS", 0)
+                row["G"] = entry.get("G", 0)
+                row["ER"] = entry.get("ER", 0)
+                row["QS"] = entry.get("QS", 0)
+            rows.append(row)
+
+        df = pd.DataFrame(rows)
+        return df
+    except Exception as e:
+        print("Warning: FanGraphs projections fetch failed for " + stats_type + ": " + str(e))
+        return None
+
+
+def ensure_projections(proj_type="steamer", force=False):
+    """Ensure projection CSVs exist. Auto-fetch if missing or stale.
+    Returns tuple (hitters_source, pitchers_source) describing what happened.
+    """
+    os.makedirs(DATA_DIR, exist_ok=True)
+    results = {}
+
+    for stats_type in ["bat", "pit"]:
+        path = _proj_csv_path(stats_type)
+        label = "hitters" if stats_type == "bat" else "pitchers"
+
+        if not force and _proj_csv_is_fresh(path):
+            results[label] = "cached"
+            continue
+
+        print("Fetching " + proj_type + " projections for " + label + "...")
+        df = fetch_fangraphs_projections(stats_type, proj_type=proj_type)
+        if df is not None and len(df) > 0:
+            df.to_csv(path, index=False)
+            results[label] = "fetched (" + str(len(df)) + " players)"
+            print("Saved " + str(len(df)) + " " + label + " projections to " + path)
+        else:
+            results[label] = "failed"
+            print("Could not fetch " + label + " projections")
+
+    return results
+
 
 # Default league categories (fallback when API unavailable)
 DEFAULT_BATTING_CATS = ["R", "H", "HR", "RBI", "TB", "AVG", "OBP", "XBH", "NSB"]
@@ -340,6 +462,143 @@ def get_pos_bonus(pos_str):
     return best
 
 
+# --- Live stats blending ---
+
+def load_live_stats():
+    """Load current-season live stats via pybaseball.
+    Returns (hitters_df, pitchers_df) or (None, None) if unavailable.
+    """
+    try:
+        from pybaseball import batting_stats, pitching_stats
+        current_year = date.today().year
+        h_df = batting_stats(current_year, qual=1)
+        p_df = pitching_stats(current_year, qual=1)
+        if h_df is not None and len(h_df) > 0:
+            h_df.columns = h_df.columns.str.strip()
+        else:
+            h_df = None
+        if p_df is not None and len(p_df) > 0:
+            p_df.columns = p_df.columns.str.strip()
+        else:
+            p_df = None
+        return h_df, p_df
+    except Exception as e:
+        print("Warning: live stats fetch failed: " + str(e))
+        return None, None
+
+
+def blend_projections_and_actual(proj_df, actual_df, stat_type="bat"):
+    """Blend projection data with actual in-season stats.
+    Weight: actual_weight = min(games_played / 80, 0.7)
+    Counting stats: weighted rate-based blending
+    Ratio stats: weighted by PA/IP
+    """
+    if proj_df is None or actual_df is None or len(actual_df) == 0:
+        return proj_df
+
+    # Build lookup from actual stats by name
+    actual_by_name = {}
+    for _, row in actual_df.iterrows():
+        name = str(row.get("Name", "")).strip()
+        if name:
+            actual_by_name[name.lower()] = row
+
+    blended_rows = []
+    for _, proj_row in proj_df.iterrows():
+        proj_name = str(proj_row.get("Name", "")).strip().lower()
+        actual_row = actual_by_name.get(proj_name)
+
+        if actual_row is None:
+            blended_rows.append(proj_row)
+            continue
+
+        blended = proj_row.copy()
+
+        if stat_type == "bat":
+            games = float(actual_row.get("G", 0))
+            actual_weight = min(games / 80.0, 0.7)
+            proj_weight = 1.0 - actual_weight
+
+            actual_pa = float(actual_row.get("PA", 0))
+            proj_pa = float(proj_row.get("PA", 0))
+
+            if actual_pa > 0 and proj_pa > 0:
+                # Counting stats: blend per-PA rates then scale to projected PA
+                counting = ["R", "H", "HR", "RBI", "SB", "CS", "2B", "3B"]
+                for stat in counting:
+                    a_val = float(actual_row.get(stat, actual_row.get("SO" if stat == "K" else stat, 0)))
+                    p_val = float(proj_row.get(stat, 0))
+                    a_rate = a_val / actual_pa if actual_pa > 0 else 0
+                    p_rate = p_val / proj_pa if proj_pa > 0 else 0
+                    blended_rate = (a_rate * actual_weight) + (p_rate * proj_weight)
+                    blended[stat] = round(blended_rate * proj_pa)
+
+                # SO/K
+                a_so = float(actual_row.get("SO", actual_row.get("K", 0)))
+                p_so = float(proj_row.get("SO", proj_row.get("K", 0)))
+                a_rate = a_so / actual_pa if actual_pa > 0 else 0
+                p_rate = p_so / proj_pa if proj_pa > 0 else 0
+                blended_rate = (a_rate * actual_weight) + (p_rate * proj_weight)
+                if "SO" in proj_row.index:
+                    blended["SO"] = round(blended_rate * proj_pa)
+                if "K" in proj_row.index:
+                    blended["K"] = round(blended_rate * proj_pa)
+
+                # Ratio stats: weighted by PA
+                for stat in ["AVG", "OBP", "SLG"]:
+                    a_val = float(actual_row.get(stat, 0))
+                    p_val = float(proj_row.get(stat, 0))
+                    total_pa = actual_pa + proj_pa
+                    if total_pa > 0:
+                        blended[stat] = round(
+                            (a_val * actual_pa * actual_weight + p_val * proj_pa * proj_weight)
+                            / (actual_pa * actual_weight + proj_pa * proj_weight), 3
+                        )
+
+                # BB
+                a_bb = float(actual_row.get("BB", 0))
+                p_bb = float(proj_row.get("BB", 0))
+                a_rate = a_bb / actual_pa if actual_pa > 0 else 0
+                p_rate = p_bb / proj_pa if proj_pa > 0 else 0
+                blended_rate = (a_rate * actual_weight) + (p_rate * proj_weight)
+                blended["BB"] = round(blended_rate * proj_pa)
+
+        else:
+            # Pitching
+            games = float(actual_row.get("G", 0))
+            actual_weight = min(games / 80.0, 0.7)
+            proj_weight = 1.0 - actual_weight
+
+            actual_ip = float(actual_row.get("IP", 0))
+            proj_ip = float(proj_row.get("IP", 0))
+
+            if actual_ip > 0 and proj_ip > 0:
+                # Counting stats per IP
+                counting = ["W", "L", "K", "BB", "SV", "HLD", "ER", "QS"]
+                for stat in counting:
+                    a_val = float(actual_row.get(stat, actual_row.get("SO" if stat == "K" else stat, 0)))
+                    p_val = float(proj_row.get(stat, 0))
+                    a_rate = a_val / actual_ip if actual_ip > 0 else 0
+                    p_rate = p_val / proj_ip if proj_ip > 0 else 0
+                    blended_rate = (a_rate * actual_weight) + (p_rate * proj_weight)
+                    blended[stat] = round(blended_rate * proj_ip)
+
+                # Ratio stats: weighted by IP
+                for stat in ["ERA", "WHIP"]:
+                    a_val = float(actual_row.get(stat, 0))
+                    p_val = float(proj_row.get(stat, 0))
+                    total_ip = actual_ip + proj_ip
+                    if total_ip > 0:
+                        blended[stat] = round(
+                            (a_val * actual_ip * actual_weight + p_val * proj_ip * proj_weight)
+                            / (actual_ip * actual_weight + proj_ip * proj_weight), 3
+                        )
+
+        blended_rows.append(blended)
+
+    return pd.DataFrame(blended_rows)
+
+
 # --- Fallback: load from JSON rankings ---
 
 def load_from_json():
@@ -415,23 +674,51 @@ def load_from_json():
 
 
 def load_all():
-    """Load and compute valuations from best available data source"""
+    """Load and compute valuations from best available data source.
+    Priority: manual CSV (if fresh) -> auto-fetched projections -> JSON fallback
+    """
     h_csv = load_hitters_csv()
     p_csv = load_pitchers_csv()
+
+    # Auto-fetch projections if CSVs missing
+    if h_csv is None or p_csv is None:
+        try:
+            ensure_projections()
+            if h_csv is None:
+                h_csv = load_hitters_csv()
+            if p_csv is None:
+                p_csv = load_pitchers_csv()
+        except Exception as e:
+            print("Warning: auto-fetch projections failed: " + str(e))
 
     hitters = None
     pitchers = None
     source = "json"
 
+    # In-season blending: blend projections with live stats (April+)
+    if h_csv is not None and date.today().month >= 4:
+        try:
+            live_h, live_p = load_live_stats()
+            if live_h is not None and len(live_h) > 0:
+                h_csv = blend_projections_and_actual(h_csv, live_h, stat_type="bat")
+                source = "blended"
+            if p_csv is not None and live_p is not None and len(live_p) > 0:
+                p_csv = blend_projections_and_actual(p_csv, live_p, stat_type="pit")
+                source = "blended"
+        except Exception as e:
+            print("Warning: live stats blending failed: " + str(e))
+
     if h_csv is not None:
         h_derived = derive_hitter_stats(h_csv)
         hitters = compute_hitter_zscores(h_derived)
-        source = "csv"
+        if source != "blended":
+            source = "csv"
 
     if p_csv is not None:
         p_derived = derive_pitcher_stats(p_csv)
         pitchers = compute_pitcher_zscores(p_derived)
-        source = "csv"
+        if source != "blended":
+            source = "csv"
 
     # Fallback to JSON for whichever is missing
     if hitters is None or pitchers is None:

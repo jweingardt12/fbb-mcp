@@ -52,6 +52,23 @@ _heartbeat_thread = threading.Thread(target=_run_heartbeat, daemon=True)
 _heartbeat_thread.start()
 
 
+# --- Startup projection fetch ---
+
+def _startup_projections():
+    """Background thread to ensure projections are loaded on startup"""
+    import time
+    time.sleep(5)  # Let other startup tasks settle
+    try:
+        valuations.ensure_projections()
+        print("Startup projections loaded successfully")
+    except Exception as e:
+        print("Startup projections failed: " + str(e))
+
+
+_proj_thread = threading.Thread(target=_startup_projections, daemon=True)
+_proj_thread.start()
+
+
 # --- Health check ---
 
 
@@ -353,6 +370,17 @@ def api_value():
             return jsonify({"error": "Missing player_name parameter"}), 400
         result = valuations.cmd_value([name], as_json=True)
         return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/projections-update", methods=["POST"])
+def api_projections_update():
+    try:
+        data = request.get_json(silent=True) or {}
+        proj_type = data.get("proj_type", "steamer")
+        result = valuations.ensure_projections(proj_type=proj_type, force=True)
+        return jsonify({"status": "ok", "result": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -771,6 +799,17 @@ def api_mlb_injuries():
 def api_mlb_standings():
     try:
         result = mlb_data.cmd_standings([], as_json=True)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/mlb/draft")
+def api_mlb_draft():
+    try:
+        year = request.args.get("year", "")
+        args = [year] if year else []
+        result = mlb_data.cmd_draft(args, as_json=True)
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

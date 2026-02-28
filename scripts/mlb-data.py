@@ -4,6 +4,7 @@
 import sys
 import json
 import urllib.request
+from datetime import date
 
 MLB_API = "https://statsapi.mlb.com/api/v1"
 
@@ -116,7 +117,7 @@ def cmd_stats(args, as_json=False):
         return
 
     player_id = args[0]
-    season = args[1] if len(args) > 1 else "2025"
+    season = args[1] if len(args) > 1 else str(date.today().year)
 
     data = fetch("/people/" + player_id + "/stats?stats=season&season=" + season)
 
@@ -232,6 +233,61 @@ def cmd_schedule(args, as_json=False):
             status = game.get("status", {}).get("detailedState", "?")
             print("  " + away + " @ " + home + " - " + status)
 
+def cmd_draft(args, as_json=False):
+    """Get MLB draft picks for a given year"""
+    year = args[0] if args else str(date.today().year)
+    try:
+        url = "https://statsapi.mlb.com/api/v1/draft/" + str(year)
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode())
+    except Exception as e:
+        if as_json:
+            return {"error": "Draft fetch failed: " + str(e)}
+        print("Draft fetch failed: " + str(e))
+        return
+
+    rounds = data.get("drafts", {}).get("rounds", [])
+    if not rounds:
+        if as_json:
+            return {"year": year, "picks": [], "note": "No draft data available"}
+        print("No draft data available for " + str(year))
+        return
+
+    if as_json:
+        picks = []
+        for rnd in rounds:
+            round_num = rnd.get("round", "")
+            for pick in rnd.get("picks", []):
+                person = pick.get("person", {})
+                team = pick.get("team", {})
+                picks.append({
+                    "round": round_num,
+                    "pick_number": pick.get("pickNumber", ""),
+                    "name": person.get("fullName", "?"),
+                    "position": person.get("primaryPosition", {}).get("abbreviation", "?"),
+                    "school": pick.get("school", {}).get("name", ""),
+                    "team": team.get("name", "?"),
+                })
+        return {"year": year, "picks": picks}
+
+    print("MLB Draft " + str(year) + ":")
+    for rnd in rounds:
+        round_num = rnd.get("round", "")
+        print("\n  Round " + str(round_num) + ":")
+        for pick in rnd.get("picks", []):
+            person = pick.get("person", {})
+            team = pick.get("team", {})
+            name = person.get("fullName", "?")
+            pos = person.get("primaryPosition", {}).get("abbreviation", "?")
+            pick_num = pick.get("pickNumber", "?")
+            team_name = team.get("name", "?")
+            school = pick.get("school", {}).get("name", "")
+            line = "    #" + str(pick_num).rjust(3) + " " + name.ljust(25) + pos.ljust(5) + team_name
+            if school:
+                line += " (" + school + ")"
+            print(line)
+
+
 COMMANDS = {
     "teams": cmd_teams,
     "roster": cmd_roster,
@@ -240,6 +296,7 @@ COMMANDS = {
     "injuries": cmd_injuries,
     "standings": cmd_standings,
     "schedule": cmd_schedule,
+    "draft": cmd_draft,
 }
 
 if __name__ == "__main__":
@@ -254,6 +311,7 @@ if __name__ == "__main__":
         print("  injuries   - Current injuries")
         print("  standings  - Division standings")
         print("  schedule   - Todays games (or date)")
+        print("  draft      - MLB draft picks by year")
         sys.exit(1)
 
     cmd = sys.argv[1]

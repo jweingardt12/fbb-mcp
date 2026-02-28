@@ -101,64 +101,106 @@ def _index_savant_rows(rows):
     return result
 
 
+def _savant_with_fallback(url_template, cache_prefix, player_type):
+    """Fetch Savant data with pre-season fallback to prior year.
+    Returns (indexed_rows, data_season) tuple.
+    """
+    year = YEAR
+    cache_key = (cache_prefix, player_type, year)
+    cached = _cache_get(cache_key, TTL_SAVANT)
+    if cached is not None:
+        return cached
+
+    url = url_template.replace("{YEAR}", str(year))
+    rows = _fetch_csv(url)
+    result = _index_savant_rows(rows)
+
+    # Pre-season fallback: if empty and before May, try last year
+    if not result and date.today().month < 5:
+        year = YEAR - 1
+        fallback_key = (cache_prefix, player_type, year)
+        cached_fb = _cache_get(fallback_key, TTL_SAVANT)
+        if cached_fb is not None:
+            return cached_fb
+        url = url_template.replace("{YEAR}", str(year))
+        rows = _fetch_csv(url)
+        result = _index_savant_rows(rows)
+        if result:
+            result["__data_season"] = year
+            _cache_set(fallback_key, result)
+            _cache_set(cache_key, result)
+            return result
+
+    if result:
+        result["__data_season"] = year
+    _cache_set(cache_key, result)
+    return result
+
+
 def _fetch_savant_expected(player_type):
     """Fetch Baseball Savant expected stats leaderboard.
     player_type: 'batter' or 'pitcher'
     """
-    cache_key = ("savant_expected", player_type, YEAR)
-    cached = _cache_get(cache_key, TTL_SAVANT)
-    if cached is not None:
-        return cached
-    url = (
+    url_template = (
         "https://baseballsavant.mlb.com/leaderboard/expected_statistics"
         "?type=" + player_type
-        + "&year=" + str(YEAR)
+        + "&year={YEAR}"
         + "&position=&team=&min=25&csv=true"
     )
-    rows = _fetch_csv(url)
-    result = _index_savant_rows(rows)
-    _cache_set(cache_key, result)
-    return result
+    return _savant_with_fallback(url_template, "savant_expected", player_type)
 
 
 def _fetch_savant_statcast(player_type):
     """Fetch Baseball Savant statcast leaderboard.
     player_type: 'batter' or 'pitcher'
     """
-    cache_key = ("savant_statcast", player_type, YEAR)
-    cached = _cache_get(cache_key, TTL_SAVANT)
-    if cached is not None:
-        return cached
-    url = (
+    url_template = (
         "https://baseballsavant.mlb.com/leaderboard/statcast"
         "?type=" + player_type
-        + "&year=" + str(YEAR)
+        + "&year={YEAR}"
         + "&position=&team=&min=25&csv=true"
     )
-    rows = _fetch_csv(url)
-    result = _index_savant_rows(rows)
-    _cache_set(cache_key, result)
-    return result
+    return _savant_with_fallback(url_template, "savant_statcast", player_type)
 
 
 def _fetch_savant_sprint_speed(player_type):
     """Fetch Baseball Savant sprint speed leaderboard.
     player_type: 'batter' or 'pitcher' (only batters have meaningful data)
     """
-    cache_key = ("savant_sprint", player_type, YEAR)
-    cached = _cache_get(cache_key, TTL_SAVANT)
-    if cached is not None:
-        return cached
-    url = (
+    url_template = (
         "https://baseballsavant.mlb.com/leaderboard/sprint_speed"
         "?type=" + player_type
-        + "&year=" + str(YEAR)
+        + "&year={YEAR}"
         + "&position=&team=&min=10&csv=true"
     )
-    rows = _fetch_csv(url)
-    result = _index_savant_rows(rows)
-    _cache_set(cache_key, result)
-    return result
+    return _savant_with_fallback(url_template, "savant_sprint", player_type)
+
+
+def _fetch_savant_pitch_arsenal(player_type="pitcher"):
+    """Fetch Baseball Savant pitch arsenal stats.
+    Shows pitch mix, velocity, spin rate, whiff rate per pitch type.
+    """
+    url_template = (
+        "https://baseballsavant.mlb.com/leaderboard/pitch-arsenal-stats"
+        "?type=" + player_type
+        + "&pitchType=&year={YEAR}"
+        + "&team=&min=10&csv=true"
+    )
+    return _savant_with_fallback(url_template, "savant_pitch_arsenal", player_type)
+
+
+def _fetch_savant_percentile_rankings(player_type):
+    """Fetch Baseball Savant percentile rankings.
+    The famous Savant percentile cards: xwOBA, xBA, exit velo, barrel%,
+    hard hit%, k%, bb%, sprint speed — all as percentiles.
+    """
+    url_template = (
+        "https://baseballsavant.mlb.com/leaderboard/percentile-rankings"
+        "?type=" + player_type
+        + "&year={YEAR}"
+        + "&position=&team=&csv=true"
+    )
+    return _savant_with_fallback(url_template, "savant_percentiles", player_type)
 
 
 # ============================================================
@@ -173,22 +215,51 @@ def _fetch_fangraphs_batting():
         return cached
     try:
         from pybaseball import batting_stats
-        df = batting_stats(YEAR, qual=25)
+        year = YEAR
+        df = batting_stats(year, qual=25)
         result = {}
-        for _, row in df.iterrows():
-            name = row.get("Name", "")
-            if name:
-                result[name.lower()] = {
-                    "bb_rate": row.get("BB%", None),
-                    "k_rate": row.get("K%", None),
-                    "o_swing_pct": row.get("O-Swing%", None),
-                    "z_contact_pct": row.get("Z-Contact%", None),
-                    "swstr_pct": row.get("SwStr%", None),
-                }
+        # Pre-season fallback: if empty and before May, try last year
+        if (df is None or len(df) == 0) and date.today().month < 5:
+            year = YEAR - 1
+            df = batting_stats(year, qual=25)
+        if df is not None:
+            for _, row in df.iterrows():
+                name = row.get("Name", "")
+                if name:
+                    result[name.lower()] = {
+                        "bb_rate": row.get("BB%", None),
+                        "k_rate": row.get("K%", None),
+                        "o_swing_pct": row.get("O-Swing%", None),
+                        "z_contact_pct": row.get("Z-Contact%", None),
+                        "swstr_pct": row.get("SwStr%", None),
+                        "data_season": year,
+                    }
         _cache_set(cache_key, result)
         return result
     except Exception as e:
         print("Warning: FanGraphs batting fetch failed: " + str(e))
+        # Pre-season fallback on exception
+        if date.today().month < 5:
+            try:
+                from pybaseball import batting_stats
+                df = batting_stats(YEAR - 1, qual=25)
+                result = {}
+                if df is not None:
+                    for _, row in df.iterrows():
+                        name = row.get("Name", "")
+                        if name:
+                            result[name.lower()] = {
+                                "bb_rate": row.get("BB%", None),
+                                "k_rate": row.get("K%", None),
+                                "o_swing_pct": row.get("O-Swing%", None),
+                                "z_contact_pct": row.get("Z-Contact%", None),
+                                "swstr_pct": row.get("SwStr%", None),
+                                "data_season": YEAR - 1,
+                            }
+                _cache_set(cache_key, result)
+                return result
+            except Exception:
+                pass
         return {}
 
 
@@ -200,22 +271,51 @@ def _fetch_fangraphs_pitching():
         return cached
     try:
         from pybaseball import pitching_stats
-        df = pitching_stats(YEAR, qual=25)
+        year = YEAR
+        df = pitching_stats(year, qual=25)
         result = {}
-        for _, row in df.iterrows():
-            name = row.get("Name", "")
-            if name:
-                result[name.lower()] = {
-                    "bb_rate": row.get("BB%", None),
-                    "k_rate": row.get("K%", None),
-                    "o_swing_pct": row.get("O-Swing%", None),
-                    "z_contact_pct": row.get("Z-Contact%", None),
-                    "swstr_pct": row.get("SwStr%", None),
-                }
+        # Pre-season fallback: if empty and before May, try last year
+        if (df is None or len(df) == 0) and date.today().month < 5:
+            year = YEAR - 1
+            df = pitching_stats(year, qual=25)
+        if df is not None:
+            for _, row in df.iterrows():
+                name = row.get("Name", "")
+                if name:
+                    result[name.lower()] = {
+                        "bb_rate": row.get("BB%", None),
+                        "k_rate": row.get("K%", None),
+                        "o_swing_pct": row.get("O-Swing%", None),
+                        "z_contact_pct": row.get("Z-Contact%", None),
+                        "swstr_pct": row.get("SwStr%", None),
+                        "data_season": year,
+                    }
         _cache_set(cache_key, result)
         return result
     except Exception as e:
         print("Warning: FanGraphs pitching fetch failed: " + str(e))
+        # Pre-season fallback on exception
+        if date.today().month < 5:
+            try:
+                from pybaseball import pitching_stats
+                df = pitching_stats(YEAR - 1, qual=25)
+                result = {}
+                if df is not None:
+                    for _, row in df.iterrows():
+                        name = row.get("Name", "")
+                        if name:
+                            result[name.lower()] = {
+                                "bb_rate": row.get("BB%", None),
+                                "k_rate": row.get("K%", None),
+                                "o_swing_pct": row.get("O-Swing%", None),
+                                "z_contact_pct": row.get("Z-Contact%", None),
+                                "swstr_pct": row.get("SwStr%", None),
+                                "data_season": YEAR - 1,
+                            }
+                _cache_set(cache_key, result)
+                return result
+            except Exception:
+                pass
         return {}
 
 
@@ -592,7 +692,10 @@ def _build_statcast(name, mlb_id):
         statcast_row = _find_in_savant(name, statcast_data)
         sprint_row = _find_in_savant(name, sprint_data)
 
-        result = {"player_type": player_type}
+        # Determine data season (may be prior year in pre-season)
+        data_season = expected_data.get("__data_season", YEAR) if expected_data else YEAR
+
+        result = {"player_type": player_type, "data_season": data_season}
 
         # Expected stats with percentile ranks
         if expected_row:
@@ -669,6 +772,25 @@ def _build_statcast(name, mlb_id):
                 "sprint_pct": sprint_pct,
                 "speed_tier": _quality_tier(sprint_pct),
             }
+
+        # Pitch arsenal (pitchers only)
+        if player_type == "pitcher":
+            try:
+                arsenal_data = _fetch_savant_pitch_arsenal("pitcher")
+                arsenal_row = _find_in_savant(name, arsenal_data)
+                if arsenal_row:
+                    result["pitch_arsenal"] = {
+                        "pitch_type": arsenal_row.get("pitch_type", ""),
+                        "pitch_name": arsenal_row.get("pitch_name", ""),
+                        "pitch_usage": _safe_float(arsenal_row.get("pitch_usage")),
+                        "velocity": _safe_float(arsenal_row.get("pitch_velocity", arsenal_row.get("velocity"))),
+                        "spin_rate": _safe_float(arsenal_row.get("spin_rate")),
+                        "whiff_pct": _safe_float(arsenal_row.get("whiff_percent", arsenal_row.get("whiff_pct"))),
+                        "put_away_pct": _safe_float(arsenal_row.get("put_away_percent", arsenal_row.get("put_away"))),
+                        "run_value": _safe_float(arsenal_row.get("run_value")),
+                    }
+            except Exception as e:
+                print("Warning: pitch arsenal failed for " + str(name) + ": " + str(e))
 
         if not expected_row and not statcast_row and not sprint_row:
             result["note"] = "Player not found in Savant leaderboards (may not meet minimum PA/IP threshold)"
@@ -824,6 +946,54 @@ def _build_context(name):
         return {"error": str(e)}
 
 
+def _build_percentiles(name, mlb_id):
+    """Build percentile rankings section from Baseball Savant.
+    The famous Savant percentile card data.
+    """
+    try:
+        player_type = _detect_player_type(name, mlb_id)
+        pct_data = _fetch_savant_percentile_rankings(player_type)
+        if not pct_data:
+            return {"note": "Percentile data not available"}
+
+        row = _find_in_savant(name, pct_data)
+        if not row:
+            return {"note": "Player not found in percentile rankings"}
+
+        data_season = pct_data.get("__data_season", YEAR)
+
+        # Extract available percentile columns
+        result = {"data_season": data_season, "player_type": player_type}
+
+        # Common percentile fields from Savant
+        pct_fields = {
+            "xwoba": ["xwoba_percent", "xwoba"],
+            "xba": ["xba_percent", "xba"],
+            "exit_velocity": ["exit_velocity_percent", "exit_velocity"],
+            "barrel_pct": ["barrel_pct_percent", "barrel_batted_rate"],
+            "hard_hit_pct": ["hard_hit_percent", "hard_hit_pct"],
+            "k_pct": ["k_percent", "k_pct"],
+            "bb_pct": ["bb_percent", "bb_pct"],
+            "whiff_pct": ["whiff_percent", "whiff_pct"],
+            "chase_rate": ["oz_swing_percent", "chase_rate"],
+            "sprint_speed": ["sprint_speed_percent", "sprint_speed"],
+        }
+
+        metrics = {}
+        for label, candidates in pct_fields.items():
+            for col in candidates:
+                val = _safe_float(row.get(col))
+                if val is not None:
+                    metrics[label] = val
+                    break
+
+        result["metrics"] = metrics
+        return result
+    except Exception as e:
+        print("Warning: _build_percentiles failed for " + str(name) + ": " + str(e))
+        return {"error": str(e)}
+
+
 def _build_discipline(name):
     """Build plate discipline section from FanGraphs data"""
     try:
@@ -858,10 +1028,10 @@ def player_intel(name, include=None):
     Get comprehensive intelligence packet for a player.
 
     include: list of sections to fetch. None = all.
-    Valid sections: 'statcast', 'trends', 'context', 'discipline'
+    Valid sections: 'statcast', 'trends', 'context', 'discipline', 'percentiles'
     """
     if include is None:
-        include = ["statcast", "trends", "context", "discipline"]
+        include = ["statcast", "trends", "context", "discipline", "percentiles"]
 
     result = {"name": name}
 
@@ -879,6 +1049,9 @@ def player_intel(name, include=None):
 
     if "discipline" in include:
         result["discipline"] = _build_discipline(name)
+
+    if "percentiles" in include:
+        result["percentiles"] = _build_percentiles(name, mlb_id)
 
     return result
 
@@ -924,8 +1097,12 @@ def cmd_player_report(args, as_json=False):
 
     statcast = intel_data.get("statcast", {})
     if statcast and not statcast.get("error"):
+        data_season = statcast.get("data_season", "")
+        season_label = ""
+        if data_season and data_season != YEAR:
+            season_label = " [Pre-season: " + str(data_season) + " data]"
         print("")
-        print("STATCAST (" + statcast.get("player_type", "unknown") + ")")
+        print("STATCAST (" + statcast.get("player_type", "unknown") + ")" + season_label)
         print("-" * 30)
         expected = statcast.get("expected", {})
         if expected:
@@ -948,6 +1125,15 @@ def cmd_player_report(args, as_json=False):
             print("  Sprint Speed: " + str(speed.get("sprint_speed", "N/A"))
                   + " (pct: " + str(speed.get("sprint_pct", "N/A"))
                   + ", " + str(speed.get("speed_tier", "N/A")) + ")")
+        arsenal = statcast.get("pitch_arsenal", {})
+        if arsenal:
+            print("  Pitch Arsenal:")
+            print("    Type: " + str(arsenal.get("pitch_name", "N/A"))
+                  + " | Usage: " + str(arsenal.get("pitch_usage", "N/A"))
+                  + " | Velo: " + str(arsenal.get("velocity", "N/A"))
+                  + " | Spin: " + str(arsenal.get("spin_rate", "N/A")))
+            print("    Whiff%: " + str(arsenal.get("whiff_pct", "N/A"))
+                  + " | Put Away%: " + str(arsenal.get("put_away_pct", "N/A")))
         if statcast.get("note"):
             print("  Note: " + statcast.get("note", ""))
 
@@ -1000,6 +1186,24 @@ def cmd_player_report(args, as_json=False):
         print("PLATE DISCIPLINE")
         print("-" * 30)
         print("  " + discipline.get("note", ""))
+
+    percentiles = intel_data.get("percentiles", {})
+    if percentiles and not percentiles.get("error") and not percentiles.get("note"):
+        pct_season = percentiles.get("data_season", "")
+        pct_label = ""
+        if pct_season and pct_season != YEAR:
+            pct_label = " [" + str(pct_season) + " data]"
+        print("")
+        print("SAVANT PERCENTILES" + pct_label)
+        print("-" * 30)
+        metrics = percentiles.get("metrics", {})
+        for key, val in metrics.items():
+            print("  " + key.ljust(15) + str(val))
+    elif percentiles and percentiles.get("note"):
+        print("")
+        print("SAVANT PERCENTILES")
+        print("-" * 30)
+        print("  " + percentiles.get("note", ""))
 
 
 def cmd_breakouts(args, as_json=False):
