@@ -26,8 +26,8 @@ export function createServer(): McpServer {
     name: "Yahoo Fantasy Baseball",
     version: "1.0.0",
     icons: [{
-      url: LOGO_DATA_URI,
-      mediaType: "image/png",
+      src: LOGO_DATA_URI,
+      mimeType: "image/png",
       sizes: ["128x128"],
     }],
   });
