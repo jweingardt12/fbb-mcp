@@ -31,8 +31,8 @@ export function ComparisonBar({ label, leftValue, rightValue, result, leftLabel,
           {rightValue}{rightLabel ? " " + rightLabel : ""}
         </span>
       </div>
-      <div className="h-2 rounded-full overflow-hidden bg-muted">
-        <div className={"h-full rounded-full transition-all " + colors.leftBg} style={{ width: leftPct + "%" }} />
+      <div className="h-2 rounded-sm overflow-hidden bg-muted">
+        <div className={"h-full rounded-sm transition-all " + colors.leftBg} style={{ width: leftPct + "%" }} />
       </div>
     </div>
   );

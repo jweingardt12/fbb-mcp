@@ -17,3 +17,9 @@ __pycache__/
 *.pyc
 *.png
 mcp-apps/research_styling_design/
+.agent/
+.agents/
+.windsurf/
+skills/
+skills-lock.json
+data/projections_*.csv

@@ -46,7 +46,7 @@ function StatcastSection({ statcast }: { statcast: NonNullable<PlayerIntel["stat
 
   return (
     <div className="space-y-1.5">
-      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Statcast</h4>
+      <h4 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">Statcast</h4>
       {hasBatterMetrics && (
         <div className="space-y-1">
           <PercentileRow
@@ -135,7 +135,7 @@ function TrendsSection({ trends }: { trends: NonNullable<PlayerIntel["trends"]> 
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Trends</h4>
+        <h4 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">Trends</h4>
         {icon && <span className={iconColor + " text-xs"}>{icon}</span>}
         {trends.hot_cold && trends.hot_cold !== "neutral" && (
           <span className={iconColor + " text-xs font-medium"}>{trends.hot_cold}</span>
@@ -176,7 +176,7 @@ function DisciplineSection({ discipline }: { discipline: NonNullable<PlayerIntel
 
   return (
     <div className="space-y-1.5">
-      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Plate Discipline</h4>
+      <h4 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">Plate Discipline</h4>
       <div className="space-y-1">
         {discipline.bb_rate != null && (
           <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ function ContextSection({ context }: { context: NonNullable<PlayerIntel["context
 
   return (
     <div className="space-y-1.5">
-      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Reddit Buzz</h4>
+      <h4 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">Reddit Buzz</h4>
       {context.reddit_mentions != null && context.reddit_mentions > 0 && (
         <p className="text-xs">
           <span>{"\u{1F4E3} " + context.reddit_mentions + " mention" + (context.reddit_mentions !== 1 ? "s" : "")}</span>
@@ -292,12 +292,12 @@ export function IntelPanel({ intel, defaultExpanded = false }: IntelPanelProps) 
       <button
         type="button"
         onClick={function () { setExpanded(!expanded); }}
-        className={"w-full flex items-center gap-2 py-1 px-2 rounded text-left hover:bg-muted/50 transition-colors " + (expanded ? "bg-muted/30" : "")}
+        className={"w-full flex items-center gap-2 py-1 px-2 rounded-sm text-left hover:bg-muted/50 transition-colors scoreboard-panel " + (expanded ? "bg-muted/30" : "")}
       >
         <ChevronRight className={"h-3 w-3 transition-transform " + (expanded ? "rotate-90" : "")} />
         <span className="text-xs text-muted-foreground font-medium">Intel</span>
         {tier && (
-          <span className={"inline-flex items-center rounded-md text-xs font-medium text-white px-1.5 py-0.5 " + qualityColor(tier)}>
+          <span className={"inline-flex items-center rounded-sm text-xs font-semibold font-mono uppercase text-white px-1.5 py-0.5 " + qualityColor(tier)}>
             {tier}
           </span>
         )}

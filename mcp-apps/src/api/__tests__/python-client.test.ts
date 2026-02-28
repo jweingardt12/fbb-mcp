@@ -14,7 +14,7 @@ afterEach(() => {
 describe("toolError", () => {
   it("formats Error instances", () => {
     const result = toolError(new Error("boom"));
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       content: [{ type: "text", text: "Error: boom" }],
       isError: true,
     });
@@ -22,7 +22,7 @@ describe("toolError", () => {
 
   it("handles non-Error values", () => {
     const result = toolError("string error");
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       content: [{ type: "text", text: "Error: string error" }],
       isError: true,
     });

@@ -241,8 +241,8 @@ export function AppShell({ name, version = "1.0.0", children }: AppShellProps) {
       <div className="mcp-app-root">
         <div className="flex flex-col items-center justify-center p-6 text-center">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-            <span className="text-sm">{label ? "Loading " + label + "..." : "Waiting for data..."}</span>
+            <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <span className="text-sm uppercase tracking-wide">{label ? "Loading " + label + "..." : "Waiting for data..."}</span>
           </div>
           {timedOut && (
             <p className="text-xs text-muted-foreground mt-3">

@@ -10,24 +10,24 @@ describe("qualityColor", () => {
     expect(qualityColor(undefined)).toBe("bg-muted-foreground/30");
   });
 
-  it("maps elite to green", () => {
-    expect(qualityColor("elite")).toBe("bg-green-500");
+  it("maps elite to amber/gold", () => {
+    expect(qualityColor("elite")).toBe("bg-[#d4a017]");
   });
 
-  it("maps strong to blue", () => {
-    expect(qualityColor("strong")).toBe("bg-blue-500");
+  it("maps strong to green", () => {
+    expect(qualityColor("strong")).toBe("bg-[#15803d]");
   });
 
-  it("maps average to slate", () => {
-    expect(qualityColor("average")).toBe("bg-slate-500");
+  it("maps average to green-gray", () => {
+    expect(qualityColor("average")).toBe("bg-[#5c7266]");
   });
 
-  it("maps below to orange", () => {
-    expect(qualityColor("below")).toBe("bg-orange-500");
+  it("maps below to amber", () => {
+    expect(qualityColor("below")).toBe("bg-[#c28800]");
   });
 
   it("maps poor to red", () => {
-    expect(qualityColor("poor")).toBe("bg-red-500");
+    expect(qualityColor("poor")).toBe("bg-[#c0392b]");
   });
 
   it("returns fallback for unknown tier", () => {
@@ -44,24 +44,24 @@ describe("qualityTextColor", () => {
     expect(qualityTextColor(undefined)).toBe("text-muted-foreground");
   });
 
-  it("maps elite to green text", () => {
-    expect(qualityTextColor("elite")).toBe("text-green-600 dark:text-green-400");
+  it("maps elite to amber text", () => {
+    expect(qualityTextColor("elite")).toBe("text-[#b8860b] dark:text-[#d4a017]");
   });
 
-  it("maps strong to blue text", () => {
-    expect(qualityTextColor("strong")).toBe("text-blue-600 dark:text-blue-400");
+  it("maps strong to green text", () => {
+    expect(qualityTextColor("strong")).toBe("text-[#15803d] dark:text-[#4ade80]");
   });
 
-  it("maps average to slate text", () => {
-    expect(qualityTextColor("average")).toBe("text-slate-600 dark:text-slate-400");
+  it("maps average to green-gray text", () => {
+    expect(qualityTextColor("average")).toBe("text-[#5c7266] dark:text-[#7d9b88]");
   });
 
-  it("maps below to orange text", () => {
-    expect(qualityTextColor("below")).toBe("text-orange-600 dark:text-orange-400");
+  it("maps below to amber text", () => {
+    expect(qualityTextColor("below")).toBe("text-[#c28800] dark:text-[#f5b731]");
   });
 
   it("maps poor to red text", () => {
-    expect(qualityTextColor("poor")).toBe("text-red-600 dark:text-red-400");
+    expect(qualityTextColor("poor")).toBe("text-[#c0392b] dark:text-[#f87171]");
   });
 });
 
