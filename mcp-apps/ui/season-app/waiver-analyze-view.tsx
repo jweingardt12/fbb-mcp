@@ -5,7 +5,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from ".
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { AlertDialog } from "../components/ui/alert-dialog";
 import { useCallTool } from "../shared/use-call-tool";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { IntelBadge } from "../shared/intel-badge";
 import { IntelPanel } from "../shared/intel-panel";
 import { PlayerName } from "../shared/player-name";
@@ -140,9 +140,8 @@ export function WaiverAnalyzeView({ data, app, navigate }: { data: WaiverData; a
                 <TableRow className={i < 3 ? "bg-sem-success-subtle" : ""}>
                   <TableCell className="font-medium">
                     <span className="flex items-center" style={{ gap: "4px" }}>
-                      {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
                       {i === 0 && <span className="text-green-600 mr-0.5">&#9733;</span>}
-                      <PlayerName name={p.name} playerId={p.pid || p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="waivers" showHeadshot={false} />
+                      <PlayerName name={p.name} playerId={p.pid || p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="waivers" />
                       {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                     </span>
                   </TableCell>

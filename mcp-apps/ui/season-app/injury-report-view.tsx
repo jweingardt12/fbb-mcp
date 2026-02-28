@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card"
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useCallTool } from "../shared/use-call-tool";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
 import { Search, Loader2, CheckCircle } from "@/shared/icons";
@@ -27,9 +27,8 @@ interface InjuryReportData {
 function PlayerRow({ player, showFind, onFind, readyToActivate, loading, app, navigate }: { player: InjuredPlayer; showFind?: boolean; onFind?: () => void; readyToActivate?: boolean; loading?: boolean; app?: any; navigate?: (data: any) => void }) {
   return (
     <div className="flex items-center gap-2 py-1.5 border-b last:border-0">
-      {player.mlb_id && <img src={mlbHeadshotUrl(player.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
       <Badge variant="outline" className="text-xs w-8 justify-center">{player.position}</Badge>
-      <span className="font-medium text-sm flex-1"><PlayerName name={player.name} mlbId={player.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} /></span>
+      <span className="font-medium text-sm flex-1"><PlayerName name={player.name} mlbId={player.mlb_id} app={app} navigate={navigate} context="roster" /></span>
       {player.intel && <IntelBadge intel={player.intel} size="sm" />}
       <Badge variant="destructive" className="text-xs">{player.status}</Badge>
       {player.description && <span className="text-xs text-muted-foreground hidden sm:inline">{player.description}</span>}

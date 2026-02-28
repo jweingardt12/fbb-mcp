@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
 import { formatFixed } from "../shared/number-format";
@@ -80,8 +80,7 @@ function PlayerList({ players, showTopHighlight, app, navigate }: { players: Dra
               </div>
             )}
             <div className={"flex items-center gap-2 py-1 px-1.5 rounded " + (isTop ? "bg-primary/10 border border-primary/30" : "")}>
-              {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-              <span className={"text-sm flex-1 truncate " + (isTop ? "font-semibold" : "font-medium")}><PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="draft" showHeadshot={false} /></span>
+              <span className={"text-sm flex-1 truncate " + (isTop ? "font-semibold" : "font-medium")}><PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="draft" /></span>
               {p.intel && <IntelBadge intel={p.intel} size="sm" />}
               <Badge variant="outline" className="text-xs shrink-0">{posDisplay}</Badge>
               <ZScoreBar z={p.z_score} />

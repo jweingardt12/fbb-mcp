@@ -7,7 +7,7 @@ interface TeamLogoProps {
   size?: number;
 }
 
-export function TeamLogo({ abbrev, name, teamId, size = 16 }: TeamLogoProps) {
+export function TeamLogo({ abbrev, name, teamId, size = 20 }: TeamLogoProps) {
   let url: string | null = null;
   if (teamId) {
     url = teamLogoUrl(teamId);

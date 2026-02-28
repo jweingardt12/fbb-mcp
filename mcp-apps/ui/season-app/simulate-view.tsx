@@ -309,9 +309,6 @@ export function SimulateView({ data, app, navigate }: { data: SimulateData; app:
                       onClick={function () { handleDropSelect(p.name); }}
                       className="flex items-center gap-2 w-full text-left px-2 py-1.5 rounded hover:bg-muted text-sm"
                     >
-                      {p.mlb_id && (
-                        <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />
-                      )}
                       <span className="font-medium">{p.name}</span>
                       <span className="text-xs text-muted-foreground">{p.position || ""}</span>
                       <span className="text-xs text-muted-foreground ml-auto flex items-center" style={{ gap: "3px" }}>

@@ -5,7 +5,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from ".
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useCallTool } from "../shared/use-call-tool";
 import { PlayerName } from "../shared/player-name";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { UserPlus, Loader2, ShieldCheck } from "@/shared/icons";
 
 interface CloserPlayer {
@@ -79,10 +79,7 @@ export function CloserMonitorView({ data, app, navigate }: { data: CloserMonitor
               {myClosers.map((p) => (
                 <TableRow key={p.player_id}>
                   <TableCell className="font-medium">
-                    <span className="flex items-center gap-1.5">
-                      {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} />
-                    </span>
+                    <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" />
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
@@ -124,10 +121,7 @@ export function CloserMonitorView({ data, app, navigate }: { data: CloserMonitor
               {available.map((p) => (
                 <TableRow key={p.player_id}>
                   <TableCell className="font-medium">
-                    <span className="flex items-center gap-1.5">
-                      {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="waivers" showHeadshot={false} />
-                    </span>
+                    <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="waivers" />
                   </TableCell>
                   <TableCell className="text-right font-mono text-xs">{p.percent_owned}%</TableCell>
                   <TableCell className="hidden sm:table-cell">

@@ -25,7 +25,7 @@ export function PlayerView({ data, app, navigate }: { data: MlbPlayerData; app?:
           <img src={mlbHeadshotUrl(data.mlb_id)} alt={data.name} className="w-16 h-16 rounded-full bg-muted object-cover" />
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <CardTitle><PlayerName name={data.name} mlbId={data.mlb_id} app={app} navigate={navigate} context="default" showHeadshot={false} /></CardTitle>
+              <CardTitle><PlayerName name={data.name} mlbId={data.mlb_id} app={app} navigate={navigate} context="default" /></CardTitle>
               {data.intel && <IntelBadge intel={data.intel} size="sm" />}
             </div>
             <div className="flex items-center gap-2 mt-1 flex-wrap">

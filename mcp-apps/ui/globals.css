@@ -82,10 +82,10 @@
   --app-space-2: clamp(0.625rem, 0.55rem + 0.4vw, 1rem);
   --app-space-3: clamp(0.75rem, 0.65rem + 0.5vw, 1.25rem);
   --app-space-4: clamp(1rem, 0.85rem + 0.6vw, 1.5rem);
-  --app-text-xs: var(--font-text-xs-size, clamp(0.6875rem, 0.68rem + 0.04vw, 0.75rem));
-  --app-text-sm: var(--font-text-sm-size, clamp(0.8125rem, 0.8rem + 0.05vw, 0.875rem));
-  --app-text-base: var(--font-text-md-size, clamp(0.875rem, 0.85rem + 0.15vw, 1rem));
-  --app-text-lg: var(--font-heading-sm-size, clamp(1rem, 0.95rem + 0.3vw, 1.125rem));
+  --app-text-xs: var(--font-text-xs-size, clamp(0.75rem, 0.72rem + 0.08vw, 0.8125rem));
+  --app-text-sm: var(--font-text-sm-size, clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem));
+  --app-text-base: var(--font-text-md-size, clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem));
+  --app-text-lg: var(--font-heading-sm-size, clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem));
   --app-shadow-soft: var(--shadow-sm, 0 1px 2px rgba(2, 8, 23, 0.08), 0 3px 12px rgba(2, 8, 23, 0.04));
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

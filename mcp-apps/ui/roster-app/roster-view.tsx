@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { AlertDialog } from "../components/ui/alert-dialog";
 import { useCallTool } from "../shared/use-call-tool";
-import { teamLogoFromAbbrev, mlbHeadshotUrl } from "../shared/mlb-images";
+import { teamLogoFromAbbrev } from "../shared/mlb-images";
 import { IntelBadge } from "../shared/intel-badge";
 import { IntelPanel } from "../shared/intel-panel";
 import { PlayerName } from "../shared/player-name";
@@ -65,9 +65,8 @@ export function RosterView({ data, app, navigate }: { data: { players: Player[] 
                   <TableCell className="font-mono text-xs">{p.position || "?"}</TableCell>
                   <TableCell className="font-medium">
                     <span className="flex items-center" style={{ gap: "4px" }}>
-                      {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
                       {logoUrl && <img src={logoUrl} alt={p.team || ""} width={16} height={16} style={{ display: "inline", flexShrink: 0 }} />}
-                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} />
+                      <PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" />
                       {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                     </span>
                   </TableCell>

@@ -60,7 +60,7 @@ export function PowerRankingsView({ data }: { data: { rankings: PowerRankingTeam
               <TableCell><RankBadge rank={t.rank} /></TableCell>
               <TableCell className={"font-medium" + (t.is_my_team ? " text-primary" : "")}>
                 <span className="flex items-center" style={{ gap: "6px" }}>
-                  {t.team_logo && <img src={t.team_logo} alt="" width={20} height={20} className="rounded-sm" style={{ flexShrink: 0 }} />}
+                  {t.team_logo && <img src={t.team_logo} alt="" width={28} height={28} className="rounded-sm" style={{ flexShrink: 0 }} />}
                   {t.name}
                 </span>
               </TableCell>

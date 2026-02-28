@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Badge } from "../components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useCallTool } from "../shared/use-call-tool";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { getTier, ZScoreBar } from "../shared/z-score";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
@@ -102,8 +102,7 @@ export function BestAvailableView({ data, app, navigate }: { data: BestAvailable
                 )}
                 <div className={"flex items-center gap-2 py-1.5 px-2 rounded " + (i === 0 ? "bg-primary/10 border border-primary/30" : i % 2 === 0 ? "bg-muted/30" : "")}>
                   <span className="font-mono text-xs text-muted-foreground w-6 text-right">{p.rank}</span>
-                  {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                  <span className={"text-sm flex-1 truncate " + (i === 0 ? "font-semibold" : "font-medium")}><PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="draft" showHeadshot={false} /></span>
+                  <span className={"text-sm flex-1 truncate " + (i === 0 ? "font-semibold" : "font-medium")}><PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="draft" /></span>
                   {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                   <Badge variant="outline" className="text-xs shrink-0">{posDisplay}</Badge>
                   <ZScoreBar z={p.z_score} />

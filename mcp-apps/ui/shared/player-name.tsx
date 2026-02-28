@@ -40,7 +40,7 @@ function getAskPrompt(name: string, context?: string): string {
 
 export function PlayerName({ name, playerId, mlbId, app, navigate, context, showHeadshot }: PlayerNameProps) {
   var headshot = mlbId && showHeadshot !== false
-    ? <img src={mlbHeadshotUrl(mlbId)} alt="" className="w-5 h-5 rounded-full bg-muted object-cover flex-shrink-0" style={{ boxShadow: "0 0 0 1px color-mix(in oklab, var(--color-border) 60%, transparent)" }} />
+    ? <img src={mlbHeadshotUrl(mlbId)} alt="" className="w-7 h-7 rounded-full bg-muted object-cover flex-shrink-0" style={{ boxShadow: "0 0 0 1px color-mix(in oklab, var(--color-border) 60%, transparent)" }} />
     : null;
 
   if (!app) {

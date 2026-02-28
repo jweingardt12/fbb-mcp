@@ -78,7 +78,7 @@ export function LeaguePulseView({ data }: { data: { teams: LeaguePulseTeam[] } }
               <TableRow key={t.team_key} className={isMyTeam ? "border-l-2 border-primary bg-primary/5" : ""}>
                 <TableCell className={"font-medium" + (isMyTeam ? " text-primary" : "")}>
                   <span className="flex items-center" style={{ gap: "6px" }}>
-                    {t.team_logo && <img src={t.team_logo} alt="" width={20} height={20} className="rounded-sm" style={{ flexShrink: 0 }} />}
+                    {t.team_logo && <img src={t.team_logo} alt="" width={28} height={28} className="rounded-sm" style={{ flexShrink: 0 }} />}
                     {t.name}
                   </span>
                 </TableCell>

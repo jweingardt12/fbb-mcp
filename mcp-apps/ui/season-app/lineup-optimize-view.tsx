@@ -5,7 +5,7 @@ import { Button } from "../components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../components/ui/dialog";
 import { useCallTool } from "../shared/use-call-tool";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { TeamLogo } from "../shared/team-logo";
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
@@ -110,8 +110,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
                     <TableCell className="font-mono text-xs">{p.position || "?"}</TableCell>
                     <TableCell className="font-medium">
                       <span className="flex items-center" style={{ gap: "4px" }}>
-                        {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} />
+                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" />
                         {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                       </span>
                     </TableCell>
@@ -149,8 +148,7 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
                     <TableCell className="font-mono text-xs">BN</TableCell>
                     <TableCell className="font-medium">
                       <span className="flex items-center" style={{ gap: "4px" }}>
-                        {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" showHeadshot={false} />
+                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="roster" />
                         {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                       </span>
                     </TableCell>
@@ -182,10 +180,10 @@ export function LineupOptimizeView({ data, app, navigate }: { data: LineupData; 
             {(data.swaps || []).map((s, i) => (
               <div key={i} className="flex items-center gap-2 py-1">
                 <Badge variant="destructive" className="text-xs">Bench</Badge>
-                <span className="text-sm"><PlayerName name={s.bench_player} context="roster" showHeadshot={false} /></span>
+                <span className="text-sm"><PlayerName name={s.bench_player} context="roster" /></span>
                 <ArrowRightLeft size={14} className="text-muted-foreground" />
                 <Badge variant="default" className="text-xs">Start</Badge>
-                <span className="text-sm"><PlayerName name={s.start_player} context="roster" showHeadshot={false} /></span>
+                <span className="text-sm"><PlayerName name={s.start_player} context="roster" /></span>
                 <Badge variant="outline" className="text-xs">{s.position}</Badge>
               </div>
             ))}

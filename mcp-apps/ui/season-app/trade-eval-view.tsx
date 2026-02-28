@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card"
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { ComparisonBar } from "../shared/comparison-bar";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
 import { Copy, Check } from "@/shared/icons";
@@ -62,8 +62,7 @@ function PlayerRow({ player, app, navigate }: { player: Player; app?: any; navig
   const positions = player.positions || player.eligible_positions || [];
   return (
     <div className="flex items-center gap-2 py-1.5 border-b last:border-0">
-      {player.mlb_id && <img src={mlbHeadshotUrl(player.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-      <span className="font-medium text-sm flex-1"><PlayerName name={player.name} playerId={player.player_id} mlbId={player.mlb_id} app={app} navigate={navigate} context="trade" showHeadshot={false} /></span>
+      <span className="font-medium text-sm flex-1"><PlayerName name={player.name} playerId={player.player_id} mlbId={player.mlb_id} app={app} navigate={navigate} context="trade" /></span>
       {player.intel && <IntelBadge intel={player.intel} size="sm" />}
       <div className="flex gap-1">
         {positions.map((pos) => (

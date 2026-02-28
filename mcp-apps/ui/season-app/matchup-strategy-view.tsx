@@ -5,7 +5,7 @@ import { Button } from "../components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { useCallTool } from "../shared/use-call-tool";
 import { PlayerName } from "../shared/player-name";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { TeamLogo } from "../shared/team-logo";
 import {
   Swords, TrendingUp, TrendingDown, Target, Shield, Lock, XCircle,
@@ -49,6 +49,7 @@ interface WaiverTarget {
 interface MatchupStrategyData {
   week: number | string;
   opponent: string;
+  opp_team_logo?: string;
   score: { wins: number; losses: number; ties: number };
   schedule: ScheduleData;
   categories: StrategyCategory[];
@@ -148,7 +149,11 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="text-sm text-muted-foreground">Week {d.week}</p>
-          <p className="font-semibold">vs. {d.opponent}</p>
+          <p className="font-semibold flex items-center" style={{ gap: "6px" }}>
+            vs.
+            {d.opp_team_logo && <img src={d.opp_team_logo} alt="" width={28} height={28} className="rounded-sm" style={{ flexShrink: 0 }} />}
+            {d.opponent}
+          </p>
         </div>
         <Badge className={"text-sm px-3 py-1 " + scoreBadgeColor(score.wins, score.losses)}>
           {scoreLabel(score.wins, score.losses)}{" "}
@@ -310,15 +315,7 @@ export function MatchupStrategyView({ data, app, navigate }: { data: MatchupStra
                     <TableRow key={idx}>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {wt.mlb_id && (
-                            <img
-                              src={mlbHeadshotUrl(wt.mlb_id)}
-                              alt=""
-                              className="w-6 h-6 rounded-full object-cover bg-muted"
-                              loading="lazy"
-                            />
-                          )}
-                          <PlayerName name={wt.name} playerId={wt.pid} mlbId={wt.mlb_id} app={app} navigate={navigate} context="waivers" showHeadshot={false} />
+                          <PlayerName name={wt.name} playerId={wt.pid} mlbId={wt.mlb_id} app={app} navigate={navigate} context="waivers" />
                         </div>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">

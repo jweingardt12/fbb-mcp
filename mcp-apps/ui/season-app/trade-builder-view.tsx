@@ -4,7 +4,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { useCallTool } from "../shared/use-call-tool";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { IntelBadge } from "../shared/intel-badge";
 import { PlayerName } from "../shared/player-name";
 import { ArrowRightLeft, Search, Loader2, CheckSquare, Square, TrendingUp, TrendingDown } from "@/shared/icons";
@@ -115,8 +115,7 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
                       style={{ border: selected ? undefined : "1px solid transparent" }}
                     >
                       {selected ? <CheckSquare size={14} className="text-destructive flex-shrink-0" /> : <Square size={14} className="text-muted-foreground flex-shrink-0" />}
-                      {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                      <span className={"truncate " + (selected ? "font-medium" : "")}><PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="trade" showHeadshot={false} /></span>
+                      <span className={"truncate " + (selected ? "font-medium" : "")}><PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="trade" /></span>
                       {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                       {p.position && <Badge variant="outline" className="text-xs ml-auto flex-shrink-0">{p.position}</Badge>}
                     </button>
@@ -164,8 +163,7 @@ export function TradeBuilderView({ data, app, navigate }: { data: TradeBuilderDa
                       style={{ border: selected ? undefined : "1px solid transparent" }}
                     >
                       {selected ? <CheckSquare size={14} className="text-primary flex-shrink-0" /> : <Square size={14} className="text-muted-foreground flex-shrink-0" />}
-                      {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                      <span className={"truncate " + (selected ? "font-medium" : "")}><PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="trade" showHeadshot={false} /></span>
+                      <span className={"truncate " + (selected ? "font-medium" : "")}><PlayerName name={p.name} playerId={p.player_id} mlbId={p.mlb_id} app={app} navigate={navigate} context="trade" /></span>
                       {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                       {p.position && <Badge variant="outline" className="text-xs ml-auto flex-shrink-0">{p.position}</Badge>}
                     </button>

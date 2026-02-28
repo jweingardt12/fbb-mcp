@@ -142,7 +142,7 @@ export function StandingsView({ data }: { data: { standings: StandingsEntry[]; p
                   <TableCell><RankBadge rank={s.rank} /></TableCell>
                   <TableCell className={"font-medium" + (isMyTeam ? " text-primary" : "")}>
                     <span className="flex items-center" style={{ gap: "6px" }}>
-                      {s.team_logo && <img src={s.team_logo} alt="" width={20} height={20} className="rounded-sm" style={{ flexShrink: 0 }} />}
+                      {s.team_logo && <img src={s.team_logo} alt="" width={28} height={28} className="rounded-sm" style={{ flexShrink: 0 }} />}
                       {s.name}
                     </span>
                   </TableCell>

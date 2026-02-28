@@ -3,7 +3,7 @@ import { Badge } from "../components/ui/badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { mlbHeadshotUrl } from "../shared/mlb-images";
+
 import { TeamLogo } from "../shared/team-logo";
 import { BarChart3, Loader2 } from "@/shared/icons";
 import { useCallTool } from "../shared/use-call-tool";
@@ -114,8 +114,7 @@ export function RankingsView({ data, app, navigate }: { data: RankingsData; app:
                     <TableCell className="font-mono text-xs">{p.rank}</TableCell>
                     <TableCell className="font-medium">
                       <span className="flex items-center" style={{ gap: "4px" }}>
-                        {p.mlb_id && <img src={mlbHeadshotUrl(p.mlb_id)} alt="" className="w-6 h-6 rounded-full bg-muted object-cover flex-shrink-0" />}
-                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="default" showHeadshot={false} />
+                        <PlayerName name={p.name} mlbId={p.mlb_id} app={app} navigate={navigate} context="default" />
                         {p.intel && <IntelBadge intel={p.intel} size="sm" />}
                       </span>
                     </TableCell>

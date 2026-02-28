@@ -16,6 +16,8 @@ interface MatchupDetailData {
   week: string | number;
   my_team: string;
   opponent: string;
+  my_team_logo?: string;
+  opp_team_logo?: string;
   score: { wins: number; losses: number; ties: number };
   categories: MatchupCategory[];
 }
@@ -123,7 +125,10 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
         <CardContent className="p-3">
           <div className="flex items-center justify-between">
             <div className="flex-1 text-center">
-              <p className="font-semibold text-sm truncate">{data.my_team}</p>
+              <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                {data.my_team_logo && <img src={data.my_team_logo} alt="" width={28} height={28} className="rounded-sm" style={{ flexShrink: 0 }} />}
+                <p className="font-semibold text-sm truncate">{data.my_team}</p>
+              </div>
               <p className="text-2xl font-bold font-mono text-sem-success">{score.wins}</p>
             </div>
             {total > 0 && (
@@ -140,7 +145,10 @@ export function MatchupDetailView({ data }: { data: MatchupDetailData }) {
               </div>
             )}
             <div className="flex-1 text-center">
-              <p className="font-semibold text-sm truncate">{data.opponent}</p>
+              <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                <p className="font-semibold text-sm truncate">{data.opponent}</p>
+                {data.opp_team_logo && <img src={data.opp_team_logo} alt="" width={28} height={28} className="rounded-sm" style={{ flexShrink: 0 }} />}
+              </div>
               <p className="text-2xl font-bold font-mono text-sem-risk">{score.losses}</p>
             </div>
           </div>
