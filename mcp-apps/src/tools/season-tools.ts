@@ -27,7 +27,7 @@ import {
   type PitcherMatchupResponse,
 } from "../api/types.js";
 
-const SEASON_URI = "ui://fbb-mcp/season.html";
+export const SEASON_URI = "ui://fbb-mcp/season.html";
 
 export function registerSeasonTools(server: McpServer, distDir: string, writesEnabled: boolean = false) {
   registerAppResource(

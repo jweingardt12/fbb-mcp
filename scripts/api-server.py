@@ -1209,20 +1209,9 @@ def workflow_roster_health():
         return jsonify({"error": str(e)}), 500
 
 
-def _synthesize_waiver_pairs(cat_check, waiver_b, waiver_p, roster):
-    """Pair waiver recommendations with droppable players"""
+def _synthesize_waiver_pairs(waiver_b, waiver_p):
+    """Pair waiver recommendations with position type labels"""
     pairs = []
-
-    # Identify lowest-value roster players as drop candidates
-    drop_candidates = []
-    for p in (roster or {}).get("players", []):
-        if p.get("status") in ("IL", "IL+", "IL10", "IL60"):
-            continue  # Don't suggest dropping IL players
-        drop_candidates.append({
-            "name": str(p.get("name", "?")),
-            "position": str(p.get("position", "?")),
-            "player_id": str(p.get("player_id", "")),
-        })
 
     for label, waiver in [("B", waiver_b), ("P", waiver_p)]:
         for rec in (waiver or {}).get("recommendations", [])[:5]:
@@ -1254,7 +1243,7 @@ def workflow_waiver_recommendations():
         waiver_p = _safe_call(season_manager.cmd_waiver_analyze, ["P", count])
         roster = _safe_call(yahoo_fantasy.cmd_roster)
 
-        pairs = _synthesize_waiver_pairs(cat_check, waiver_b, waiver_p, roster)
+        pairs = _synthesize_waiver_pairs(waiver_b, waiver_p)
 
         return jsonify({
             "pairs": pairs,
@@ -1282,6 +1271,10 @@ def workflow_trade_analysis():
         give_ids = []
         get_ids = []
 
+        # Fetch roster once for give-player ID lookups
+        roster = _safe_call(yahoo_fantasy.cmd_roster)
+        roster_players = (roster or {}).get("players", [])
+
         for name in give_names:
             try:
                 val = valuations.cmd_value([name], as_json=True)
@@ -1289,9 +1282,7 @@ def workflow_trade_analysis():
                 if players:
                     p = players[0]
                     give_players.append(p)
-                    # Try to find player_id from roster
-                    roster = _safe_call(yahoo_fantasy.cmd_roster)
-                    for rp in (roster or {}).get("players", []):
+                    for rp in roster_players:
                         if str(rp.get("name", "")).lower() == str(p.get("name", "")).lower():
                             give_ids.append(str(rp.get("player_id", "")))
                             break

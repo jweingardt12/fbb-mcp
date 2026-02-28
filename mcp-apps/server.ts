@@ -40,7 +40,7 @@ export function createServer(): McpServer {
   registerHistoryTools(server, DIST_DIR);
   registerMlbTools(server, DIST_DIR);
   registerIntelTools(server, DIST_DIR);
-  registerWorkflowTools(server, DIST_DIR, WRITES_ENABLED);
+  registerWorkflowTools(server, WRITES_ENABLED);
 
   return server;
 }

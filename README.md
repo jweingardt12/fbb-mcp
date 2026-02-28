@@ -9,6 +9,7 @@ Fantasy Baseball MCP Server for Claude. Manage your Yahoo Fantasy Baseball leagu
 - [What It Does](#what-it-does)
 - [Quick Start](#quick-start)
 - [Connecting to Claude](#connecting-to-claude)
+- [Agent Orchestrators (OpenClaw)](#agent-orchestrators-openclaw)
 - [MCP Tools](#mcp-tools)
 - [CLI Commands](#cli-commands)
 - [Architecture](#architecture)
@@ -63,11 +64,31 @@ Claude decides which tools to call and in what order based on your question. Com
 
 ## Quick Start
 
-### 1. Get Yahoo API credentials
+### One-command install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jweingardt12/fbb-mcp/main/scripts/install.sh | bash
+```
+
+Or tell your OpenClaw agent: **"install github.com/jweingardt12/fbb-mcp"**
+
+The installer handles everything: pulls the Docker image, prompts for your Yahoo API credentials, starts the container, runs Yahoo OAuth discovery, and configures your MCP client (Claude Code, Claude Desktop, or OpenClaw).
+
+**Prerequisites:** Docker and `docker compose`
+
+**Uninstall:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/jweingardt12/fbb-mcp/main/scripts/install.sh | bash -s -- --uninstall
+```
+
+<details>
+<summary><strong>Manual setup</strong></summary>
+
+#### 1. Get Yahoo API credentials
 
 Go to [developer.yahoo.com/apps/create](https://developer.yahoo.com/apps/create), create an app with **Fantasy Sports** read permissions and `oob` as the redirect URI. Copy the consumer key and secret.
 
-### 2. Configure and run
+#### 2. Configure and run
 
 ```bash
 cp docker-compose.example.yml docker-compose.yml
@@ -79,7 +100,7 @@ docker compose up -d
 
 The container auto-generates `config/yahoo_oauth.json` from your env vars on first start. You don't need to create this file manually.
 
-### 3. Find your league and team IDs
+#### 3. Find your league and team IDs
 
 On the first API call, Yahoo will prompt you to authorize the app. Run `discover` to trigger auth and find your IDs in one step:
 
@@ -111,7 +132,7 @@ docker compose up -d
 
 Tokens refresh automatically after the initial authorization.
 
-### 4. Connect to Claude
+#### 4. Connect to Claude
 
 Add to your `.mcp.json` (Claude Code) or `claude_desktop_config.json` (Claude Desktop):
 
@@ -127,6 +148,8 @@ Add to your `.mcp.json` (Claude Code) or `claude_desktop_config.json` (Claude De
 ```
 
 That's it. Everything runs inside Docker — no local dependencies beyond Docker itself.
+
+</details>
 
 ### 5. Enable write operations (optional)
 
@@ -228,9 +251,79 @@ Claude.ai → GET /mcp → 401 Unauthorized
 ```
 </details>
 
+## Agent Orchestrators (OpenClaw)
+
+The MCP server includes workflow tools optimized for autonomous agent operation — each aggregates 5-7+ individual API calls server-side, returning concise, decision-ready output in a single tool call. Any AI agent orchestrator that supports MCP (OpenClaw, LangChain, etc.) can use these.
+
+### Setup with OpenClaw
+
+**1. Ensure the Docker container is running:**
+
+```bash
+docker compose up -d
+```
+
+**2. Copy the config files:**
+
+```bash
+cp openclaw-config.yaml /path/to/openclaw/config/
+cp AGENTS.md /path/to/openclaw/config/
+cp openclaw-cron-examples.json /path/to/openclaw/config/
+```
+
+**3. Edit `openclaw-config.yaml`** — the default connects via stdio through Docker:
+
+```yaml
+agents:
+  - id: fantasy-gm
+    model: anthropic/claude-sonnet-4-5
+    persona: ./AGENTS.md
+    mcp_servers:
+      - name: fbb-mcp
+        command: docker
+        args: [exec, -i, fbb-mcp, node, /app/mcp-apps/dist/main.js, --stdio]
+        env:
+          ENABLE_WRITE_OPS: "true"
+    schedules: ./openclaw-cron-examples.json
+```
+
+**4. Start the agent:**
+
+```bash
+openclaw start
+```
+
+The agent persona (`AGENTS.md`) teaches the agent daily/weekly routines, strategy principles, and which workflow tools to use. The cron schedule (`openclaw-cron-examples.json`) automates common tasks:
+
+| Schedule | Task | Tools Called |
+|----------|------|-------------|
+| Daily 9am | Lineup + briefing | `yahoo_morning_briefing` + `yahoo_auto_lineup` |
+| Monday 8am | Matchup plan | `yahoo_league_landscape` + `yahoo_matchup_strategy` |
+| Wednesday 10am | Waiver check | `yahoo_waiver_recommendations` |
+| Saturday 9am | Roster audit | `yahoo_roster_health_check` |
+
+Edit the cron expressions and timezone in `openclaw-cron-examples.json` to match your preference.
+
+### Workflow Tools
+
+These tools are available to all clients (Claude Code, Claude.ai, agent orchestrators), but are particularly useful for autonomous agents since they minimize tool calls and token usage.
+
+| Tool | Aggregates | Use Case |
+|------|-----------|----------|
+| `yahoo_morning_briefing` | injury_report + lineup_optimize + matchup + strategy + whats_new + waiver_analyze x2 | Daily situational awareness |
+| `yahoo_league_landscape` | standings + season_pace + power_rankings + league_pulse + transactions + trade_finder + scoreboard | Weekly strategic planning |
+| `yahoo_roster_health_check` | injury_report + lineup_optimize + roster + intel/busts | Roster audit |
+| `yahoo_waiver_recommendations` | category_check + waiver_analyze x2 + roster | Decision-ready waiver picks |
+| `yahoo_auto_lineup` | injury_report + lineup_optimize (apply) | Daily lineup optimization |
+| `yahoo_trade_analysis` | value + trade_eval + intel/player | Trade evaluation by name |
+
+### Health Check
+
+The server exposes a `GET /health` endpoint (unauthenticated) that returns `{ ok: true, writes_enabled: bool }` for monitoring.
+
 ## MCP Tools
 
-71 total tools (59 read-only + 12 write operations), each with rich inline HTML UI apps rendered directly in Claude.
+77 total tools (64 read-only + 13 write operations), each with rich inline HTML UI apps rendered directly in Claude.
 
 <details>
 <summary><strong>Roster Management</strong> (12 tools)</summary>
@@ -369,9 +462,9 @@ Claude.ai → GET /mcp → 401 Unauthorized
 
 ### Write Operations
 
-The following 12 tools require `ENABLE_WRITE_OPS=true` and a valid browser session. When `ENABLE_WRITE_OPS=false` (default), these tools are hidden entirely:
+The following 13 tools require `ENABLE_WRITE_OPS=true`. When `ENABLE_WRITE_OPS=false` (default), these tools are hidden entirely. All except `yahoo_auto_lineup` also require a valid browser session.
 
-`yahoo_add`, `yahoo_drop`, `yahoo_swap`, `yahoo_waiver_claim`, `yahoo_waiver_claim_swap`, `yahoo_set_lineup`, `yahoo_propose_trade`, `yahoo_accept_trade`, `yahoo_reject_trade`, `yahoo_browser_status`, `yahoo_change_team_name`, `yahoo_change_team_logo`
+`yahoo_add`, `yahoo_drop`, `yahoo_swap`, `yahoo_waiver_claim`, `yahoo_waiver_claim_swap`, `yahoo_set_lineup`, `yahoo_propose_trade`, `yahoo_accept_trade`, `yahoo_reject_trade`, `yahoo_browser_status`, `yahoo_change_team_name`, `yahoo_change_team_logo`, `yahoo_auto_lineup`
 
 <details>
 <summary><strong>CLI Commands</strong></summary>
@@ -406,7 +499,7 @@ The `./yf` helper script provides direct CLI access to all functionality:
 │  │  (Flask :8766)    │──│  (Express :4951)    │  │
 │  │                   │  │                     │  │
 │  │  yahoo_fantasy_api│  │  MCP SDK + ext-apps │  │
-│  │  pybaseball       │  │  71 tool defs       │  │
+│  │  pybaseball       │  │  77 tool defs       │  │
 │  │  MLB-StatsAPI     │  │  8 apps / 62 views  │  │
 │  │  Playwright       │  │                     │  │
 │  └──────────────────┘  └─────────────────────┘  │
@@ -454,6 +547,9 @@ fbb-mcp/
 ├── Dockerfile
 ├── .env.example
 ├── yf                              # CLI helper script
+├── AGENTS.md                       # Agent persona for autonomous GM
+├── openclaw-config.yaml            # OpenClaw agent orchestrator config
+├── openclaw-cron-examples.json     # Cron schedule examples
 ├── config/
 │   ├── yahoo_oauth.json            # OAuth credentials + tokens (gitignored, auto-generated from env vars)
 │   ├── yahoo_session.json          # Browser session (gitignored, for write ops)
@@ -464,7 +560,8 @@ fbb-mcp/
 │   ├── projections_hitters.csv     # Auto-fetched Steamer projections (gitignored)
 │   └── projections_pitchers.csv    # Auto-fetched Steamer projections (gitignored)
 ├── scripts/
-│   ├── api-server.py               # Flask API server
+│   ├── install.sh                   # One-command installer (curl | bash)
+│   ├── api-server.py               # Flask API server (includes workflow endpoints)
 │   ├── yahoo-fantasy.py            # League management
 │   ├── season-manager.py           # In-season management
 │   ├── draft-assistant.py          # Draft day tool
@@ -478,8 +575,8 @@ fbb-mcp/
     ├── server.ts                   # MCP server setup + tool registration
     ├── main.ts                     # Entry point (stdio + HTTP)
     ├── assets/logo-128.png         # Server icon (pixel-art baseball)
-    ├── src/tools/                  # 8 tool files, 71 MCP tools
-    ├── src/api/                    # Python API client
+    ├── src/tools/                  # 9 tool files, 77 MCP tools
+    ├── src/api/                    # Python API client + format helpers
     └── ui/                         # 8 inline HTML apps, 62 views (Preact + Tailwind)
 ```
 

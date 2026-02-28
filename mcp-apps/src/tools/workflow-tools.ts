@@ -13,10 +13,9 @@ import {
   type InjuryReportResponse,
   type LineupOptimizeResponse,
 } from "../api/types.js";
+import { SEASON_URI } from "./season-tools.js";
 
-const SEASON_URI = "ui://fbb-mcp/season.html";
-
-export function registerWorkflowTools(server: McpServer, distDir: string, writesEnabled: boolean = false) {
+export function registerWorkflowTools(server: McpServer, writesEnabled: boolean = false) {
 
   // yahoo_morning_briefing
   registerAppTool(
@@ -221,11 +220,10 @@ export function registerWorkflowTools(server: McpServer, distDir: string, writes
     },
     async () => {
       try {
-        // Pre-check injuries
-        const injury = await apiGet<InjuryReportResponse>("/api/injury-report");
-
-        // Apply lineup optimization
-        const lineup = await apiGet<LineupOptimizeResponse>("/api/lineup-optimize", { apply: "true" });
+        const [injury, lineup] = await Promise.all([
+          apiGet<InjuryReportResponse>("/api/injury-report"),
+          apiGet<LineupOptimizeResponse>("/api/lineup-optimize", { apply: "true" }),
+        ]);
 
         const lines: string[] = [];
         lines.push(header("AUTO_LINEUP", lineup.applied ? "changes applied" : "preview only"));
@@ -273,9 +271,9 @@ export function registerWorkflowTools(server: McpServer, distDir: string, writes
     async ({ give_names, get_names }) => {
       try {
         const data = await apiPost<TradeAnalysisResponse>("/api/workflow/trade-analysis", {
-          give_names: give_names as any,
-          get_names: get_names as any,
-        } as any);
+          give_names,
+          get_names,
+        });
 
         const lines: string[] = [];
         lines.push(header("TRADE_ANALYSIS", "Give " + give_names.join(", ") + " | Get " + get_names.join(", ")));
@@ -284,14 +282,12 @@ export function registerWorkflowTools(server: McpServer, distDir: string, writes
         lines.push("");
         lines.push("GIVING:");
         for (const p of data.give_players || []) {
-          const zScores = p.z_scores || {};
-          const total = Object.values(zScores).reduce((sum: number, v) => sum + (typeof v === "number" ? v : 0), 0);
+          const total = Number((p.z_scores || {} as any).Final || 0);
           lines.push("  " + str(p.name).padEnd(25) + " z-total=" + total.toFixed(2));
         }
         lines.push("GETTING:");
         for (const p of data.get_players || []) {
-          const zScores = p.z_scores || {};
-          const total = Object.values(zScores).reduce((sum: number, v) => sum + (typeof v === "number" ? v : 0), 0);
+          const total = Number((p.z_scores || {} as any).Final || 0);
           lines.push("  " + str(p.name).padEnd(25) + " z-total=" + total.toFixed(2));
         }
 
@@ -328,8 +324,11 @@ export function registerWorkflowTools(server: McpServer, distDir: string, writes
 }
 
 function getSuffix(rank: number): string {
-  if (rank === 1) return "st";
-  if (rank === 2) return "nd";
-  if (rank === 3) return "rd";
+  const mod100 = rank % 100;
+  if (mod100 >= 11 && mod100 <= 13) return "th";
+  const mod10 = rank % 10;
+  if (mod10 === 1) return "st";
+  if (mod10 === 2) return "nd";
+  if (mod10 === 3) return "rd";
   return "th";
 }

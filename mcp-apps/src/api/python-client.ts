@@ -26,7 +26,7 @@ export async function apiGet<T>(path: string, params?: Record<string, string>): 
   return response.json() as Promise<T>;
 }
 
-export async function apiPost<T>(path: string, body: Record<string, string>): Promise<T> {
+export async function apiPost<T>(path: string, body: Record<string, unknown>): Promise<T> {
   const url = new URL(path, API_BASE);
   const response = await fetch(url.toString(), {
     method: "POST",
